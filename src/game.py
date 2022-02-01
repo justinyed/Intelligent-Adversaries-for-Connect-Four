@@ -164,14 +164,6 @@ class GameInterface:
         """
         pass
 
-    def update_status(self, args=None) -> None:
-        """
-        update the status of the game (e.i. check for a win or tie).
-
-        :param args: any argument needed by the game to update the status
-        """
-        pass
-
 
 class Connect4(GameInterface):
     """
@@ -233,62 +225,52 @@ class Connect4(GameInterface):
     def is_terminal_state(self):
         return self.in_progress != self.get_status()
 
-    # --- Game Mechanics ---
-
     def perform_action(self, directive):
+        return self.drop_piece(directive)
+
+    def drop_piece(self, column):
         """
         drop piece into slot in grid
 
-        :param directive: column to drop piece
+        :param column: column to drop piece
         :return: new status after action
         """
-        return self.drop_piece(directive)
-
-    def update_status(self, args=None) -> None:
-        """
-        update the status of the game (e.i. check for a win or tie).
-
-        :param args: piece that was set
-        """
-        self.check_status(args)
-
-    def drop_piece(self, column):
         if self.status != self.in_progress:
             return self.status
         for y in range(self.board.height):
             position = (column, y)
             if self.board.get_piece(position) == self.board.default:
                 self.board.set_piece(position, self.get_current_player())
-                self.update_status(position)  # update status
+                self.__update_status(position)  # update status
                 self.turn += 1  # increment turn, move was actually made
                 return self.status
 
-    def check_status(self, set_position) -> None:
-        if self.check_tie():
+    def __update_status(self, set_position) -> None:
+        if self.__check_tie():
             self.status = self.tie
-        elif self.check_for_win_local(set_position):
+        elif self.__check_for_win_local(set_position):
             self.status = 1 + (self.turn % self.player_count)
         else:
             self.status = self.in_progress
 
-    def check_tie(self):
+    def __check_tie(self):
         return self.max_turns == self.turn
 
-    def check_for_win_local(self, drop_position):
+    def __check_for_win_local(self, drop_position):
         """
         Local Win Check. Checks Starting from the dropped piece (change on grid)
         :param drop_position: Position of Dropped Piece
         :return: True if Win was found, otherwise False
         """
-        return self.check_line(drop_position, (0, 1)) or \
-               self.check_line(drop_position, (1, 0)) or \
-               self.check_line(drop_position, (1, 1)) or \
-               self.check_line(drop_position, (-1, 1))
+        return self.__check_line(drop_position, (0, 1)) or \
+               self.__check_line(drop_position, (1, 0)) or \
+               self.__check_line(drop_position, (1, 1)) or \
+               self.__check_line(drop_position, (-1, 1))
 
-    def check_line(self, origin, direction):
-        return self.count_line(origin, direction) == self.n_connect
+    def __check_line(self, origin, direction):
+        return self.__count_line(origin, direction) == self.n_connect
 
-    def count_line(self, origin, direction):
+    def __count_line(self, origin, direction):
         x0, y0 = origin
         dx, dy = direction
         ndx, ndy = -1 * dx, -1 * dy
@@ -297,7 +279,7 @@ class Connect4(GameInterface):
         while True:
             tx, ty = x0 + ndx, y0 + ndy
             transition = (tx, ty)
-            if self.is_legal_position(transition) and self.is_same_as_current(transition):
+            if self.__is_legal_position(transition) and self.__is_same_as_current(transition):
                 x0, y0 = transition
             else:
                 break
@@ -305,15 +287,15 @@ class Connect4(GameInterface):
         while True:
             tx, ty = x0 + dx, y0 + dy
             transition = (tx, ty)
-            if self.is_legal_position(transition) and self.is_same_as_current(transition):
+            if self.__is_legal_position(transition) and self.__is_same_as_current(transition):
                 x0, y0 = transition
                 count += 1
             else:
                 break
         return count
 
-    def is_legal_position(self, position):
+    def __is_legal_position(self, position):
         return 0 <= position[0] < self.board.width and 0 <= position[1] < self.board.height
 
-    def is_same_as_current(self, position):
+    def __is_same_as_current(self, position):
         return self.get_current_player() == self.board.get_piece(position)
