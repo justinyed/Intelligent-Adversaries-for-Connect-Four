@@ -37,9 +37,10 @@ python -m pip install -r requirements.txt
 
 ### Intelligence
 
+>**Intelligent Agents:** Choose the action which leads to the greatest expected utility.
+
 | Agents                 | Description                                                                                                        |
 |------------------------|--------------------------------------------------------------------------------------------------------------------|
-| Random                 | Choices a random legal move                                                                                        |
 | Reflex                 | Choices a move based only on an evaluation function                                                                |
 | Minimax                | Choices a move which maximizes its own utility and minimizes the utility of its opponent                           |
 | Alpha-Beta Minimax     | Extension of Minimax which focuses on evaluating relevant states by pruning sub-trees with too few utility points. |
@@ -50,7 +51,7 @@ python -m pip install -r requirements.txt
 
 ### Discord Bot Interface
 
-[Discord](https://discord.com/) Bot Interface: Challenge Agents or Human Players, and Leader Board.  This project utilizes the [discord.py](https://discordpy.readthedocs.io/en/stable/), which is a modern, easy to use, feature-rich, and idiomatic API wrapper for Discord.
+>**[Discord](https://discord.com/) Bot Interface:** Challenge Agents or Human Players, and Leader Board.  This project utilizes [discord.py](https://discordpy.readthedocs.io/en/stable/), which is a modern, easy to use, feature-rich, and idiomatic API wrapper for Discord.
 
 #### Features:
 - Challenge Handler
