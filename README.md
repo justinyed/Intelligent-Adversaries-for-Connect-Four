@@ -50,7 +50,7 @@ python -m pip install -r requirements.txt
 
 ### Discord Bot Interface
 
->[Discord](https://discord.com/) Bot Interface: Challenge Agents or Human Players, and Leader Board.  This project utilizes the [discord.py](https://discordpy.readthedocs.io/en/stable/), which is a modern, easy to use, feature-rich, and idiomatic API wrapper for Discord.
+[Discord](https://discord.com/) Bot Interface: Challenge Agents or Human Players, and Leader Board.  This project utilizes the [discord.py](https://discordpy.readthedocs.io/en/stable/), which is a modern, easy to use, feature-rich, and idiomatic API wrapper for Discord.
 
 #### Features:
 - Challenge Handler
@@ -103,6 +103,4 @@ python -m pip install -r requirements.txt
 
 - Learned a lot from the CNU Course CPSC 471: Intro to AI taught by Dr. Conner.
 
-- Agents were inspired by **my solutions** to the [AI UC Berkley Problems](http://ai.berkeley.edu).
-- Agents were inspired by **my solutions** to the [AI UC Berkley Problems](http://ai.berkeley.edu).
 - Agents were inspired by **my solutions** to the [AI UC Berkley Problems](http://ai.berkeley.edu).
