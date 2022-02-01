@@ -37,7 +37,7 @@ python -m pip install -r requirements.txt
 
 ### Intelligence
 
->**Intelligent Agents:** Choose the action which leads to the greatest expected utility.
+**Intelligent Agents:** Choose the action which leads to the greatest expected utility.
 
 | Agents                 | Description                                                                                                        |
 |------------------------|--------------------------------------------------------------------------------------------------------------------|
@@ -51,7 +51,7 @@ python -m pip install -r requirements.txt
 
 ### Discord Bot Interface
 
->**[Discord](https://discord.com/) Bot Interface:** Challenge Agents or Human Players, and Leader Board.  This project utilizes [discord.py](https://discordpy.readthedocs.io/en/stable/), which is a modern, easy to use, feature-rich, and idiomatic API wrapper for Discord.
+**[Discord](https://discord.com/) Bot Interface:** Challenge Agents or Human Players, and Leader Board.  This project utilizes [discord.py](https://discordpy.readthedocs.io/en/stable/), which is a modern, easy to use, feature-rich, and idiomatic API wrapper for Discord.
 
 #### Features:
 - Challenge Handler
