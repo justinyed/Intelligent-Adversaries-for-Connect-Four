@@ -64,7 +64,7 @@ class GameInterface:
 
         :return: internal board
         """
-        pass
+        return self.board
 
     def set_board(self, board):
         """

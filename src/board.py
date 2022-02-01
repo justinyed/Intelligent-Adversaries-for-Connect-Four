@@ -18,7 +18,7 @@ class BoardInterface:
         self.height = height
         self.width = width
         self.default = default
-        self.grid = grid
+        self.grid = self.new_grid()
 
     def new_grid(self):
         """
