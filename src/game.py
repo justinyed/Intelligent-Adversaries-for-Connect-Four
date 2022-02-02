@@ -165,7 +165,7 @@ class GameInterface:
         pass
 
 
-class Connect4(GameInterface):
+class ConnectFour(GameInterface):
     """
     Internal Representation of the Game.
     """
@@ -215,7 +215,7 @@ class Connect4(GameInterface):
         return new_state
 
     def get_successor_game(self, action):
-        return Connect4(state=self.get_successor_state(action))
+        return ConnectFour(state=self.get_successor_state(action))
 
     def get_current_player(self):
         if self.get_status() != self.in_progress:
