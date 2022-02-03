@@ -1,4 +1,5 @@
 import copy
+from ast import literal_eval
 
 HEIGHT = 6
 WIDTH = 7
@@ -90,10 +91,14 @@ class BoardInterface:
 
         :return: serialized board
         """
-        return f"h={self.height}," \
-               f"w={self.width}," \
-               f"d={self.default}," \
-               f"g={str(self.grid)}"
+        pass
+
+    def load(self, serialized_object):
+        """
+        load board from serialized board
+
+        """
+        pass
 
     def __hash__(self):
         return self.__str__()
@@ -159,3 +164,22 @@ class TupleBoard(BoardInterface):
         """
         x, y = position
         return self.grid[x + self.width * y]
+
+    def serialize(self):
+        """
+        serialize board to be stored
+
+        :return: serialized board
+        """
+        return f"{self.height},{self.width},{self.default},{self.grid}"
+
+    def load(self, serialized_object):
+        """
+        load board from serialized board
+
+        """
+        o = serialized_object.split(',')
+        self.height = int(o[0])
+        self.width = int(o[1])
+        self.default = int(o[2])
+        self.default = literal_eval(o[3])
