@@ -84,35 +84,17 @@ def get_test_layout(file):
     return actual, expected, msg
 
 
-def fn(i): ...
-
-
-output = ...
-
-
-class TestSequence(unittest.TestCase):
-    pass
-
-
-for i in range(1, 11):
-    test_method_name = 'test_fn_{0}'.format(i)
-    testmethod = lambda self: self.assertEqual(fn(i), output[i])
-    setattr(TestSequence, test_method_name, testmethod)
-
-path = join('.', DIRECTORY)
-        files = [f for f in listdir(path) if isfile(join(path, f))]
-        for file in files:
-            file_name = basename(file)
-            print(f'Test Layout {file_name}')
-            self.assertEqual(*get_test_layout(join('.', DIRECTORY, file)))
-
-
-
 class TestGameMechanics(unittest.TestCase):
     pass
-    def test_mechanics(self):
 
 
+# found out how to use unittest using a loop
+path = join('.', DIRECTORY)
+files = [f for f in listdir(path) if isfile(join(path, f))]
+for file in files:
+    test_method_name = 'test_fn_{0}'.format(file)
+    testmethod = lambda self: self.assertEqual(*get_test_layout(join('.', DIRECTORY, file)))
+    setattr(TestGameMechanics, test_method_name, testmethod)
 
 if __name__ == '__main__':
     unittest.main()
