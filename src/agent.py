@@ -20,8 +20,7 @@ class Agent:
     An agent must define a get_action method
     """
 
-    def __init__(self, player, eval_function=simple_evaluation_function):
-        self.player = player
+    def __init__(self, eval_function=simple_evaluation_function):
         self.evaluation_function = eval_function
 
     def get_action(self, game):

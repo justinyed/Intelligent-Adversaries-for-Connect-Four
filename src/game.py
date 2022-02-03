@@ -9,7 +9,7 @@ N_CONNECT = 4
 class GameInterface:
     """Game Interface"""
 
-    def __init__(self, board, players=(PLAYER1, PLAYER2), tie=TIE_CODE, turn=0, status=0):
+    def __init__(self, board_type, players=(PLAYER1, PLAYER2), tie=TIE_CODE, turn=0, status=0):
         """
         Constructor for Game
 
@@ -19,7 +19,8 @@ class GameInterface:
         :param turn: starting turn; default=0
         :param status: starting status; default=0
         """
-        self.board = board
+        self.board = None
+        self.board_type = board_type
         self.players = players
         self.player_count = len(self.players)
         self.tie = tie
@@ -170,19 +171,20 @@ class ConnectFour(GameInterface):
     Internal Representation of the Game.
     """
 
-    def __init__(self, board=TupleBoard(), state=None):
-        super().__init__(board)
-        self.max_turns = board.width * board.height - 1  # -1 since turns start at 0
-        self.player1 = self.players[0]
-        self.player2 = self.players[1]
-        self.n_connect = N_CONNECT
-        self.in_progress = board.default
+    def __init__(self, board_type=TupleBoard, state=None):
+        super().__init__(board_type)
 
         # Initialize State
         if state is None:
-            self.grid, self.turn, self.status = self.new_state()
+            self.board, self.turn, self.status = self.new_state()
         else:
-            self.grid, self.turn, self.status = state
+            self.board, self.turn, self.status = state
+
+        self.max_turns = self.board.width * self.board.height - 1  # -1 since turns start at 0
+        self.player1 = self.players[0]
+        self.player2 = self.players[1]
+        self.n_connect = N_CONNECT
+        self.in_progress = self.board.default
 
     # --- Game Methods ---
 
@@ -197,17 +199,17 @@ class ConnectFour(GameInterface):
         """
         :return: new grid, new turn counter, new status
         """
-        return self.board.new_grid(), 0, self.in_progress
+        board = self.board_type()
+        return board, 0, board.default
 
     def get_state(self):
-        return self.board.get_grid_copy(), self.turn, self.status
+        return self.board.copy(), self.turn, self.status
 
     def set_state(self, state):
-        self.grid, self.turn, self.status = state
+        self.board, self.turn, self.status = state
 
     def get_successor_state(self, action):
         original_state = self.get_state()
-
         self.drop_piece(action)
         new_state = self.get_state()
 

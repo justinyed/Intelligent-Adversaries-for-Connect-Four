@@ -1,14 +1,8 @@
 from time import sleep
 import constants_cli
 from game import ConnectFour
-from agent import Random, Reflex, Agent
-
-
-def get_options(player):
-    return {"Human Player": Human(player),
-            "Random Agent": Random(player),
-            "Reflex Agent": Reflex(player)
-            }
+from agent import Agent
+import sys
 
 
 class ConnectFourCLI:
@@ -54,7 +48,7 @@ class ConnectFourCLI:
             if game.is_terminal_state():
                 print(self.get_display(game))
                 player = game.get_current_player()
-                print(f"Player {ConnectFourCLI.player_number(game, player)} {constants_cli.WIN_MSG}")
+                print(f"{constants_cli.COLORS[(player - 1)]}Player {ConnectFourCLI.player_number(game, player)} {constants_cli.WIN_MSG}{constants_cli.RESET_COLOR}")
                 break
 
     @staticmethod
@@ -71,7 +65,7 @@ class ConnectFourCLI:
         """
         menu = constants_cli.SELECT_AGENT_MSG
 
-        options = get_options(player)
+        options = constants_cli.OPTIONS
 
         keys = list(options.keys())
         for i in range(len(keys)):
@@ -91,6 +85,10 @@ class ConnectFourCLI:
             sleep(constants_cli.BAD_INPUT_TIME)
             ConnectFourCLI.select_agent(game, player)
 
+    def get_display(self, game):
+        """Build the Full Display for the round"""
+        return constants_cli.CLEAR_MSG + self.__get_display_board(game) + "\n" + self.__get_display_numbers(game) + "\n"
+
     @staticmethod
     def get_display_piece(game, piece):
         if piece == game.player1:
@@ -101,17 +99,15 @@ class ConnectFourCLI:
             return constants_cli.EMPTY_PIECE
 
     @staticmethod
-    def get_display_board(game):
-        """
-        Build the Grid's Representation to be displayed
-        """
-        colors = [constants_cli.PLAYER1_COLOR, constants_cli.PLAYER2_COLOR, constants_cli.TIE_COLOR]
+    def __get_display_board(game):
+        """Build the Grid's Representation to be displayed"""
         current_player = game.get_current_player()
 
-        if current_player == game.get_tie_code():
-            representation = f"{colors[(current_player - 1)]}{constants_cli.TIE_MSG}{constants_cli.RESET_COLOR}\n"
-        else:
-            representation = f"{colors[(current_player - 1)]}Player {ConnectFourCLI.player_number(game, current_player)}'s{constants_cli.RESET_COLOR} Turn\n"
+        representation = ""
+
+        if current_player in game.get_players():
+            representation += f"{constants_cli.COLORS[(current_player - 1)]}Player " + \
+                              f"{ConnectFourCLI.player_number(game, current_player)}'s{constants_cli.RESET_COLOR} Turn\n"
 
         representation += f"turn={game.get_turn()} \n" + f"status={game.get_status()}\n"
 
@@ -122,24 +118,17 @@ class ConnectFourCLI:
             representation += "\n"
         return representation[:-1]
 
-    def get_display(self, game):
-        """
-        Build the Full Round Display
-        """
-        menu = ""
-        menu += "\n" * 50 + self.get_display_board(game) + "\n"
-
-        # number line
-        menu += "=" * (game.get_board().width * 3) + "\n"
-        num_line = "["
+    def __get_display_numbers(self, game):
+        """Build number line with last played move highlighted"""
+        num_line = "=" * (game.get_board().width * 3) + "\n"
+        num_line += "["
         for i in range(1, game.get_board().width + 1):
             if self.move is not None and i == self.move + 1:
                 num_line += f"{constants_cli.LAST_MOVE_COLOR}{i}{constants_cli.RESET_COLOR}]["
             else:
                 num_line += f"{i}]["
         num_line = f"{num_line[:-2]}]"
-        menu += f"{num_line}\n"
-        return menu
+        return num_line
 
 
 class Human(Agent):
@@ -147,16 +136,17 @@ class Human(Agent):
 
     def get_action(self, game):
         try:
+            player = game.get_current_player()
             move = int(input(
-                f"Player {ConnectFourCLI.player_number(game, game.get_current_player())} ("
-                f"{ConnectFourCLI.get_display_piece(game, game.get_current_player())}"
+                f"Player {ConnectFourCLI.player_number(game, player)} ("
+                f"{ConnectFourCLI.get_display_piece(game, player)}"
                 f"), drop in what column (1-7): "))
             move -= 1
 
-            if move not in game.get_legal_actions():
-                raise ValueError()
-            else:
+            if move in game.get_legal_actions():
                 return move
+            else:
+                raise ValueError()
 
         except ValueError:
             print(constants_cli.ILLEGAL_INPUT_MSG)

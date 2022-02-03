@@ -1,3 +1,5 @@
+import copy
+
 HEIGHT = 6
 WIDTH = 7
 
@@ -18,7 +20,19 @@ class BoardInterface:
         self.height = height
         self.width = width
         self.default = default
-        self.grid = self.new_grid()
+
+        if grid is None:
+            self.grid = self.new_grid()
+        else:
+            self.grid = grid
+
+    def copy(self):
+        """
+        Perform Deep Copy
+
+        :return: copy
+        """
+        pass
 
     def new_grid(self):
         """
@@ -93,15 +107,16 @@ class TupleBoard(BoardInterface):
     The Internal Representation of a Grid Style Board Game.
     """
 
-    def __init__(self, height=HEIGHT, width=WIDTH):
-        super().__init__(height=height, width=width)
+    def __init__(self, grid=None, height=HEIGHT, width=WIDTH):
+        super().__init__(grid=grid, height=height, width=width)
 
     def new_grid(self):
         """
         Initialize the Grid
         :return: New Grid
         """
-        return tuple((self.default for _ in range(self.width * self.height)))
+        return tuple((self.default
+                      for _ in range(self.width * self.height)))
 
     def get_grid(self):
         """
@@ -110,8 +125,16 @@ class TupleBoard(BoardInterface):
         return self.grid
 
     def get_grid_copy(self):
-        return tuple((self.grid[i]
-                      for i in range(self.height * self.width)))
+        return copy.deepcopy(self.grid)
+
+    def copy(self):
+        return TupleBoard(grid=copy.deepcopy(self.get_grid()), height=copy.deepcopy(self.height), width=copy.deepcopy(self.width))
+
+    def __copy__(self):
+        return TupleBoard(grid=self.get_grid(), height=self.height, width=self.width)
+
+    def __deepcopy__(self, memo):
+        return TupleBoard(grid=copy.deepcopy(self.get_grid(), memo), height=copy.deepcopy(self.height, memo), width=copy.deepcopy(self.width, memo))
 
     def set_grid(self, grid):
         """

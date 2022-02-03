@@ -1,4 +1,14 @@
 from colorama import Fore
+from interface_cli import Human
+import agent
+
+
+OPTIONS = {
+    "Human Player": Human(),
+    "Random Agent": agent.Random(),
+    "Reflex Agent": agent.Reflex()
+}
+
 
 # Messages
 WIN_MSG = "Won the Connect Four Game!"
@@ -16,6 +26,7 @@ PLAYER2_COLOR = Fore.RED
 LAST_MOVE_COLOR = Fore.GREEN
 TIE_COLOR = Fore.MAGENTA
 RESET_COLOR = Fore.RESET
+COLORS = [PLAYER1_COLOR, PLAYER2_COLOR, TIE_COLOR]
 
 # Pieces
 PIECE = "O"
