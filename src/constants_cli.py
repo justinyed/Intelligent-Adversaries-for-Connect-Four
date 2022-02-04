@@ -1,10 +1,10 @@
 from colorama import Fore
-# from interface_cli import Human
+from interface_cli import Human
 import agent
 
 
 OPTIONS = {
-    # "Human Player": Human(),
+    "Human Player": Human(),
     "Random Agent": agent.Random(),
     "Reflex Agent": agent.Reflex()
 }

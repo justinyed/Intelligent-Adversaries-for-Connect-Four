@@ -45,14 +45,13 @@ class Random(Agent):
 
 class Reflex(Agent):
     """
-    A reflex agent chooses an action at each choice point by comparing
+    A reflex agent chooses an action at each choice point by naively comparing
     its alternatives via an evaluation function.
     """
 
     def get_action(self, game):
         if game.is_active_state():
             possible_moves = list(game.get_legal_actions())
-            print(possible_moves)
             utilities = [self.evaluation_function(game.get_successor_game(move))
                          for move in possible_moves]
 

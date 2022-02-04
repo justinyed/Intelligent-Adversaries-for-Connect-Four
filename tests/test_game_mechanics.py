@@ -88,7 +88,6 @@ def get_test_layout(file):
     g, a, expected = load_layout(file)
     actual = g.drop_piece(a)
     msg = f"expected=\'{expected}\', but actual=\'{actual}\'\n" + get_board_str(g)
-    print(msg)
     return actual, expected, msg
 
 
