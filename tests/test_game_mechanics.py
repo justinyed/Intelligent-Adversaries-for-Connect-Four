@@ -2,9 +2,10 @@ import unittest
 import numpy as np
 from src.game import ConnectFour
 from src.board import TupleBoard
+from src.interface_cli import ConnectFourCLI
 import ast
 from os import listdir
-from os.path import isfile, join, sep, basename
+from os.path import isfile, join
 
 PLAYER1 = 'X'
 PLAYER2 = 'O'
@@ -21,27 +22,38 @@ def state_from_string(layout, game_type=ConnectFour, board_type=TupleBoard):
     :param board_type: Class for the Board
     :return:
     """
-    layout = str(layout)
-
     game = game_type(board_type=TupleBoard)
 
     # Retrieve grid
-    grid_lines = layout.splitlines(keepends=False)
-
+    grid_lines = layout.splitlines(keepends=False)[:6]
     raw_grid = list(reversed([row[1:].lstrip("[").rstrip("]").split("][") for row in grid_lines]))
 
+    # create string board
     str_grid = str(raw_grid) \
         .replace(f"'{PLAYER1}'", str(game.player1)) \
         .replace(f"'{PLAYER2}'", str(game.player2)) \
         .replace(f"'{EMPTY}'", str(game.get_board().default)) \
         .replace(f"]", "").replace(f"[", "")
 
-    cnt_player1 = str_grid.count(PLAYER1)
-    cnt_player2 = str_grid.count(PLAYER2)
-    turn = cnt_player1 + cnt_player2 + 1
-
+    # create tuple board
     grid = ast.literal_eval("(" + str_grid + ")")
-    return board_type(grid=grid), turn, 0
+
+    # create array board from tuple board
+    grid_array = np.array(grid)
+    grid_array = np.transpose(grid_array.reshape([6, 7]))
+
+    # Build Board from set_piece function (agnostic to the backend of the board)
+    turn = 1
+    board = board_type()
+    for player in game.get_players():
+        xs, ys = np.where(grid_array == player)
+        xs, ys = tuple(xs), tuple(ys)
+        positions = list(zip(xs, ys))
+        for pos in positions:
+            board.set_piece(position=pos, piece=player)
+            turn += 1
+
+    return board, turn, 0
 
 
 def load_layout(file, game=ConnectFour(board_type=TupleBoard)):
@@ -69,18 +81,14 @@ def get_board_str(game):
     :param game:
     :return:
     """
-    grid = game.get_board().get_grid()
-    if type(grid) in (tuple, list):
-        grid = np.array(list(reversed(grid)))
-    if len(np.shape(grid)) == 1:
-        grid = np.fliplr(grid.reshape([6, 7]))
-    return str(grid)
+    return ConnectFourCLI.get_display_board(game)
 
 
 def get_test_layout(file):
     g, a, expected = load_layout(file)
     actual = g.drop_piece(a)
     msg = f"expected=\'{expected}\', but actual=\'{actual}\'\n" + get_board_str(g)
+    print(msg)
     return actual, expected, msg
 
 
@@ -92,9 +100,11 @@ class TestGameMechanics(unittest.TestCase):
 path = join('.', DIRECTORY)
 files = [f for f in listdir(path) if isfile(join(path, f))]
 for file in files:
-    test_method_name = 'test_fn_{0}'.format(file)
-    testmethod = lambda self: self.assertEqual(*get_test_layout(join('.', DIRECTORY, file)))
-    setattr(TestGameMechanics, test_method_name, testmethod)
+    test_method_name = f'test_fn_{file.split(".")[0]}'
+    test_info = get_test_layout(join('.', DIRECTORY, file))
+    test_method = lambda self: self.assertEqual(*test_info)
+    # define the TestGameMechanics Function
+    setattr(TestGameMechanics, test_method_name, test_method)
 
 if __name__ == '__main__':
     unittest.main()

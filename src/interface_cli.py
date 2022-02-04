@@ -2,7 +2,6 @@ from time import sleep
 import constants_cli
 from game import ConnectFour
 from agent import Agent
-import sys
 
 
 class ConnectFourCLI:
@@ -87,7 +86,7 @@ class ConnectFourCLI:
 
     def get_display(self, game):
         """Build the Full Display for the round"""
-        return constants_cli.CLEAR_MSG + self.__get_display_board(game) + "\n" + self.__get_display_numbers(game) + "\n"
+        return constants_cli.CLEAR_MSG + ConnectFourCLI.get_display_board(game) + "\n" + self.__get_display_numbers(game) + "\n"
 
     @staticmethod
     def get_display_piece(game, piece):
@@ -99,7 +98,7 @@ class ConnectFourCLI:
             return constants_cli.EMPTY_PIECE
 
     @staticmethod
-    def __get_display_board(game):
+    def get_display_board(game):
         """Build the Grid's Representation to be displayed"""
         current_player = game.get_current_player()
 
