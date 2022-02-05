@@ -43,7 +43,7 @@ def state_from_string(layout, game_type=ConnectFour, board_type=TupleBoard):
     grid_array = np.transpose(grid_array.reshape([6, 7]))
 
     # Build Board from set_piece function (agnostic to the backend of the board)
-    turn = 1
+    turn = 0
     board = board_type()
     for player in game.get_players():
         xs, ys = np.where(grid_array == player)
