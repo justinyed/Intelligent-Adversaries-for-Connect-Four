@@ -29,13 +29,17 @@ class ConnectFourCLI:
         """
         while True:
             print(self.get_display(game))
-            if game.turn % self.num_players == 0:
-                self.move = self.agent_1.get_action(game)
-                sleep(constants_cli.DROP_TIME)
-            else:
-                self.move = self.agent_2.get_action(game)
-                print(self.move)
-                sleep(constants_cli.DROP_TIME)
+            try:
+                if game.turn % self.num_players == 0:
+                    self.move = self.agent_1.get_action(game)
+                    sleep(constants_cli.DROP_TIME)
+                else:
+                    self.move = self.agent_2.get_action(game)
+                    sleep(constants_cli.DROP_TIME)
+            except (ValueError, TypeError):
+                print(constants_cli.ILLEGAL_INPUT_MSG)
+                sleep(constants_cli.BAD_INPUT_TIME)
+                self.handler(game)
 
             game.drop_piece(self.move)
 
@@ -139,23 +143,17 @@ class Human(Agent):
     """Handles a Human Player's Input"""
 
     def get_action(self, game):
-        try:
-            player = game.get_current_player()
-            move = int(input(
-                f"Player {ConnectFourCLI.player_number(game, player)} ("
-                f"{ConnectFourCLI.get_display_piece(game, player)}"
-                f"), drop in what column (1-7): "))
-            move -= 1
+        player = game.get_current_player()
+        move = int(input(
+            f"Player {ConnectFourCLI.player_number(game, player)} ("
+            f"{ConnectFourCLI.get_display_piece(game, player)}"
+            f"), drop in what column (1-7): "))
+        move -= 1
 
-            if move in game.get_legal_actions():
-                return move
-            else:
-                raise ValueError()
-
-        except ValueError:
-            print(constants_cli.ILLEGAL_INPUT_MSG)
-            sleep(constants_cli.BAD_INPUT_TIME)
-            self.get_action(game)
+        if move in game.get_legal_actions():
+            return move
+        else:
+            raise ValueError()
 
 
 if __name__ == '__main__':

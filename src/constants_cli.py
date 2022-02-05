@@ -1,14 +1,13 @@
 from colorama import Fore
 from interface_cli import Human
 import agent
-
+import os
 
 OPTIONS = {
     "Human Player": Human(),
     "Random Agent": agent.Random(),
     "Reflex Agent": agent.Reflex()
 }
-
 
 # Messages
 WIN_MSG = "Won the Connect Four Game!"
