@@ -47,7 +47,10 @@ class ConnectFourCLI:
             if game.is_terminal_state():
                 print(self.get_display(game))
                 player = game.get_current_player()
-                print(f"{constants_cli.COLORS[(player - 1)]}Player {ConnectFourCLI.player_number(game, player)} {constants_cli.WIN_MSG}{constants_cli.RESET_COLOR}")
+                msg = f"{constants_cli.COLORS[(player - 1)]}Player " + \
+                      f"{ConnectFourCLI.player_number(game, player)} " + \
+                      f"{constants_cli.WIN_MSG}{constants_cli.RESET_COLOR}"
+                print(msg)
                 break
 
     @staticmethod
@@ -86,7 +89,8 @@ class ConnectFourCLI:
 
     def get_display(self, game):
         """Build the Full Display for the round"""
-        return constants_cli.CLEAR_MSG + ConnectFourCLI.get_display_board(game) + "\n" + self.__get_display_numbers(game) + "\n"
+        return constants_cli.CLEAR_MSG + ConnectFourCLI.get_display_board(game) + "\n" + \
+               self.__get_display_numbers(game) + "\n"
 
     @staticmethod
     def get_display_piece(game, piece):
@@ -106,7 +110,8 @@ class ConnectFourCLI:
 
         if current_player in game.get_players():
             representation += f"{constants_cli.COLORS[(current_player - 1)]}Player " + \
-                              f"{ConnectFourCLI.player_number(game, current_player)}'s{constants_cli.RESET_COLOR} Turn\n"
+                              f"{ConnectFourCLI.player_number(game, current_player)}'s" + \
+                              f"{constants_cli.RESET_COLOR} Turn\n"
 
         representation += f"turn={game.get_turn()} \n" + f"status={game.get_status()}\n"
 

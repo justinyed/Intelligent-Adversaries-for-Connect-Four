@@ -11,9 +11,10 @@ PLAYER1 = 'X'
 PLAYER2 = 'O'
 EMPTY = ' '
 DIRECTORY = "layouts"
+BOARD_TYPE = TupleBoard
 
 
-def state_from_string(layout, game_type=ConnectFour, board_type=TupleBoard):
+def state_from_string(layout, game_type=ConnectFour, board_type=BOARD_TYPE):
     """
     Designed to work with 1D tuple board type, but could be modified for other types
 
@@ -22,7 +23,7 @@ def state_from_string(layout, game_type=ConnectFour, board_type=TupleBoard):
     :param board_type: Class for the Board
     :return:
     """
-    game = game_type(board_type=TupleBoard)
+    game = game_type(board_type=board_type)
 
     # Retrieve grid
     grid_lines = layout.splitlines(keepends=False)[:6]
@@ -56,9 +57,9 @@ def state_from_string(layout, game_type=ConnectFour, board_type=TupleBoard):
     return board, turn, 0
 
 
-def load_layout(file, game=ConnectFour(board_type=TupleBoard)):
+def load_layout(filepath, game=ConnectFour(board_type=BOARD_TYPE)):
     try:
-        with open(file, mode='r') as f:
+        with open(filepath, mode='r') as f:
 
             action = ast.literal_eval(f.readline().split("=")[1])
             expected_status = ast.literal_eval(f.readline().split("=")[1])
@@ -84,8 +85,8 @@ def get_board_str(game):
     return ConnectFourCLI.get_display_board(game)
 
 
-def get_test_layout(file):
-    g, a, expected = load_layout(file)
+def get_test_layout(filepath):
+    g, a, expected = load_layout(filepath)
     actual = g.drop_piece(a)
     msg = f"expected=\'{expected}\', but actual=\'{actual}\'\n" + get_board_str(g)
     return actual, expected, msg

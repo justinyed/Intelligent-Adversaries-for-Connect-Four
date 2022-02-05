@@ -48,6 +48,12 @@ python -m pip install -r requirements.txt
 | Dynamic Programming    | Utilizes Value Iteration and Policy Iteration on Markov Decision Processes                                         |
 | Reinforcement Learning | Utilizes reinforcement learning algorithms.                                                                        |
 
+### Command Line Interface
+
+**Command Line Interface:** Challenge Agents or Human Players.
+- Mainly For Testing or Debugging
+- Displays Turn, Current Status, and Last Move Made 
+- Colored Board
 
 ### Discord Bot Interface
 
@@ -66,10 +72,10 @@ python -m pip install -r requirements.txt
 |-----------------|-------------------------------------------------------------------------------------------------------------------|
 | `@c4 [command]` | In order to interact with the Connect Four Game Bot in a Discord Chat a command must be preceded by its callsign. |
 
-| Command            | Alias | Description                                                                                                                                     |
-|--------------------|-------|-------------------------------------------------------------------------------------------------------------------------------------------------|
-| `challenge [ID]`   | `clg` | Challenge a player or agent by providing the ID.  If no argument is given, then a menu will assist.                                             |
-| `leaderboard [ID]` | `lb`  | Display the record for a player or agent by providing the ID. If no parameter is given, then a leaderboard of default length will be displayed. |
+| Command            | Alias | Description                                                                                                                           |
+|--------------------|-------|---------------------------------------------------------------------------------------------------------------------------------------|
+| `challenge [ID]`   | `clg` | Challenge a player or agent by providing the ID.  If no parameter is given, then a menu will assist.                                  |
+| `leaderboard [ID]` | `lb`  | Display the record for a player or agent by providing the ID. If no parameter is given, then a default leaderboard will be displayed. |
 - Help: `-h` or `--help` preceded by a command will show a help dialog with options.
 
 ---
