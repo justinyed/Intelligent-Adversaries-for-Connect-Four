@@ -104,7 +104,7 @@ class MultiAgent(Agent):
 class MiniMax(MultiAgent):
     """
     A multi-agent which chooses an action at each choice point by attempting to maximize its utility and
-    minimize the utility of its opponent.  Utility of a state is defined by an evaluation function.
+    minimize the utility of its opponent. Utility of a state is defined by an evaluation function.
     """
 
     def get_action(self, game_state):
