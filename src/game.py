@@ -13,7 +13,6 @@ class GameInterface:
         """
         Constructor for Game
 
-        :param board: initialized board object
         :param players: tuple of players; default=(PLAYER1, PLAYER2)
         :param tie: tie code to use for games in tie status; default=TIE_CODE
         :param turn: starting turn; default=0
