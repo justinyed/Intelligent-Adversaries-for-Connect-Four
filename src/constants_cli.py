@@ -1,12 +1,13 @@
 from colorama import Fore
 from interface_cli import Human
 import agent
-import os
 
 OPTIONS = {
     "Human Player": Human(),
     "Random Agent": agent.Random(),
-    "Reflex Agent": agent.Reflex()
+    "Reflex Agent": agent.Reflex(),
+    "Minimax Agent": agent.MiniMax(depth_limit=2),
+    "Alpha-Beta Agent": agent.AlphaBeta(depth_limit=3),
 }
 
 # Messages
@@ -37,4 +38,4 @@ PLAYER2_PIECE = f"{PLAYER2_COLOR}{PIECE}{RESET_COLOR}"
 NUM_PLAYERS = 2
 PLAYER1 = 1
 PLAYER2 = 2
-DROP_TIME = 0.75
+DROP_TIME = 0.0
