@@ -5,6 +5,13 @@ NEGATIVE_INF = float("-inf")
 
 
 def evaluation_function_simple(game):
+    """
+    Evaluates the state of the game and returns the static value of being in that state.
+
+    :param game: game state to evaluate
+    :return: static value in current state
+    """
+
     if game.get_status() == game.get_current_player():
         return POSITIVE_INF  # win
     elif game.is_terminal_state():
@@ -13,6 +20,13 @@ def evaluation_function_simple(game):
 
 
 def depth_function_simple(game, depth_limit) -> int:
+    """
+    Just Returns the Depth Limit
+
+    :param game: unused, but here for API consistency
+    :param depth_limit: defined depth limit
+    :return: depth limit
+    """
     return depth_limit
 
 
@@ -22,11 +36,17 @@ class Agent:
     """
 
     def __init__(self, evaluation_fn=evaluation_function_simple):
+        """
+        Agent Interface
+
+        :param evaluation_fn: evaluation function (returns the static value of a state)
+        """
         self.evaluation_function = evaluation_fn
 
     def get_action(self, game):
         """
         The Agent will receive a game and must return an action from the legal moves
+
         :param game: current state of the game
         :return: The action chosen by the agent given the game
         """
@@ -71,6 +91,11 @@ class MultiAgent(Agent):
     """
 
     def __init__(self, depth_limit=2, eval_fn=evaluation_function_simple, depth_fn=depth_function_simple):
+        """
+        :param depth_limit: depth limit on the MiniMax depth search
+        :param eval_fn: evaluation function (returns the static value of a state)
+        :param depth_fn: depth function (returns the current depth limit)
+        """
         super().__init__(eval_fn)
         self.depth_limit = depth_limit
         self.get_depth_limit = depth_fn
