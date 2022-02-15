@@ -36,6 +36,7 @@ class ConnectFourCLI:
                 else:
                     self.move = self.agent_2.get_action(game)
                     sleep(constants_cli.DROP_TIME)
+
             except (ValueError, TypeError):
                 print(constants_cli.ILLEGAL_INPUT_MSG)
                 sleep(constants_cli.BAD_INPUT_TIME)
@@ -64,8 +65,7 @@ class ConnectFourCLI:
         else:
             return constants_cli.PLAYER2
 
-    @staticmethod
-    def select_agent(game, player):
+    def select_agent(self, game, player) -> Agent:
         """
         Agent Selection Menu
         """
@@ -85,11 +85,8 @@ class ConnectFourCLI:
         except (IndexError, ValueError):
             print(constants_cli.BAD_INPUT_MSG)
             sleep(constants_cli.BAD_INPUT_TIME)
-            ConnectFourCLI.select_agent(game, player)
-        except Exception as error:
-            print(error)
-            sleep(constants_cli.BAD_INPUT_TIME)
-            ConnectFourCLI.select_agent(game, player)
+            return self.select_agent(game, player)
+
 
     def get_display(self, game):
         """Build the Full Display for the round"""
@@ -143,6 +140,7 @@ class Human(Agent):
     """Handles a Human Player's Input"""
 
     def get_action(self, game):
+        # try:
         player = game.get_current_player()
         move = int(input(
             f"Player {ConnectFourCLI.player_number(game, player)} ("

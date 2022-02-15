@@ -1,4 +1,5 @@
 from random import choice
+from evaluation_function_conv import evaluation_function_conv
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
@@ -35,7 +36,7 @@ class Agent:
     An agent must define a get_action method
     """
 
-    def __init__(self, evaluation_fn=evaluation_function_simple):
+    def __init__(self, evaluation_fn=evaluation_function_conv):
         """
         Agent Interface
 
