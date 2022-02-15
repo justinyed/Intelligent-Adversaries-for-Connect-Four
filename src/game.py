@@ -1,4 +1,4 @@
-from board import BoardInterface, TupleBoard
+from board import BoardInterface, TupleBoard, ArrayBoard
 
 PLAYER1 = 1
 PLAYER2 = -1
@@ -170,7 +170,7 @@ class ConnectFour(GameInterface):
     Internal Representation of the Game.
     """
 
-    def __init__(self, board_type=TupleBoard, state=None):
+    def __init__(self, board_type=ArrayBoard, state=None):
         super().__init__(board_type)
 
         # Initialize State
