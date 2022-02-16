@@ -4,6 +4,7 @@ import numpy as np
 
 HEIGHT = 6
 WIDTH = 7
+DEFAULT = 0
 X = 0
 Y = 1
 
@@ -11,7 +12,7 @@ Y = 1
 class BoardInterface:
     """The Internal Representation of a Grid Style Board."""
 
-    def __init__(self, height=HEIGHT, width=WIDTH, default=0, grid=None):
+    def __init__(self, height=HEIGHT, width=WIDTH, default=DEFAULT, grid=None):
         """
         constructor for board object
 
@@ -100,8 +101,8 @@ class TupleBoard(BoardInterface):
     The Internal Representation of a Grid Style Board Game.
     """
 
-    def __init__(self, grid=None, height=HEIGHT, width=WIDTH):
-        super().__init__(grid=grid, height=height, width=width)
+    def __init__(self, grid=None, default=DEFAULT, height=HEIGHT, width=WIDTH):
+        super().__init__(grid=grid, default=default, height=height, width=width)
 
     def new_grid(self):
         """
@@ -178,8 +179,8 @@ class ArrayBoard(BoardInterface):
     The Internal Representation of a Grid Style Board Game.
     """
 
-    def __init__(self, grid=None, height=HEIGHT, width=WIDTH):
-        super().__init__(grid=grid, height=height, width=width)
+    def __init__(self, grid=None, default=DEFAULT, height=HEIGHT, width=WIDTH):
+        super().__init__(grid=grid, default=default, height=height, width=width)
 
     def new_grid(self):
         """

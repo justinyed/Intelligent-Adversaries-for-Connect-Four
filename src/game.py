@@ -1,8 +1,10 @@
 from board import BoardInterface, TupleBoard, ArrayBoard
 
+EMPTY = 0
 PLAYER1 = 1
 PLAYER2 = -1
 TIE_CODE = 3
+
 N_CONNECT = 4
 
 
@@ -198,7 +200,7 @@ class ConnectFour(GameInterface):
         """
         :return: new grid, new turn counter, new status
         """
-        board = self.board_type()
+        board = self.board_type(default=EMPTY)
         return board, 0, board.default
 
     def get_state(self):
