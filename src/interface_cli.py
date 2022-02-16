@@ -17,7 +17,7 @@ class ConnectFourCLI:
 
     def start(self, game=ConnectFour()):
         """
-        Once initialize use this method to start the game
+        Once initialized, use this method to start the game
         """
         self.agent_1 = self.select_agent(game, constants_cli.PLAYER1)
         self.agent_2 = self.select_agent(game, constants_cli.PLAYER2)
@@ -140,7 +140,6 @@ class Human(Agent):
     """Handles a Human Player's Input"""
 
     def get_action(self, game):
-        # try:
         player = game.get_current_player()
         move = int(input(
             f"Player {ConnectFourCLI.player_number(game, player)} ("
