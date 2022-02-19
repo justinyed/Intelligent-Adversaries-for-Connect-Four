@@ -4,7 +4,7 @@ from random import choice
 
 class ActionQueue:
     """
-    todo WIP for Iterative Deepening
+    for Iterative Deepening
     """
 
     def __init__(self, iterable, iterable_ordered=False):
