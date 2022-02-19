@@ -42,7 +42,13 @@ class ActionQueue:
             self.__data.insert(len(self), x)
 
     def extend(self, container: [list, tuple]):
-        self.__data = deque(iterable=sorted(self.to_list() + list(container), reverse=True))
+        dirty = sorted(self.to_list() + list(container), reverse=True)
+        found, clean = [], []
+        for k, v in dirty:
+            if v not in found:
+                found.append(v)
+                clean.append((k, v))
+        self.__data = deque(iterable=clean)
 
     def to_list(self):
         return list([e for e in self.__data])
@@ -64,4 +70,4 @@ class ActionQueue:
         return choice(best_actions)
 
     def __iter__(self):
-        return iter()
+        return self.to_list()

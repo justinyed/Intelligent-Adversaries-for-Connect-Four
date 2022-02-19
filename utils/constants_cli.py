@@ -7,7 +7,8 @@ OPTIONS = {
     "Random Agent": agent.Random(),
     "Reflex Agent": agent.Reflex(),
     "Minimax Agent": agent.MiniMax(depth_limit=2),
-    "Alpha-Beta Agent": agent.AlphaBeta(depth_limit=3),
+    "Alpha-Beta Agent": agent.AlphaBeta(depth_limit=4),
+    "Iterative Agent": agent.AlphaBeta(depth_limit=4)
 }
 
 # Messages

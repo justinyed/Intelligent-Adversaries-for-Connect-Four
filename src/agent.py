@@ -150,7 +150,7 @@ class AlphaBeta(MultiAgent):
     """
     A multi-agent which chooses an action at each choice point by attempting to maximize its utility and
     minimize the utility of its opponent.  Utility of a state is defined by an evaluation function.
-    Additionally, this agent will focus on evaluating relevant states by pruning sub-trees with too few utility points.
+    Additionally, this agent will focus on evaluating relevant states by pruning subtrees with too few utility points.
     """
 
     def get_action(self, game_state):
@@ -193,15 +193,15 @@ class AlphaBeta(MultiAgent):
         return value, best_action
 
 
-class IterativeDeepening(AlphaBeta):
+class IterativeDeepening(MultiAgent):
     """
-    todo WIP
     A multi-agent which chooses an action at each choice point by attempting to maximize its utility and
     minimize the utility of its opponent.  Utility of a state is defined by an evaluation function.
-    Additionally, this agent will focus on evaluating relevant states by pruning sub-trees with too few utility points.
+    Additionally, this agent will focus on evaluating relevant states by pruning subtrees with too few utility points.
+    todo fix doc string
     """
 
-    def __init__(self, depth_limit=3, eval_fn=evaluation_function_simple, depth_fn=depth_function_simple):
+    def __init__(self, depth_limit=3, eval_fn=wtsq, depth_fn=depth_function_simple):
         super().__init__(depth_limit, eval_fn, depth_fn)
         self.best_known_moves = dict()
         self.iterative_depth_limit = 0
@@ -225,8 +225,7 @@ class IterativeDeepening(AlphaBeta):
         best_moves = []
 
         for action in self.best_known_moves[current_depth]:
-            value_prime, _ = AlphaBeta._min_value(self, game_state.get_successor_game(action), current_depth, alpha,
-                                                  beta)
+            value_prime, _ = self._min_value(game_state.get_successor_game(action), current_depth, alpha, beta)
             if value_prime == value:
                 self.best_known_moves[current_depth].append((value, action))
             if value_prime > value:
@@ -238,3 +237,18 @@ class IterativeDeepening(AlphaBeta):
                 break
         self.best_known_moves[current_depth].extend(best_moves)
         return value, choice(best_moves)
+
+    def _min_value(self, game_state, current_depth, alpha, beta):
+        if game_state.is_terminal_state():
+            return self.evaluation_function(game_state), None
+
+        value, best_action = POSITIVE_INF, None
+
+        for action in game_state.get_legal_actions():
+            value_prime, _ = self._max_value(game_state.get_successor_game(action), current_depth + 1, alpha, beta)
+            if value_prime < value:
+                value, best_action = value_prime, action
+                beta = min(beta, value)
+            if value < alpha:
+                break
+        return value, best_action
