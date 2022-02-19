@@ -252,7 +252,7 @@ class ConnectFour(GameInterface):
         if self.__check_tie():
             self.status = self.tie
         elif self.__check_for_win_local(set_position):
-            self.status = 1 + (self.turn % self.player_count)
+            self.status = self.players[self.turn % self.player_count]
         else:
             self.status = self.in_progress
 

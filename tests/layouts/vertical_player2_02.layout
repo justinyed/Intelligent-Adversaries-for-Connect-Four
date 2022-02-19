@@ -1,5 +1,5 @@
 action=2
-expected_status=2
+expected_status=-1
 [ ][ ][ ][X][ ][ ][ ]
 [ ][ ][ ][O][ ][ ][ ]
 [ ][ ][ ][X][ ][ ][ ]

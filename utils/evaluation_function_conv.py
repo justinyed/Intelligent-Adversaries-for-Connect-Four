@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.signal import convolve2d
-from game import ConnectFour
+from game import ConnectFour, PLAYER1, PLAYER2, EMPTY, TIE_CODE
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
@@ -16,40 +16,41 @@ def get_kernels(n=4):
 
 kernels_2 = get_kernels(2)
 kernels_3 = get_kernels(3)
-kernels_4 = get_kernels(4)
 
 
 def evaluation_function_conv(game: ConnectFour):
     """
     Uses Convolution method to evaluate the state of the game and returns the static value of being in that state.
+    Acts as a heuristic and evaluation function.
 
     :param game: game state to evaluate
     :return: static value in current state
     """
     grid = game.get_board().get_grid()
-    player = game.get_current_player()
+    current_player = game.get_current_player()
+    opposing_player = -1 * current_player
     negative_grid = -1 * grid
 
-    opponent_fours = check_line(negative_grid, player, kernels_4, 4).sum()
-    if opponent_fours == 1:
+    # Check for terminal state
+    if game.get_status() == current_player:
+        return POSITIVE_INF
+    elif game.get_status() == opposing_player:
+        return NEGATIVE_INF
+    elif game.get_status() == TIE_CODE:
         return NEGATIVE_INF
 
-    fours = check_line(grid, player, kernels_4, 4).sum()
-    if fours == 1:
-        return POSITIVE_INF
+    threes = check_line(grid, current_player, kernels_3, 3).sum()
+    opponent_threes = check_line(negative_grid, current_player, kernels_3, 3).sum()
 
-    threes = check_line(grid, player, kernels_3, 3).sum() - (2 * fours)
-    opponent_threes = check_line(negative_grid, player, kernels_3, 3).sum() - (2 * opponent_fours)
-
-    twos = check_line(grid, player, kernels_2, 2).sum() - (2 * threes - 3 * fours)
-    opponent_twos = check_line(negative_grid, player, kernels_2, 2).sum() - (2 * opponent_threes - 3 * opponent_fours)
+    twos = check_line(grid, current_player, kernels_2, 2).sum() - (2 * threes)
+    opponent_twos = check_line(negative_grid, current_player, kernels_2, 2).sum() - (2 * opponent_threes)
 
     a = 300
-    b = 30
-    c = -600
+    b = -600
+    c = 30
     d = -20
 
-    return a * threes + b * twos + c * opponent_threes + d * opponent_twos
+    return a * threes + b * opponent_threes + c * twos + d * opponent_twos
 
 
 def check_line(grid, current_player, kernels, n):

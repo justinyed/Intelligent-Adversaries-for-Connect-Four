@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from src.game import ConnectFour
-from src.board import TupleBoard
+from src.board import TupleBoard, ArrayBoard
 from src.interface_cli import ConnectFourCLI
 import ast
 from os import listdir
@@ -11,7 +11,7 @@ PLAYER1 = 'X'
 PLAYER2 = 'O'
 EMPTY = ' '
 DIRECTORY = "layouts"
-BOARD_TYPE = TupleBoard
+BOARD_TYPE = ArrayBoard
 
 
 def state_from_string(layout, game_type=ConnectFour, board_type=BOARD_TYPE):
