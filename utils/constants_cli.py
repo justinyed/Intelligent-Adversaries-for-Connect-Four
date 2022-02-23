@@ -10,7 +10,7 @@ def agent_options(player):
         "Human Player": Human(),
         "Random Agent": agent.Random(player=player),
         "Reflex Agent": agent.Reflex(player=player),
-        "Minimax Agent": agent.MiniMax(depth_limit=2, eval_fn=wtsq, player=player),
+        "Minimax Agent": agent.MiniMax(depth_limit=2, eval_fn=conv, player=player),
         "Alpha-Beta Agent": agent.AlphaBeta(depth_limit=3, eval_fn=wtsq, player=player),
         "Iterative Agent": agent.AlphaBeta(depth_limit=4, eval_fn=wtsq, player=player)
     }

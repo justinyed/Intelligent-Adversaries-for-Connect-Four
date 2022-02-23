@@ -3,7 +3,7 @@ from game import ConnectFour, PLAYER1, PLAYER2, EMPTY, TIE_CODE
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
-WINNING_VALUE = 10000
+WINNING_VALUE = POSITIVE_INF
 LOSING_VALUE = NEGATIVE_INF
 
 """
@@ -27,18 +27,19 @@ def evaluation_function_weighted_square(game: ConnectFour, current_player: int):
     returns the static value of being in that state.
     Acts as a heuristic and evaluation function.
 
+    :param current_player:
     :param game: game state to evaluate
     :return: static value in current state
     """
-    grid = game.get_board().get_grid()
-
     # Check for terminal state
     if game.get_status() is current_player:
         return WINNING_VALUE
     elif game.is_terminal_state():
         return LOSING_VALUE
 
-    if current_player == PLAYER2:  # neutralize grid
-        grid = -1 * grid
+    grid = game.get_board().get_grid()
+
+    if current_player is PLAYER2:  # neutralize grid
+        grid *= -1
 
     return np.sum(WEIGHTS * grid)

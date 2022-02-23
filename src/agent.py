@@ -46,6 +46,7 @@ class Agent:
         """
         self.evaluation_function = evaluation_fn
         self.player = player
+        self.opponent = -1 * player
 
     def get_action(self, game):
         """

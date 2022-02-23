@@ -1,17 +1,19 @@
 import unittest
-import numpy as np
-from src.game import ConnectFour
-from src.board import TupleBoard, ArrayBoard
-from src.interface_cli import ConnectFourCLI
 import ast
 from os import listdir
 from os.path import isfile, join
+import numpy as np
+from parameterized import parameterized
+
+from src.game import ConnectFour
+from src.board import TupleBoard, ArrayBoard
+from src.interface_cli import ConnectFourCLI
 
 PLAYER1 = 'X'
 PLAYER2 = 'O'
 EMPTY = ' '
 DIRECTORY = "layouts"
-BOARD_TYPE = ArrayBoard
+BOARD_TYPE = TupleBoard
 
 
 def state_from_string(layout, game_type=ConnectFour, board_type=BOARD_TYPE):
@@ -74,37 +76,19 @@ def load_layout(filepath, game=ConnectFour(board_type=BOARD_TYPE)):
         return game
 
 
-def get_board_str(game):
-    """
-    Theoretically should handle 1D or 2D tuple or list
-    May also work with a numpy array.
-
-    :param game:
-    :return:
-    """
-    return ConnectFourCLI.get_display_board(game)
-
-
 def get_test_layout(filepath):
     g, a, expected = load_layout(filepath)
     actual = g.drop_piece(a)
-    msg = f"expected=\'{expected}\', but actual=\'{actual}\'\n" + get_board_str(g)
+    msg = f"expected=\'{expected}\', but actual=\'{actual}\'\n" + ConnectFourCLI.get_display_board(g)
     return actual, expected, msg
 
 
-class TestGameMechanics(unittest.TestCase):
-    pass
-
-
-# found out how to use unittest using a loop
 path = join('.', DIRECTORY)
 files = [f for f in listdir(path) if isfile(join(path, f))]
-for file in files:
-    test_method_name = f'test_fn_{file.split(".")[0]}'
-    test_info = get_test_layout(join('.', DIRECTORY, file))
-    test_method = lambda self: self.assertEqual(*test_info)
-    # define the TestGameMechanics Function
-    setattr(TestGameMechanics, test_method_name, test_method)
+params = list([[f'{file.split(".")[0]}', *get_test_layout(join('.', DIRECTORY, file))] for file in files])
 
-if __name__ == '__main__':
-    unittest.main()
+
+class TestSequence(unittest.TestCase):
+    @parameterized.expand(params)
+    def test_sequence(self, name, a, b, c):
+        self.assertEqual(a, b, c)
