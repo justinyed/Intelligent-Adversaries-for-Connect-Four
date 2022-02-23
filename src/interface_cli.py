@@ -71,7 +71,7 @@ class ConnectFourCLI:
         """
         menu = constants_cli.SELECT_AGENT_MSG
 
-        options = constants_cli.OPTIONS
+        options = constants_cli.agent_options(player)
 
         keys = list(options.keys())
         for i in range(len(keys)):

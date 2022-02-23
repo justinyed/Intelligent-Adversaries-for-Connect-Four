@@ -3,6 +3,8 @@ from game import ConnectFour, PLAYER1, PLAYER2, EMPTY, TIE_CODE
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
+WINNING_VALUE = 10000
+LOSING_VALUE = NEGATIVE_INF
 
 """
 The value of each line is the sum of the values of its 4 individual squares, 
@@ -16,13 +18,12 @@ WEIGHTS = np.array([[3, 4, 5, 7, 5, 4, 3],
                     [5, 8, 11, 13, 11, 8, 5],
                     [5, 8, 11, 13, 11, 8, 5],
                     [4, 6, 8, 10, 8, 6, 4],
-                    [3, 4, 5, 7, 5, 4, 3]
-                    ])
+                    [3, 4, 5, 7, 5, 4, 3]])
 
 
-def evaluation_function_weighted_square(game: ConnectFour):
+def evaluation_function_weighted_square(game: ConnectFour, current_player: int):
     """
-    Uses 69 unique line method by Martin Stenmark to evaluate the state of the game and
+    Uses the 69 unique line method by Martin Stenmark to evaluate the state of the game and
     returns the static value of being in that state.
     Acts as a heuristic and evaluation function.
 
@@ -30,18 +31,14 @@ def evaluation_function_weighted_square(game: ConnectFour):
     :return: static value in current state
     """
     grid = game.get_board().get_grid()
-    current_player = game.get_current_player()
-    opposing_player = -1 * current_player
-
-    if current_player is PLAYER2:  # neutralize grid
-        grid = -1 * grid
 
     # Check for terminal state
-    if game.get_status() == current_player:
-        return POSITIVE_INF
-    elif game.get_status() == opposing_player:
-        return NEGATIVE_INF
-    elif game.get_status() == TIE_CODE:
-        return NEGATIVE_INF
+    if game.get_status() is current_player:
+        return WINNING_VALUE
+    elif game.is_terminal_state():
+        return LOSING_VALUE
+
+    if current_player == PLAYER2:  # neutralize grid
+        grid = -1 * grid
 
     return np.sum(WEIGHTS * grid)

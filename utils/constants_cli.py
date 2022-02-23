@@ -1,15 +1,20 @@
 from colorama import Fore
 from interface_cli import Human
 import agent
+from utils.evaluation_function_wtsq import evaluation_function_weighted_square as wtsq
+from utils.evaluation_function_conv import evaluation_function_conv as conv
 
-OPTIONS = {
-    "Human Player": Human(),
-    "Random Agent": agent.Random(),
-    "Reflex Agent": agent.Reflex(),
-    "Minimax Agent": agent.MiniMax(depth_limit=2),
-    "Alpha-Beta Agent": agent.AlphaBeta(depth_limit=4),
-    "Iterative Agent": agent.AlphaBeta(depth_limit=4)
-}
+
+def agent_options(player):
+    return {
+        "Human Player": Human(),
+        "Random Agent": agent.Random(player=player),
+        "Reflex Agent": agent.Reflex(player=player),
+        "Minimax Agent": agent.MiniMax(depth_limit=2, eval_fn=wtsq, player=player),
+        "Alpha-Beta Agent": agent.AlphaBeta(depth_limit=3, eval_fn=wtsq, player=player),
+        "Iterative Agent": agent.AlphaBeta(depth_limit=4, eval_fn=wtsq, player=player)
+    }
+
 
 # Messages
 WIN_MSG = "Won the Connect Four Game!"
@@ -18,7 +23,7 @@ BAD_INPUT_MSG = "Improper Input; Try Again"
 ILLEGAL_INPUT_MSG = "Column Out of Range; Try Again"
 BAD_INPUT_TIME = 0.75
 CLEAR_MSG = "\n" * 50
-LINE_MSG = "=" * 50
+LINE_MSG = "=" * 32
 SELECT_AGENT_MSG = CLEAR_MSG + "CONNECT 4\n" + LINE_MSG + "\n" + "AGENT SELECTION:\n"
 
 # Colors
@@ -39,4 +44,4 @@ PLAYER2_PIECE = f"{PLAYER2_COLOR}{PIECE}{RESET_COLOR}"
 NUM_PLAYERS = 2
 PLAYER1 = 1
 PLAYER2 = 2
-DROP_TIME = 0.0
+DROP_TIME = 0.60

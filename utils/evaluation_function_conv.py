@@ -18,25 +18,22 @@ kernels_2 = get_kernels(2)
 kernels_3 = get_kernels(3)
 
 
-def evaluation_function_conv(game: ConnectFour):
+def evaluation_function_conv(game: ConnectFour, current_player: int):
     """
     Uses Convolution method to evaluate the state of the game and returns the static value of being in that state.
     Acts as a heuristic and evaluation function.
 
+    :param current_player:
     :param game: game state to evaluate
     :return: static value in current state
     """
     grid = game.get_board().get_grid()
-    current_player = game.get_current_player()
-    opposing_player = -1 * current_player
     negative_grid = -1 * grid
 
     # Check for terminal state
-    if game.get_status() == current_player:
+    if game.get_status() is current_player:
         return POSITIVE_INF
-    elif game.get_status() == opposing_player:
-        return NEGATIVE_INF
-    elif game.get_status() == TIE_CODE:
+    elif game.is_terminal_state():
         return NEGATIVE_INF
 
     threes = check_line(grid, current_player, kernels_3, 3).sum()

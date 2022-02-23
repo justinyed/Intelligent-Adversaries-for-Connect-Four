@@ -101,6 +101,7 @@ python -m pip install -r requirements.txt
 | `proto`    | Notebooks & scripts for prototyping.             |
 | `src`      | Source Code for interface, game, & Intelligence. |
 | `tests`    | Scripts for any tests that have been made.       |
+| `utils`    | Utility functions                                |
 
 ---
 

@@ -7,7 +7,7 @@ POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
 
 
-def evaluation_function_simple(game):
+def evaluation_function_simple(game, current_player):
     """
     Evaluates the state of the game and returns the static value of being in that state.
 
@@ -15,7 +15,7 @@ def evaluation_function_simple(game):
     :return: static value in current state
     """
 
-    if game.get_status() == game.get_current_player():
+    if game.get_status() == current_player:
         return POSITIVE_INF  # win
     elif game.is_terminal_state():
         return NEGATIVE_INF  # loss or tie
@@ -38,13 +38,14 @@ class Agent:
     An agent must define a get_action method
     """
 
-    def __init__(self, evaluation_fn=wtsq):
+    def __init__(self, evaluation_fn=wtsq, player=0):
         """
         Agent Interface
 
         :param evaluation_fn: evaluation function (returns the static value of a state)
         """
         self.evaluation_function = evaluation_fn
+        self.player = player
 
     def get_action(self, game):
         """
@@ -76,7 +77,7 @@ class Reflex(Agent):
     def get_action(self, game):
         if game.is_active_state():
             possible_moves = list(game.get_legal_actions())
-            utilities = [self.evaluation_function(game.get_successor_game(move))
+            utilities = [self.evaluation_function(game.get_successor_game(move), self.player)
                          for move in possible_moves]
 
             best_utility = max(utilities)
@@ -93,13 +94,13 @@ class MultiAgent(Agent):
     its possible actions and the possible actions of its opponent via an evaluation function.
     """
 
-    def __init__(self, depth_limit=2, eval_fn=wtsq, depth_fn=depth_function_simple):
+    def __init__(self, depth_limit=2, eval_fn=wtsq, depth_fn=depth_function_simple, player=0):
         """
         :param depth_limit: depth limit on the MiniMax depth search
         :param eval_fn: evaluation function (returns the static value of a state)
         :param depth_fn: depth function (returns the current depth limit)
         """
-        super().__init__(eval_fn)
+        super().__init__(eval_fn, player)
         self.depth_limit = depth_limit
         self.get_depth_limit = depth_fn
 
@@ -116,7 +117,7 @@ class MiniMax(MultiAgent):
 
     def _max_value(self, game_state, current_depth):
         if game_state.is_terminal_state() or current_depth >= self.get_depth_limit(game_state, self.depth_limit):
-            return self.evaluation_function(game_state), None
+            return self.evaluation_function(game_state, self.player), None
 
         value = NEGATIVE_INF
         best_actions = []
@@ -135,7 +136,7 @@ class MiniMax(MultiAgent):
 
     def _min_value(self, game_state, current_depth):
         if game_state.is_terminal_state():
-            return self.evaluation_function(game_state), None
+            return self.evaluation_function(game_state, self.player), None
 
         value, best_action = POSITIVE_INF, None
 
@@ -159,7 +160,7 @@ class AlphaBeta(MultiAgent):
 
     def _max_value(self, game_state, current_depth, alpha, beta):
         if game_state.is_terminal_state() or self.get_depth_limit(game_state, self.depth_limit) <= current_depth:
-            return self.evaluation_function(game_state), None
+            return self.evaluation_function(game_state, self.player), None
 
         value, best_action = NEGATIVE_INF, None
         best_moves = []
@@ -179,7 +180,7 @@ class AlphaBeta(MultiAgent):
 
     def _min_value(self, game_state, current_depth, alpha, beta):
         if game_state.is_terminal_state():
-            return self.evaluation_function(game_state), None
+            return self.evaluation_function(game_state, self.player), None
 
         value, best_action = POSITIVE_INF, None
 
@@ -201,8 +202,8 @@ class IterativeDeepening(MultiAgent):
     todo fix doc string
     """
 
-    def __init__(self, depth_limit=3, eval_fn=wtsq, depth_fn=depth_function_simple):
-        super().__init__(depth_limit, eval_fn, depth_fn)
+    def __init__(self, depth_limit=3, eval_fn=wtsq, depth_fn=depth_function_simple, player=0):
+        super().__init__(depth_limit, eval_fn, depth_fn, player)
         self.best_known_moves = dict()
         self.iterative_depth_limit = 0
         self.current_depth_limit = 0
@@ -219,7 +220,7 @@ class IterativeDeepening(MultiAgent):
     def _max_value(self, game_state, current_depth, alpha, beta):
         if game_state.is_terminal_state() or \
                 self.get_depth_limit(game_state, self.iterative_depth_limit) <= current_depth:
-            return self.evaluation_function(game_state), None
+            return self.evaluation_function(game_state, self.player), None
 
         value, best_action = NEGATIVE_INF, None
         best_moves = []
@@ -240,7 +241,7 @@ class IterativeDeepening(MultiAgent):
 
     def _min_value(self, game_state, current_depth, alpha, beta):
         if game_state.is_terminal_state():
-            return self.evaluation_function(game_state), None
+            return self.evaluation_function(game_state, self.player), None
 
         value, best_action = POSITIVE_INF, None
 
