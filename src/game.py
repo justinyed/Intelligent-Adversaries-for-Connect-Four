@@ -4,7 +4,8 @@ EMPTY = 0
 PLAYER1 = 1
 PLAYER2 = -1
 TIE_CODE = 3
-
+X = 0
+Y = 1
 N_CONNECT = 4
 
 
@@ -271,34 +272,25 @@ class ConnectFour(GameInterface):
                self.__check_line(drop_position, (-1, 1))
 
     def __check_line(self, origin, direction):
-        return self.__count_line(origin, direction) == self.n_connect
+        return self.__count_line(origin, direction) >= self.n_connect
 
     def __count_line(self, origin, direction):
-        x0, y0 = origin
+        current_position = origin
         dx, dy = direction
-        ndx, ndy = -1 * dx, -1 * dy
         count = 1
 
-        while True:
-            tx, ty = x0 + ndx, y0 + ndy
-            transition = (tx, ty)
-            if self.__is_legal_position(transition) and self.__is_same_as_current(transition):
-                x0, y0 = transition
-            else:
-                break
+        while self.__is_legal_position(current_position) and self.__is_same_as_current(current_position):
+            current_position = current_position[X] + (-1 * dx), current_position[Y] + (-1 * dy)
 
-        while True:
-            tx, ty = x0 + dx, y0 + dy
-            transition = (tx, ty)
-            if self.__is_legal_position(transition) and self.__is_same_as_current(transition):
-                x0, y0 = transition
-                count += 1
-            else:
-                break
-        return count
+        current_position = current_position[X] + dx, current_position[Y] + dy
+
+        while self.__is_legal_position(current_position) and self.__is_same_as_current(current_position):
+            current_position = current_position[X] + dx, current_position[Y] + dy
+            count += 1
+        return count - 1
 
     def __is_legal_position(self, position):
-        return 0 <= position[0] < self.board.width and 0 <= position[1] < self.board.height
+        return 0 <= position[X] < self.board.width and 0 <= position[Y] < self.board.height
 
     def __is_same_as_current(self, position):
         return self.get_current_player() == self.board.get_piece(position)

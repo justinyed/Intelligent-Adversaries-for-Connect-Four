@@ -8,11 +8,13 @@ from parameterized import parameterized
 from src.game import ConnectFour
 from src.board import TupleBoard, ArrayBoard
 from src.interface_cli import ConnectFourCLI
+from utils.constants_cli import PLAYER1_COLOR, PLAYER2_COLOR, RESET_COLOR
 
 PLAYER1 = 'X'
 PLAYER2 = 'O'
 EMPTY = ' '
-DIRECTORY = "layouts"
+REMINDER = f'P1={PLAYER1_COLOR}{PLAYER1}{RESET_COLOR}; P2={PLAYER2_COLOR}{PLAYER2}{RESET_COLOR}'
+DIRECTORY = 'layouts'
 BOARD_TYPE = TupleBoard
 
 
@@ -78,8 +80,15 @@ def load_layout(filepath, game=ConnectFour(board_type=BOARD_TYPE)):
 
 def get_test_layout(filepath):
     g, a, expected = load_layout(filepath)
+    before = f"\nInitial State:\n{ConnectFourCLI.get_display_board(g)}"
     actual = g.drop_piece(a)
-    msg = f"expected=\'{expected}\', but actual=\'{actual}\'\n" + ConnectFourCLI.get_display_board(g)
+    after = f"\nCurrent State:\n{ConnectFourCLI.get_display_board(g)}"
+    msg = f"expected=\'{expected}\', but actual=\'{actual}\'\n" \
+          f"{REMINDER}\n" \
+          f"{before}\n" \
+          f"\n### performed action '{a}' ###\n" \
+          f"{after}\n{'='*35}"
+
     return actual, expected, msg
 
 
@@ -90,5 +99,5 @@ params = list([[f'{file.split(".")[0]}', *get_test_layout(join('.', DIRECTORY, f
 
 class TestSequence(unittest.TestCase):
     @parameterized.expand(params)
-    def test_sequence(self, name, a, b, c):
+    def test(self, name, a, b, c):
         self.assertEqual(a, b, c)
