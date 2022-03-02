@@ -252,7 +252,7 @@ class ConnectFour(GameInterface):
     def __update_status(self, set_position) -> None:
         if self.__check_tie():
             self.status = self.tie
-        elif self.__check_for_win_local(set_position):
+        elif self.__check_for_win(set_position):
             self.status = self.get_players()[self.get_turn() % self.player_count]
         else:
             self.status = self.in_progress
@@ -260,7 +260,7 @@ class ConnectFour(GameInterface):
     def __check_tie(self):
         return self.max_turns == self.turn
 
-    def __check_for_win_local(self, drop_position):
+    def __check_for_win(self, drop_position):
         """
         Local Win Check. Checks Starting from the dropped piece (change on grid)
         :param drop_position: Position of Dropped Piece

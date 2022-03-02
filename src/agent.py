@@ -1,7 +1,7 @@
 from random import choice
 from utils.action_queue import ActionQueue
 from utils.evaluation_function_wtsq import evaluation_function_weighted_square as wtsq
-
+import time
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
@@ -11,6 +11,7 @@ def evaluation_function_simple(game, current_player):
     """
     Evaluates the state of the game and returns the static value of being in that state.
 
+    :param current_player:
     :param game: game state to evaluate
     :return: static value in current state
     """
@@ -31,6 +32,26 @@ def depth_function_simple(game, depth_limit) -> int:
     :return: depth limit
     """
     return depth_limit
+
+
+def depth_function_turn_bonus(game, depth_limit) -> int:
+    """
+    Returns the Depth Limit plus a bonus which is related to the games maturity
+
+    :param game:
+    :param depth_limit: defined depth limit
+    :return: depth limit
+    """
+    turn = game.turn
+
+    if turn >= 15:
+        return depth_limit + 1
+    elif turn >= 22:
+        return depth_limit + 2
+    elif turn >= 30:
+        return depth_limit + 3
+    else:
+        return depth_limit
 
 
 class Agent:
@@ -104,6 +125,22 @@ class MultiAgent(Agent):
         super().__init__(eval_fn, player)
         self.depth_limit = depth_limit
         self.get_depth_limit = depth_fn
+        self.time_limit = None  # seconds
+        self.start_time = None
+
+    def timer_set(self, seconds: int) -> None:
+        self.time_limit = seconds
+
+    def _timer_start(self) -> None:
+        if self.time_limit is not None:
+            self.start_time = time.time()
+
+    def _timer_elapsed(self) -> bool:
+        """
+        True if timer has elapsed; false otherwise
+        :return: True if timer has elapsed; otherwise False
+        """
+        return self.time_limit <= time.time() - self.start_time if self.time_limit is not None else False
 
 
 class MiniMax(MultiAgent):
@@ -113,11 +150,12 @@ class MiniMax(MultiAgent):
     """
 
     def get_action(self, game_state):
+        self._timer_start()
         _, move = self._max_value(game_state, 0)
         return move
 
     def _max_value(self, game_state, current_depth):
-        if game_state.is_terminal_state() or current_depth >= self.get_depth_limit(game_state, self.depth_limit):
+        if self._timer_elapsed() or game_state.is_terminal_state() or current_depth >= self.get_depth_limit(game_state, self.depth_limit):
             return self.evaluation_function(game_state, self.player), None
 
         value = NEGATIVE_INF
@@ -156,11 +194,12 @@ class AlphaBeta(MultiAgent):
     """
 
     def get_action(self, game_state):
+        self._timer_start()
         _, move = self._max_value(game_state, 0, NEGATIVE_INF, POSITIVE_INF)
         return move
 
     def _max_value(self, game_state, current_depth, alpha, beta):
-        if game_state.is_terminal_state() or self.get_depth_limit(game_state, self.depth_limit) <= current_depth:
+        if self._timer_elapsed() or game_state.is_terminal_state() or self.get_depth_limit(game_state, self.depth_limit) <= current_depth:
             return self.evaluation_function(game_state, self.player), None
 
         value, best_action = NEGATIVE_INF, None
@@ -210,6 +249,7 @@ class IterativeDeepening(MultiAgent):
         self.current_depth_limit = 0
 
     def get_action(self, game_state):
+        self._timer_start()
         move = None
         # iterative deepening
         for current_depth_limit in range(0, self.depth_limit + 1):
@@ -219,7 +259,8 @@ class IterativeDeepening(MultiAgent):
         return move
 
     def _max_value(self, game_state, current_depth, alpha, beta):
-        if game_state.is_terminal_state() or \
+        # todo handle when time has elapsed
+        if self._timer_elapsed() or game_state.is_terminal_state() or \
                 self.get_depth_limit(game_state, self.iterative_depth_limit) <= current_depth:
             return self.evaluation_function(game_state, self.player), None
 
@@ -254,3 +295,9 @@ class IterativeDeepening(MultiAgent):
             if value < alpha:
                 break
         return value, best_action
+
+
+
+
+
+

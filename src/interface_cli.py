@@ -2,6 +2,7 @@ from time import sleep
 from utils import constants_cli
 from game import ConnectFour
 from agent import Agent
+from sys import getsizeof
 
 
 class ConnectFourCLI:
@@ -43,6 +44,8 @@ class ConnectFourCLI:
                 self.handler(game)
 
             game.drop_piece(self.move)
+            print(game.get_board().__hash__())
+            print(getsizeof(game.get_board().__hash__()))
 
             # check for terminal states
             if game.get_status() == game.tie:

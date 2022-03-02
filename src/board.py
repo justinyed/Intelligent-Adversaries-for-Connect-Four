@@ -1,6 +1,8 @@
 import copy
 from ast import literal_eval
 import numpy as np
+import io
+import sys
 
 HEIGHT = 6
 WIDTH = 7
@@ -187,7 +189,7 @@ class ArrayBoard(BoardInterface):
         Initialize the Grid
         :return: New Grid
         """
-        return np.zeros((self.height, self.width), dtype=int)
+        return np.zeros((self.height, self.width), dtype=np.int8)
 
     def get_grid(self):
         """
@@ -227,3 +229,64 @@ class ArrayBoard(BoardInterface):
         :return: piece at position
         """
         return self.grid[abs(position[Y] - (self.height - 1))][position[X]]
+
+    def __hash__(self):
+        return tuple(self.grid.flatten())
+
+
+class BitBoard(BoardInterface):
+    """
+    The Internal Representation of a Grid Style Board Game.
+    """
+
+    def __init__(self, grid=None, default=DEFAULT, height=HEIGHT, width=WIDTH):
+        super().__init__(grid=grid, default=default, height=height, width=width)
+
+    def new_grid(self):
+        """
+        Initialize the Grid
+        :return: New Grid
+        """
+        return np.zeros((self.height, self.width), dtype=np.int8)
+
+    def get_grid(self):
+        """
+        :return: internal grid
+        """
+        return self.grid
+
+    def get_grid_copy(self):
+        return np.copy(self.grid)
+
+    def copy(self):
+        return ArrayBoard(grid=np.copy(self.get_grid()), height=copy.deepcopy(self.height), width=copy.deepcopy(self.width))
+
+    def __copy__(self):
+        return ArrayBoard(grid=self.get_grid(), height=self.height, width=self.width)
+
+    def __deepcopy__(self, memo):
+        return ArrayBoard(grid=np.copy(self.get_grid()), height=copy.deepcopy(self.height, memo), width=copy.deepcopy(self.width, memo))
+
+    def set_grid(self, grid):
+        """
+        Set internal grid
+        :param grid: internal grid
+        """
+        self.grid = grid
+
+    def set_piece(self, position, piece):
+        """
+        :param position: Tuple (x, y) of position to place piece
+        :param piece: piece to place
+        """
+        self.grid[abs(position[Y] - (self.height - 1))][position[X]] = piece
+
+    def get_piece(self, position):
+        """
+        :param position: Tuple (x, y) of position to get
+        :return: piece at position
+        """
+        return self.grid[abs(position[Y] - (self.height - 1))][position[X]]
+
+    def __hash__(self):
+        return tuple(self.grid.flatten())
