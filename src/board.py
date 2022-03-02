@@ -7,6 +7,7 @@ import sys
 HEIGHT = 6
 WIDTH = 7
 DEFAULT = 0
+N_CONNECT = 4
 X = 0
 Y = 1
 
@@ -90,6 +91,61 @@ class BoardInterface:
         :return: piece at position
         """
         pass
+
+    def drop_piece(self, column, piece):
+        """
+        drop piece into slot in grid
+
+        :param column: column to drop piece
+        :return: new status after action
+        """
+        for y in range(self.height):
+            position = (column, y)
+            if self.get_piece(position) == self.default:
+                self.set_piece(position, piece)
+                return position
+
+    def get_legal_actions(self):
+        """
+        :return: a generator which contains the legal moves
+        """
+        return (x for x in range(self.width) if self.get_piece((x, self.height - 1)) == self.default)
+
+    def check_win(self, drop_position, current_piece):
+        """
+        Local Win Check. Checks Starting from the dropped piece (change on grid)
+        :param current_piece: current piece
+        :param drop_position: Position of Dropped Piece
+        :return: True if Win was found, otherwise False
+        """
+        return self.__check_line(drop_position, (0, 1), current_piece) or \
+               self.__check_line(drop_position, (1, 0), current_piece) or \
+               self.__check_line(drop_position, (1, 1), current_piece) or \
+               self.__check_line(drop_position, (-1, 1), current_piece)
+
+    def __check_line(self, origin, direction, current_piece):
+        return self.__count_line(origin, direction, current_piece) >= N_CONNECT
+
+    def __count_line(self, origin, direction, current_piece):
+        current_position = origin
+        dx, dy = direction
+        count = 0
+
+        while self.is_legal_position(current_position) and self.__is_same_as_current(current_position, current_piece):
+            current_position = current_position[X] + -1 * dx, current_position[Y] + -1 * dy
+
+        current_position = current_position[X] + dx, current_position[Y] + dy
+
+        while self.is_legal_position(current_position) and self.__is_same_as_current(current_position, current_piece):
+            current_position = current_position[X] + dx, current_position[Y] + dy
+            count += 1
+        return count
+
+    def __is_same_as_current(self, position, current_piece):
+        return current_piece == self.get_piece(position)
+
+    def is_legal_position(self, position):
+        return 0 <= position[X] < self.width and 0 <= position[Y] < self.height
 
     def __hash__(self):
         return self.__str__()

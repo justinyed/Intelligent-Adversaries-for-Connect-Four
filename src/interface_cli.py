@@ -43,9 +43,7 @@ class ConnectFourCLI:
                 sleep(constants_cli.BAD_INPUT_TIME)
                 self.handler(game)
 
-            game.drop_piece(self.move)
-            print(game.get_board().__hash__())
-            print(getsizeof(game.get_board().__hash__()))
+            game.perform_action(self.move)
 
             # check for terminal states
             if game.get_status() == game.tie:
@@ -89,7 +87,6 @@ class ConnectFourCLI:
             print(constants_cli.BAD_INPUT_MSG)
             sleep(constants_cli.BAD_INPUT_TIME)
             return self.select_agent(game, player)
-
 
     def get_display(self, game):
         """Build the Full Display for the round"""

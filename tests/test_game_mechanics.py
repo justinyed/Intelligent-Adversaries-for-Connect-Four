@@ -81,7 +81,7 @@ def load_layout(filepath, game=ConnectFour(board_type=BOARD_TYPE)):
 def get_test_layout(filepath):
     g, a, expected = load_layout(filepath)
     before = f"\nInitial State:\n{ConnectFourCLI.get_display_board(g)}"
-    actual = g.drop_piece(a)
+    actual = g.perform_action(a)
     after = f"\nCurrent State:\n{ConnectFourCLI.get_display_board(g)}"
     msg = f"expected=\'{expected}\', but actual=\'{actual}\'\n" \
           f"{REMINDER}\n" \

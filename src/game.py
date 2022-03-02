@@ -194,8 +194,7 @@ class ConnectFour(GameInterface):
         """
         :return: a generator which contains the legal moves
         """
-        return (x for x in range(self.board.width) if
-                self.board.get_piece((x, self.board.height - 1)) == self.board.default)
+        return self.board.get_legal_actions()
 
     def new_state(self):
         """
@@ -212,7 +211,7 @@ class ConnectFour(GameInterface):
 
     def get_successor_state(self, action):
         original_state = self.get_state()
-        self.drop_piece(action)
+        self.perform_action(action)
         new_state = self.get_state()
 
         self.set_state(original_state)
@@ -226,71 +225,28 @@ class ConnectFour(GameInterface):
             return self.get_status()
         return self.get_players()[self.get_turn() % self.player_count]
 
-    def is_terminal_state(self):
+    def is_terminal_state(self) -> bool:
         return self.in_progress != self.get_status()
 
     def perform_action(self, directive):
-        return self.drop_piece(directive)
-
-    def drop_piece(self, column):
-        """
-        drop piece into slot in grid
-
-        :param column: column to drop piece
-        :return: new status after action
-        """
-        if self.status != self.in_progress:
-            return self.status
-        for y in range(self.board.height):
-            position = (column, y)
-            if self.board.get_piece(position) == self.board.default:
-                self.board.set_piece(position, self.get_current_player())
-                self.__update_status(position)  # update status
-                self.turn += 1  # increment turn, move was actually made
-                return self.status
+        position = self.board.drop_piece(directive, self.get_current_player())
+        self.__update_status(position)
+        status = self.get_status()
+        if status == self.board.default:
+            self.turn += 1  # increment turn, move was actually made
+        return status
 
     def __update_status(self, set_position) -> None:
-        if self.__check_tie():
+        if self.check_tie():
             self.status = self.tie
-        elif self.__check_for_win(set_position):
+        elif self.board.check_win(set_position, self.get_current_player()):
             self.status = self.get_players()[self.get_turn() % self.player_count]
         else:
             self.status = self.in_progress
 
-    def __check_tie(self):
+    def check_tie(self) -> bool:
         return self.max_turns == self.turn
 
-    def __check_for_win(self, drop_position):
-        """
-        Local Win Check. Checks Starting from the dropped piece (change on grid)
-        :param drop_position: Position of Dropped Piece
-        :return: True if Win was found, otherwise False
-        """
-        return self.__check_line(drop_position, (0, 1)) or \
-               self.__check_line(drop_position, (1, 0)) or \
-               self.__check_line(drop_position, (1, 1)) or \
-               self.__check_line(drop_position, (-1, 1))
 
-    def __check_line(self, origin, direction):
-        return self.__count_line(origin, direction) >= self.n_connect
 
-    def __count_line(self, origin, direction):
-        current_position = origin
-        dx, dy = direction
-        count = 1
 
-        while self.__is_legal_position(current_position) and self.__is_same_as_current(current_position):
-            current_position = current_position[X] + (-1 * dx), current_position[Y] + (-1 * dy)
-
-        current_position = current_position[X] + dx, current_position[Y] + dy
-
-        while self.__is_legal_position(current_position) and self.__is_same_as_current(current_position):
-            current_position = current_position[X] + dx, current_position[Y] + dy
-            count += 1
-        return count - 1
-
-    def __is_legal_position(self, position):
-        return 0 <= position[X] < self.board.width and 0 <= position[Y] < self.board.height
-
-    def __is_same_as_current(self, position):
-        return self.get_current_player() == self.board.get_piece(position)
