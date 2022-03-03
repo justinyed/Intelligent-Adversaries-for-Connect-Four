@@ -149,20 +149,20 @@ class MiniMax(MultiAgent):
     minimize the utility of its opponent. Utility of a state is defined by an evaluation function.
     """
 
-    def get_action(self, game_state):
+    def get_action(self, game):
         self._timer_start()
-        _, move = self._max_value(game_state, 0)
+        _, move = self._max_value(game, 0)
         return move
 
-    def _max_value(self, game_state, current_depth):
-        if self._timer_elapsed() or game_state.is_terminal_state() or current_depth >= self.get_depth_limit(game_state, self.depth_limit):
-            return self.evaluation_function(game_state, self.player), None
+    def _max_value(self, game, current_depth):
+        if self._timer_elapsed() or game.is_terminal_state() or current_depth >= self.get_depth_limit(game,
+                                                                                                      self.depth_limit):
+            return self.evaluation_function(game, self.player), None
 
-        value = NEGATIVE_INF
-        best_actions = []
+        value, best_actions = NEGATIVE_INF, []
 
-        for action in game_state.get_legal_actions():
-            value_prime, _ = self._min_value(game_state.get_successor_game(action), current_depth)
+        for action in game.get_legal_actions():
+            value_prime, _ = self._min_value(game.get_successor_game(action), current_depth)
             if value_prime == value:
                 best_actions.append(action)
 
@@ -173,14 +173,14 @@ class MiniMax(MultiAgent):
 
         return value, choice(best_actions)
 
-    def _min_value(self, game_state, current_depth):
-        if game_state.is_terminal_state():
-            return self.evaluation_function(game_state, self.player), None
+    def _min_value(self, game, current_depth):
+        if game.is_terminal_state():
+            return self.evaluation_function(game, self.player), None
 
         value, best_action = POSITIVE_INF, None
 
-        for action in game_state.get_legal_actions():
-            value_prime, _ = self._max_value(game_state.get_successor_game(action), current_depth + 1)
+        for action in game.get_legal_actions():
+            value_prime, _ = self._max_value(game.get_successor_game(action), current_depth + 1)
             if value_prime < value:
                 value, best_action = value_prime, action
         return value, best_action
@@ -193,20 +193,21 @@ class AlphaBeta(MultiAgent):
     Additionally, this agent will focus on evaluating relevant states by pruning subtrees with too few utility points.
     """
 
-    def get_action(self, game_state):
+    def get_action(self, game):
         self._timer_start()
-        _, move = self._max_value(game_state, 0, NEGATIVE_INF, POSITIVE_INF)
+        _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF)
         return move
 
-    def _max_value(self, game_state, current_depth, alpha, beta):
-        if self._timer_elapsed() or game_state.is_terminal_state() or self.get_depth_limit(game_state, self.depth_limit) <= current_depth:
-            return self.evaluation_function(game_state, self.player), None
+    def _max_value(self, game, current_depth, alpha, beta):
+        if self._timer_elapsed() or game.is_terminal_state() or \
+                self.get_depth_limit(game, self.depth_limit) <= current_depth:
+            return self.evaluation_function(game, self.player), None
 
         value, best_action = NEGATIVE_INF, None
         best_moves = []
 
-        for action in game_state.get_legal_actions():
-            value_prime, _ = self._min_value(game_state.get_successor_game(action), current_depth, alpha, beta)
+        for action in game.get_legal_actions():
+            value_prime, _ = self._min_value(game.get_successor_game(action), current_depth, alpha, beta)
             if value_prime == value:
                 best_moves.append(action)
             if value_prime > value:
@@ -248,14 +249,18 @@ class IterativeDeepening(MultiAgent):
         self.iterative_depth_limit = 0
         self.current_depth_limit = 0
 
-    def get_action(self, game_state):
+    def get_action(self, game):
         self._timer_start()
-        move = None
+        ordered_initial_queue = ActionQueue.build_naive_action_queue(game, self.evaluation_function, self.player)
+        move = ordered_initial_queue.get_best()
+        if game.get_turn() == 0:
+            return move
+
         # iterative deepening
         for current_depth_limit in range(0, self.depth_limit + 1):
             self.iterative_depth_limit = current_depth_limit
-            self.best_known_moves[current_depth_limit] = ActionQueue(game_state.get_legal_actions())
-            _, move = self._max_value(game_state, 0, NEGATIVE_INF, POSITIVE_INF)
+            self.best_known_moves[current_depth_limit] = ordered_initial_queue.copy()
+            _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF)
         return move
 
     def _max_value(self, game_state, current_depth, alpha, beta):
@@ -267,7 +272,7 @@ class IterativeDeepening(MultiAgent):
         value, best_action = NEGATIVE_INF, None
         best_moves = []
 
-        for action in self.best_known_moves[current_depth]:
+        for _, action in self.best_known_moves[current_depth]:
             value_prime, _ = self._min_value(game_state.get_successor_game(action), current_depth, alpha, beta)
             if value_prime == value:
                 self.best_known_moves[current_depth].append((value, action))

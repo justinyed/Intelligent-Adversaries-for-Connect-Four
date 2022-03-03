@@ -7,14 +7,11 @@ class ActionQueue:
     for Iterative Deepening
     """
 
-    def __init__(self, iterable, iterable_ordered=False):
-
-        if not iterable_ordered:
-            l = list(iterable)
-            zeroes = list([0 for _ in range(len(l))])
-            iterable = zip(zeroes, l)
-
+    def __init__(self, iterable):
         self.__data = deque(iterable=sorted(iterable, reverse=True))
+
+    def copy(self):
+        return ActionQueue(self.__data.copy())
 
     def __len__(self):
         return len(self.__data)
@@ -56,18 +53,26 @@ class ActionQueue:
     def get_best(self):
         if len(self) == 0:
             return None
-
-        best_value = int(self.__data.index(0)[0])
+        best_value = int(self.__data[0][0])
         best_actions = []
 
         for i in range(len(self)):
-            e = self.__data.index(i)
+            e = self.__data[i]
             if e[0] >= best_value:
                 best_actions.append(e)
             else:
                 break
 
-        return choice(best_actions)
+        return choice(best_actions)[1]
 
     def __iter__(self):
-        return self.to_list()
+        return iter(self.to_list())
+
+    def __str__(self):
+        return str(self.__data)
+
+    @staticmethod
+    def build_naive_action_queue(game, evaluation_function, current_player):
+        value_action_pairs = list([(evaluation_function(game.get_successor_game(move), current_player), move)
+                                   for move in game.get_legal_actions()])
+        return ActionQueue(value_action_pairs)

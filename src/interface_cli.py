@@ -41,7 +41,7 @@ class ConnectFourCLI:
                 print(constants_cli.ILLEGAL_INPUT_MSG)
                 sleep(constants_cli.BAD_INPUT_TIME)
                 self.handler(game)
-
+            print("!!!!", self.move)
             game.perform_action(self.move)
 
             # check for terminal states
