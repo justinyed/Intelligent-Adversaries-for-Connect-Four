@@ -20,34 +20,34 @@ BOARD_TYPE = TupleBoard
 
 def state_from_string(layout, game_type=ConnectFour, board_type=BOARD_TYPE):
     """
-    Designed to work with 1D tuple board type, but could be modified for other types
+    Designed to work with 1D tuple _board type, but could be modified for other types
 
-    :param layout: string of the board layout
+    :param layout: string of the _board layout
     :param game_type: Class for the Game
     :param board_type: Class for the Board
     :return:
     """
     game = game_type(board_type=board_type)
 
-    # Retrieve grid
+    # Retrieve _grid
     grid_lines = layout.splitlines(keepends=False)[:6]
     raw_grid = list(reversed([row[1:].lstrip("[").rstrip("]").split("][") for row in grid_lines]))
 
-    # create string board
+    # create string _board
     str_grid = str(raw_grid) \
-        .replace(f"'{PLAYER1}'", str(game.player1)) \
-        .replace(f"'{PLAYER2}'", str(game.player2)) \
-        .replace(f"'{EMPTY}'", str(game.get_board().default)) \
+        .replace(f"'{PLAYER1}'", str(game.get_player1())) \
+        .replace(f"'{PLAYER2}'", str(game.get_player2())) \
+        .replace(f"'{EMPTY}'", str(game.get_default())) \
         .replace(f"]", "").replace(f"[", "")
 
-    # create tuple board
+    # create tuple _board
     grid = ast.literal_eval("(" + str_grid + ")")
 
-    # create array board from tuple board
+    # create array _board from tuple _board
     grid_array = np.array(grid)
     grid_array = np.transpose(grid_array.reshape([6, 7]))
 
-    # Build Board from set_piece function (agnostic to the backend of the board)
+    # Build Board from set_piece function (agnostic to the backend of the _board)
     turn = 0
     board = board_type()
     for player in game.get_players():
@@ -57,7 +57,8 @@ def state_from_string(layout, game_type=ConnectFour, board_type=BOARD_TYPE):
         for pos in positions:
             board.set_piece(position=pos, piece=player)
             turn += 1
-
+    board.reindex_lowest()
+    print("L:", board.get_lowest())
     return board, turn, 0
 
 

@@ -92,7 +92,7 @@ class ConnectFourBot:
 
         # REQUEST MOVE
         try:
-            if game.turn % NUM_PLAYERS == 0:
+            if game._turn % NUM_PLAYERS == 0:
                 self.last_moves[challenger] = self.agent1[challenger].get_action(game)
                 sleep(DROP_TIME)
             else:
@@ -108,7 +108,7 @@ class ConnectFourBot:
         game.drop_piece(self.last_moves[challenger])
 
         # CHECK TERMINAL STATE
-        if game.get_status() == game.tie:  # TIE
+        if game.get_status() == game._tie:  # TIE
             pass
         if game.is_terminal_state():  # WIN
             player = game.get_current_player()

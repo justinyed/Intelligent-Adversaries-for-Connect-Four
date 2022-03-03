@@ -1,4 +1,4 @@
-from board import BoardInterface, TupleBoard, ArrayBoard
+from board import BoardInterface, ArrayBoard
 
 EMPTY = 0
 PLAYER1 = 1
@@ -16,46 +16,46 @@ class GameInterface:
         """
         Constructor for Game
 
-        :param players: tuple of players; default=(PLAYER1, PLAYER2)
-        :param tie: tie code to use for games in tie status; default=TIE_CODE
-        :param turn: starting turn; default=0
-        :param status: starting status; default=0
+        :param players: tuple of _players; default=(PLAYER1, PLAYER2)
+        :param tie: _tie code to use for games in _tie _status; default=TIE_CODE
+        :param turn: starting _turn; default=0
+        :param status: starting _status; default=0
         """
-        self.board = None
-        self.board_type = board_type
-        self.players = players
-        self.player_count = len(self.players)
-        self.tie = tie
-        self.turn = turn
-        self.status = status
+        self._board = None
+        self._board_type = board_type
+        self._players = players
+        self._player_count = len(self._players)
+        self._tie = tie
+        self._turn = turn
+        self._status = status
 
     def get_tie_code(self) -> int:
         """
-        get code used for tie games
+        get code used for _tie games
 
-        :return: tie code
+        :return: _tie code
         """
-        return self.tie
+        return self._tie
 
     def get_players(self) -> tuple:
         """
         get tuple of pLayers
 
-        :return: tuple of players
+        :return: tuple of _players
         """
-        return self.players
+        return self._players
 
     def get_player_count(self) -> int:
         """
-        get number of players
+        get number of _players
 
-        :return: count of players as int
+        :return: count of _players as int
         """
-        return self.player_count
+        return self._player_count
 
     def get_current_player(self) -> int:
         """
-        get the current player from the tuple of players
+        get the current player from the tuple of _players
 
         :return: current player
         """
@@ -63,19 +63,19 @@ class GameInterface:
 
     def get_board(self) -> BoardInterface:
         """
-        get internal board
+        get internal _board
 
-        :return: internal board
+        :return: internal _board
         """
-        return self.board
+        return self._board
 
     def set_board(self, board):
         """
-        set internal board
+        set internal _board
 
         :param board: to set
         """
-        self.board = board
+        self._board = board
 
     def new_state(self) -> tuple:
         """
@@ -121,11 +121,11 @@ class GameInterface:
 
     def get_status(self) -> int:
         """
-        get status of the game is an integer code representing the status.
+        get _status of the game is an integer code representing the _status.
 
-        :return: status of the game
+        :return: _status of the game
         """
-        return self.status
+        return self._status
 
     def set_state(self, state):
         """
@@ -136,11 +136,11 @@ class GameInterface:
 
     def get_turn(self) -> int:
         """
-        get the current turn number
+        get the current _turn number
 
         :return: Current Turn
         """
-        return self.turn
+        return self._turn
 
     def is_terminal_state(self) -> bool:
         """
@@ -158,12 +158,19 @@ class GameInterface:
         """
         return not self.is_terminal_state()
 
+    def is_tie(self) -> bool:
+        """
+        todo
+        :return:
+        """
+        return self.get_status() == self._tie
+
     def perform_action(self, directive) -> int:
         """
         given a directive execute action/move upon the game state.
 
         :param directive: parameter for action specification
-        :return: updated status code of the game
+        :return: updated _status code of the game
         """
         pass
 
@@ -178,36 +185,48 @@ class ConnectFour(GameInterface):
 
         # Initialize State
         if state is None:
-            self.board, self.turn, self.status = self.new_state()
+            self._board, self._turn, self._status = self.new_state()
         else:
-            self.board, self.turn, self.status = state
+            self._board, self._turn, self._status = state
 
-        self.max_turns = self.board.width * self.board.height - 1  # -1 since turns start at 0
-        self.player1 = self.players[0]
-        self.player2 = self.players[1]
-        self.n_connect = N_CONNECT
-        self.in_progress = self.board.default
+        self._max_turns = self._board.get_size() - 1  # -1 since turns start at 0
+        self._player1 = self._players[0]
+        self._player2 = self._players[1]
+        self._n_connect = N_CONNECT
+        self._in_progress = self._board.get_default()
 
     # --- Game Methods ---
+
+    def get_player1(self):
+        return self._player1
+
+    def get_player2(self):
+        return self._player2
+
+    def get_default(self):
+        return self.get_board().get_default()
+
+    def get_max_turns(self) -> int:
+        return self._max_turns
 
     def get_legal_actions(self):
         """
         :return: a generator which contains the legal moves
         """
-        return self.board.get_legal_actions()
+        return self._board.get_legal_actions()
 
     def new_state(self):
         """
-        :return: new grid, new turn counter, new status
+        :return: new _grid, new _turn counter, new _status
         """
-        board = self.board_type(default=EMPTY)
-        return board, 0, board.default
+        board = self._board_type()
+        return board, 0, board.get_default()
 
     def get_state(self):
-        return self.board.copy(), self.turn, self.status
+        return self._board.copy(), self._turn, self._status
 
     def set_state(self, state):
-        self.board, self.turn, self.status = state
+        self._board, self._turn, self._status = state
 
     def get_successor_state(self, action):
         original_state = self.get_state()
@@ -221,32 +240,28 @@ class ConnectFour(GameInterface):
         return ConnectFour(state=self.get_successor_state(action))
 
     def get_current_player(self):
-        if self.get_status() != self.in_progress:
+        if self.get_status() != self._in_progress:
             return self.get_status()
-        return self.get_players()[self.get_turn() % self.player_count]
+        return self.get_players()[self.get_turn() % self._player_count]
 
     def is_terminal_state(self) -> bool:
-        return self.in_progress != self.get_status()
-
-    def perform_action(self, directive):
-        position = self.board.drop_piece(directive, self.get_current_player())
-        self.__update_status(position)
-        status = self.get_status()
-        if status == self.board.default:
-            self.turn += 1  # increment turn, move was actually made
-        return status
+        return self._in_progress != self.get_status()
 
     def __update_status(self, set_position) -> None:
         if self.check_tie():
-            self.status = self.tie
-        elif self.board.check_win(set_position, self.get_current_player()):
-            self.status = self.get_players()[self.get_turn() % self.player_count]
+            self._status = self._tie
+        elif self._board.check_win(set_position, self.get_current_player()):
+            self._status = self.get_players()[self.get_turn() % self._player_count]
         else:
-            self.status = self.in_progress
+            self._status = self._in_progress
+
+    def perform_action(self, directive):
+        position = self._board.drop_piece(directive, self.get_current_player())
+        self.__update_status(position)
+        status = self.get_status()
+        if status == self._board.get_default():
+            self._turn += 1  # increment _turn, move was actually made
+        return status
 
     def check_tie(self) -> bool:
-        return self.max_turns == self.turn
-
-
-
-
+        return self._max_turns == self._turn

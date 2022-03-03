@@ -8,7 +8,7 @@ LOSING_VALUE = NEGATIVE_INF
 
 """
 The value of each line is the sum of the values of its 4 individual squares, 
-and the value of the board is the sum of the values of the 69 potential winning lines. 
+and the value of the _board is the sum of the values of the 69 potential winning lines. 
 In other words, each square is weighted according to the number of unique winning lines it can be a member of
 Found This Idea here: https://web.stonehill.edu/compsci/CS211/Assignments%202018/assignment%206.htm
 The articles says that it originally came from a paper by Martin Stenmark.
@@ -39,7 +39,7 @@ def evaluation_function_weighted_square(game: ConnectFour, current_player: int):
 
     grid = game.get_board().get_grid()
 
-    if current_player is PLAYER2:  # neutralize grid
+    if current_player is PLAYER2:  # neutralize _grid
         grid *= -1
 
     return np.sum(WEIGHTS * grid)

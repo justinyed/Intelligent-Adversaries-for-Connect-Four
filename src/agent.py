@@ -19,7 +19,7 @@ def evaluation_function_simple(game, current_player):
     if game.get_status() == current_player:
         return POSITIVE_INF  # win
     elif game.is_terminal_state():
-        return NEGATIVE_INF  # loss or tie
+        return NEGATIVE_INF  # loss or _tie
     return 0
 
 
@@ -42,7 +42,7 @@ def depth_function_turn_bonus(game, depth_limit) -> int:
     :param depth_limit: defined depth limit
     :return: depth limit
     """
-    turn = game.turn
+    turn = game.get_turn()
 
     if turn >= 15:
         return depth_limit + 1
@@ -295,9 +295,3 @@ class IterativeDeepening(MultiAgent):
             if value < alpha:
                 break
         return value, best_action
-
-
-
-
-
-

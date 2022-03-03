@@ -2,7 +2,6 @@ from time import sleep
 from utils import constants_cli
 from game import ConnectFour
 from agent import Agent
-from sys import getsizeof
 
 
 class ConnectFourCLI:
@@ -31,7 +30,7 @@ class ConnectFourCLI:
         while True:
             print(self.get_display(game))
             try:
-                if game.turn % self.num_players == 0:
+                if game.get_turn() % self.num_players == 0:
                     self.move = self.agent_1.get_action(game)
                     sleep(constants_cli.DROP_TIME)
                 else:
@@ -46,7 +45,7 @@ class ConnectFourCLI:
             game.perform_action(self.move)
 
             # check for terminal states
-            if game.get_status() == game.tie:
+            if game.is_tie():
                 print(self.get_display(game))
                 print(constants_cli.TIE_MSG)
                 break
@@ -61,7 +60,7 @@ class ConnectFourCLI:
 
     @staticmethod
     def player_number(game, piece):
-        if game.player1 == piece:
+        if game.get_player1() == piece:
             return constants_cli.PLAYER1
         else:
             return constants_cli.PLAYER2
@@ -95,9 +94,9 @@ class ConnectFourCLI:
 
     @staticmethod
     def get_display_piece(game, piece):
-        if piece == game.player1:
+        if piece == game.get_player1():
             return constants_cli.PLAYER1_PIECE
-        elif piece == game.player2:
+        elif piece == game.get_player2():
             return constants_cli.PLAYER2_PIECE
         else:
             return constants_cli.EMPTY_PIECE
@@ -116,8 +115,8 @@ class ConnectFourCLI:
 
         representation += f"turn={game.get_turn()} \n" + f"status={game.get_status()}\n"
 
-        for y in range(game.get_board().height - 1, -1, -1):
-            for x in range(game.get_board().width):
+        for y in range(game.get_board().get_height() - 1, -1, -1):
+            for x in range(game.get_board().get_width()):
                 piece = game.get_board().get_piece((x, y))
                 representation += f"[{ConnectFourCLI.get_display_piece(game, piece)}]"
             representation += "\n"
@@ -125,9 +124,9 @@ class ConnectFourCLI:
 
     def __get_display_numbers(self, game):
         """Build number line with last played move highlighted"""
-        num_line = "=" * (game.get_board().width * 3) + "\n"
+        num_line = "=" * (game.get_board().get_width() * 3) + "\n"
         num_line += "["
-        for i in range(1, game.get_board().width + 1):
+        for i in range(1, game.get_board().get_width() + 1):
             if self.move is not None and i == self.move + 1:
                 num_line += f"{constants_cli.LAST_MOVE_COLOR}{i}{constants_cli.RESET_COLOR}]["
             else:
