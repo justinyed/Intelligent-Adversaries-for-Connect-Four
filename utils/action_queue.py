@@ -13,9 +13,6 @@ class ActionQueue:
     def copy(self):
         return ActionQueue(self.__data.copy())
 
-    def __len__(self):
-        return len(self.__data)
-
     def get(self, i=None):
         if i is None:
             return self.__data[0]
@@ -24,32 +21,27 @@ class ActionQueue:
     def pop(self):
         return self.__data.pop()
 
-    def append(self, x: tuple) -> None:
-        if len(x) != 2 and type(x[0]) in [int, float]:
-            raise ValueError(f"x is not of length 2 or the first element is not a number")
-        self.extend([x])
-
-    def extend(self, container):
-        dirty = sorted(list(container) + self.to_list(), reverse=True)
+    def extend(self, container) -> None:
+        if type(container) is ActionQueue:
+            container = container.to_list()
+        unclean = sorted(list(container) + self.to_list(), reverse=True)
         found, clean = [], []
-        for value, action in dirty:
+        for value, action in unclean:
             if action not in found:
                 found.append(action)
                 clean.append((value, action))
         self.__data = deque(iterable=clean)
 
-    def to_list(self):
-        return list([e for e in self.__data])
+    def append(self, x: tuple) -> None:
+        self.extend([x])
 
-    def get_actions(self):
-        return list([e[1] for e in self.__data])
+    def clear(self) -> None:
+        self.__data.clear()
 
-    def get_values(self):
-        return list([e[0] for e in self.__data])
-
-    def get_best(self):
+    def get_best_action(self):
         if len(self) == 0:
             return None
+
         best_value, best_actions = int(self.__data[0][0]), []
 
         for i in range(len(self)):
@@ -61,14 +53,48 @@ class ActionQueue:
 
         return choice(best_actions)[1]
 
+    @staticmethod
+    def reflex_action_queue(game, evaluation_function, current_player):
+        """
+        The reflex action queue builds a list of value action pairs based on
+        the static value of a game state as defined by an evaluation function.
+        :param game: game state
+        :param evaluation_function: evaluates the value of the game
+        :param current_player: maximizing current_player
+        :return: ActionQueue with value action pairs as defined above
+        """
+        value_action_pairs = list([(evaluation_function(game.get_successor_game(move), current_player), move)
+                                   for move in game.get_legal_actions()])
+        return ActionQueue(value_action_pairs)
+
+    def to_list(self) -> list:
+        return list([e for e in self.__data])
+
+    def get_actions(self) -> list:
+        return list([e[1] for e in self.__data])
+
+    def get_values(self) -> list:
+        return list([e[0] for e in self.__data])
+
+    def __add__(self, other):
+        self.extend(other)
+
     def __iter__(self):
         return iter(self.get_actions())
 
     def __str__(self):
         return str(self.__data)
 
-    @staticmethod
-    def build_naive_action_queue(game, evaluation_function, current_player):
-        value_action_pairs = list([(evaluation_function(game.get_successor_game(move), current_player), move)
-                                   for move in game.get_legal_actions()])
-        return ActionQueue(value_action_pairs)
+    def __len__(self):
+        return len(self.__data)
+
+    def __reversed__(self):
+        self.__data = reversed(self.__data)
+
+    def __rand__(self, other):
+        self.__add__(other)
+
+    def __deepcopy__(self, memodict):
+        return self.copy()
+
+

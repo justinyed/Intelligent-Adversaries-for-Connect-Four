@@ -19,8 +19,8 @@ class ConnectFourCLI:
         """
         Once initialized, use this method to start the game
         """
-        self.agent_1 = self.select_agent(game, constants_cli.PLAYER1)
-        self.agent_2 = self.select_agent(game, constants_cli.PLAYER2)
+        self.agent_1 = self.select_agent(game, 1)
+        self.agent_2 = self.select_agent(game, -1)  # player must be same as encoding
         self.handler(game)
 
     def handler(self, game):
@@ -79,8 +79,8 @@ class ConnectFourCLI:
 
         print(menu)
         try:
-            c = int(input(f"Select an option for Agent {ConnectFourCLI.player_number(game, player)}: "))
-            return list(options.values())[c]
+            choice = int(input(f"Select an option for Agent {ConnectFourCLI.player_number(game, player)}: "))
+            return list(options.values())[choice]
 
         except (IndexError, ValueError):
             print(constants_cli.BAD_INPUT_MSG)

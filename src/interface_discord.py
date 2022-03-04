@@ -60,7 +60,7 @@ class ConnectFourBot:
     @bot.command(name='challenge',
                  aliases=['clg'],
                  brief='brief',
-                 description='Challenge a player or agent by providing the ID.  If no parameter is given, then a menu '
+                 description='Challenge a current_player or agent by providing the ID.  If no parameter is given, then a menu '
                              'will assist.',
                  help='help'
                  )
@@ -142,15 +142,15 @@ class ConnectFourBot:
     # @bot.command(name="leaderboard",
     #              aliases=['lb'],
     #              brief='brief',
-    #              description='Display the record for a player or agent by providing the ID. If no parameter is given, '
+    #              description='Display the record for a current_player or agent by providing the ID. If no parameter is given, '
     #                          'then a default leaderboard will be displayed.',
     #              help='help'
     #              )
-    # async def leaderboard(self, ctx, player=None):
-    #     if player is None:
+    # async def leaderboard(self, ctx, current_player=None):
+    #     if current_player is None:
     #         await ctx.send("Print Default Leaderboard")
     #     else:
-    #         await ctx.send(f"Display {player}'s Record")
+    #         await ctx.send(f"Display {current_player}'s Record")
 
 
 def setup(bot):

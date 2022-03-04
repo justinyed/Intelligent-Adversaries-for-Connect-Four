@@ -55,9 +55,9 @@ class GameInterface:
 
     def get_current_player(self) -> int:
         """
-        get the current player from the tuple of _players
+        get the current current_player from the tuple of _players
 
-        :return: current player
+        :return: current current_player
         """
         pass
 

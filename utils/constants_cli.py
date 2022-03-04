@@ -5,14 +5,14 @@ from utils.evaluation_function_wtsq import evaluation_function_weighted_square a
 from utils.evaluation_function_conv import evaluation_function_conv as conv
 
 
-def agent_options(player):
+def agent_options(current_player):
     return {
-        "Human Player": Human(),
-        "Random Agent": agent.Random(player=player),
-        "Reflex Agent": agent.Reflex(player=player),
-        "Minimax Agent": agent.MiniMax(depth_limit=2, eval_fn=conv, player=player),
-        "Alpha-Beta Agent": agent.AlphaBeta(depth_limit=3, eval_fn=wtsq, player=player),
-        "Iterative Agent": agent.IterativeDeepening(depth_limit=4, eval_fn=wtsq, player=player)
+        "Human Player": Human(current_player),
+        "Random Agent": agent.Random(current_player),
+        "Reflex Agent": agent.Reflex(current_player, eval_fn=wtsq),
+        "Minimax Agent": agent.MiniMax(current_player, eval_fn=conv, depth_limit=2),
+        "Alpha-Beta Agent": agent.AlphaBeta(current_player, eval_fn=wtsq, depth_limit=3),
+        "Iterative Agent": agent.IterativeDeepening(current_player, eval_fn=wtsq, depth_limit=4)
     }
 
 
