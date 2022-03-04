@@ -58,7 +58,6 @@ def state_from_string(layout, game_type=ConnectFour, board_type=BOARD_TYPE):
             board.set_piece(position=pos, piece=player)
             turn += 1
     board.reindex_lowest()
-    print("L:", board.get_lowest())
     return board, turn, 0
 
 

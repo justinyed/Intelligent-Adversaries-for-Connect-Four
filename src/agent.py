@@ -203,8 +203,7 @@ class AlphaBeta(MultiAgent):
                 self.get_depth_limit(game, self.depth_limit) <= current_depth:
             return self.evaluation_function(game, self.player), None
 
-        value, best_action = NEGATIVE_INF, None
-        best_moves = []
+        value, best_moves = NEGATIVE_INF, []
 
         for action in game.get_legal_actions():
             value_prime, _ = self._min_value(game.get_successor_game(action), current_depth, alpha, beta)
@@ -258,33 +257,32 @@ class IterativeDeepening(MultiAgent):
 
         # iterative deepening
         for current_depth_limit in range(0, self.depth_limit + 1):
+            print('perform iteration=', current_depth_limit)
             self.iterative_depth_limit = current_depth_limit
             self.best_known_moves[current_depth_limit] = ordered_initial_queue.copy()
             _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF)
         return move
 
     def _max_value(self, game_state, current_depth, alpha, beta):
-        # todo handle when time has elapsed
-        if self._timer_elapsed() or game_state.is_terminal_state() or \
-                self.get_depth_limit(game_state, self.iterative_depth_limit) <= current_depth:
+        # todo handle when time has elapsed self._timer_elapsed() or
+        if game_state.is_terminal_state() or self.get_depth_limit(game_state, self.iterative_depth_limit) <= current_depth:
             return self.evaluation_function(game_state, self.player), None
 
-        value, best_action = NEGATIVE_INF, None
-        best_moves = []
+        value, best_value_action_pairs = NEGATIVE_INF, []
 
-        for _, action in self.best_known_moves[current_depth]:
+        for action in self.best_known_moves[current_depth]:
             value_prime, _ = self._min_value(game_state.get_successor_game(action), current_depth, alpha, beta)
             if value_prime == value:
-                self.best_known_moves[current_depth].append((value, action))
+                best_value_action_pairs.append((value, action))
             if value_prime > value:
                 value = value_prime
                 alpha = max(alpha, value)
-                best_moves.clear()
-                best_moves.append(action)
+                best_value_action_pairs.clear()
+                best_value_action_pairs.append((value, action))
             if value > beta:
                 break
-        self.best_known_moves[current_depth].extend(best_moves)
-        return value, choice(best_moves)
+        self.best_known_moves[current_depth].extend(best_value_action_pairs)
+        return choice(best_value_action_pairs)
 
     def _min_value(self, game_state, current_depth, alpha, beta):
         if game_state.is_terminal_state():

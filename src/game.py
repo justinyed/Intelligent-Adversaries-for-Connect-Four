@@ -248,10 +248,10 @@ class ConnectFour(GameInterface):
         return self._in_progress != self.get_status()
 
     def __update_status(self, set_position) -> None:
-        if self.check_tie():
-            self._status = self._tie
-        elif self._board.check_win(set_position, self.get_current_player()):
+        if self._board.check_win(set_position, self.get_current_player()):
             self._status = self.get_players()[self.get_turn() % self._player_count]
+        elif self.check_tie():
+            self._status = self._tie
         else:
             self._status = self._in_progress
 
