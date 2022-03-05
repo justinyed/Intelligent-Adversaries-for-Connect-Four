@@ -26,7 +26,7 @@ def simulate_game(n=0):
 
 
 if __name__ == '__main__':
-    for i in range(100):
+    for i in range(10):
         simulate_game(i)
     print(record)
     print("Done")

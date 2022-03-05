@@ -135,7 +135,7 @@ class MultiAgent(Agent):
         return self.time_limit <= time.time() - self.start_time if self.time_limit is not None else False
 
     def _is_depth_max(self, game, current_depth) -> bool:
-        return current_depth >= self.get_depth_limit(game,self.depth_limit)
+        return current_depth >= self.get_depth_limit(game, self.depth_limit)
 
 
 class MiniMax(MultiAgent):
@@ -197,9 +197,9 @@ class AlphaBeta(MultiAgent):
             return self.evaluation_function(game, self.player), None
 
         value, best_actions = NEGATIVE_INF, []
-        ordered_actions = ActionQueue.reflex_action_queue(game, self.evaluation_function, self.player).get_actions()
+        # ordered_actions = ActionQueue.reflex_action_queue(game, self.evaluation_function, self.player).get_actions()
 
-        for action in ordered_actions:
+        for action in game.get_legal_actions():
             value_prime, _ = self._min_value(game.get_successor_game(action), current_depth, alpha, beta)
             if value_prime == value:
                 best_actions.append(action)
@@ -217,10 +217,10 @@ class AlphaBeta(MultiAgent):
             return self.evaluation_function(game, self.player), None
 
         value, best_action = POSITIVE_INF, None
-        ordered_actions = reversed(ActionQueue.
-                                   reflex_action_queue(game, self.evaluation_function, self.player).get_actions())
+        # ordered_actions = reversed(ActionQueue.
+        #                            reflex_action_queue(game, self.evaluation_function, self.player).get_actions())
 
-        for action in ordered_actions:
+        for action in game.get_legal_actions():
             value_prime, _ = self._max_value(game.get_successor_game(action), current_depth + 1, alpha, beta)
             if value_prime < value:
                 value, best_action = value_prime, action
@@ -241,22 +241,23 @@ class IterativeDeepening(MultiAgent):
     def __init__(self, player, eval_fn=wtsq, depth_limit=3, depth_fn=depth_function_simple):
         super().__init__(player, eval_fn, depth_limit, depth_fn)
         self.best_known_moves = dict()
-        self.iterative_depth_limit = 0
-        self.current_depth_limit = 0
+        self.absolute_depth_limit = depth_limit
 
     def get_action(self, game):
         self._timer_start()
+        self.best_known_moves.clear()
         ordered_initial_queue = ActionQueue.reflex_action_queue(game, self.evaluation_function, self.player)
         move = ordered_initial_queue.get_best_action()
+
         if game.get_turn() == 0:
             return move
 
         # iterative deepening
-        for current_depth_limit in range(0, self.depth_limit + 1):
+        for current_depth_limit in range(0, self.absolute_depth_limit + 1):
             print('perform iteration=', current_depth_limit)
-            self.iterative_depth_limit = current_depth_limit
-            self.best_known_moves[current_depth_limit] = ordered_initial_queue.copy()
+            self.depth_limit = current_depth_limit
             _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF)
+
         return move
 
     def _max_value(self, game, current_depth, alpha, beta):
@@ -266,14 +267,18 @@ class IterativeDeepening(MultiAgent):
 
         value, best_value_action_pairs = NEGATIVE_INF, []
 
-        for action in self.best_known_moves[current_depth]:
+        if current_depth not in self.best_known_moves.keys():
+            self.best_known_moves[current_depth] = ActionQueue\
+                .reflex_action_queue(game, self.evaluation_function, self.player)
+
+        for action in self.best_known_moves[current_depth].get_actions():
             value_prime, _ = self._min_value(game.get_successor_game(action), current_depth, alpha, beta)
-            if value_prime == value:
-                best_value_action_pairs.append((value, action))
             if value_prime > value:
                 value = value_prime
                 alpha = max(alpha, value)
                 best_value_action_pairs.clear()
+                best_value_action_pairs.append((value, action))
+            else:
                 best_value_action_pairs.append((value, action))
             if value > beta:
                 break
