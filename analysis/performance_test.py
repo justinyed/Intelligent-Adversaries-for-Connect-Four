@@ -1,12 +1,12 @@
 from src.game import ConnectFour
-from src.agent import AlphaBeta, MiniMax, Reflex, IterativeDeepening
+import intelligence as agent
 
 record = {-1: 0, 1: 0, 3: 0}
 
 
 def simulate_game(n=0):
-    agent_1 = AlphaBeta(player=1, depth_limit=3)
-    agent_2 = AlphaBeta(player=-1, depth_limit=3)
+    agent_1 = agent.IterativeDeepening(player=1, depth_limit=3)
+    agent_2 = agent.IterativeDeepening(player=-1, depth_limit=3)
     game = ConnectFour()
 
     while True:

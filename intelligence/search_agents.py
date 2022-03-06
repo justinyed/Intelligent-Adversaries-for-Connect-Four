@@ -1,10 +1,22 @@
+from intelligence import Agent
+from intelligence.action_queue import ActionQueue, reflex_action_queue
+from intelligence.evaluation_fn_wtsq import evaluation_function_weighted_square as wtsq
 from random import choice
-from utils.action_queue import ActionQueue
-from utils.evaluation_function_wtsq import evaluation_function_weighted_square as wtsq
 import time
+from lru import LRUCache as Lru
+import pickle
+import os
+
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
+CACHE_FILE = '../data/successor_cache.pkl'
+
+if not os.path.isfile(CACHE_FILE):
+    with open(CACHE_FILE, 'wb') as file:
+        lru = Lru(10000)
+        lru['first'] = 0
+        pickle.dump(lru, file)  # Least Recently Used Cache
 
 
 def evaluation_function_simple(game, current_player):
@@ -54,31 +66,6 @@ def depth_function_turn_bonus(game, depth_limit) -> int:
         return depth_limit
 
 
-class Agent:
-    """
-    An agent must define a get_action method
-    """
-
-    def __init__(self, player, eval_fn=wtsq):
-        """
-        Agent Interface
-
-        :param evaluation_fn: evaluation function (returns the static value of a state)
-        """
-        self.evaluation_function = eval_fn
-        self.player = player
-        self.opponent = -1 * player
-
-    def get_action(self, game):
-        """
-        The Agent will receive a game and must return an action from the legal moves
-
-        :param game: current state of the game
-        :return: The action chosen by the agent given the game
-        """
-        return 0
-
-
 class Random(Agent):
     """
     A random agent chooses an action at random.
@@ -99,7 +86,7 @@ class Reflex(Agent):
     def get_action(self, game):
         if game.is_terminal_state():
             return None
-        return ActionQueue.reflex_action_queue(game, self.evaluation_function, self.player).get_best_action()
+        return reflex_action_queue(game, self.evaluation_function, self.player).get_best_action()
 
 
 class MultiAgent(Agent):
@@ -119,6 +106,8 @@ class MultiAgent(Agent):
         self.get_depth_limit = depth_fn
         self.time_limit = None  # seconds
         self.start_time = None
+        with open(CACHE_FILE, 'rb') as file:
+            self._successor_cache = pickle.load(file)  # Least Recently Used Cache
 
     def timer_set(self, seconds: int) -> None:
         self.time_limit = seconds
@@ -136,6 +125,21 @@ class MultiAgent(Agent):
 
     def _is_depth_max(self, game, current_depth) -> bool:
         return current_depth >= self.get_depth_limit(game, self.depth_limit)
+
+    def get_successor(self, state, action):
+        h = state.get_board().hash_board(action)
+        if h in self._successor_cache:
+            return self._successor_cache[h]
+        else:
+            g = state.get_successor(action)
+            self._successor_cache[h] = g  # todo may create problems without deep copy?
+            return g
+
+    def __del__(self):
+        with open(CACHE_FILE, 'wb') as file:
+            pickle.dump(self._successor_cache, file)  # Least Recently Used Cache
+        del self._successor_cache
+
 
 
 class MiniMax(MultiAgent):
@@ -156,7 +160,7 @@ class MiniMax(MultiAgent):
         value, best_actions = NEGATIVE_INF, []
 
         for action in game.get_legal_actions():
-            value_prime, _ = self._min_value(game.get_successor(action), current_depth)
+            value_prime, _ = self._min_value(self.get_successor(game, action), current_depth)
             if value_prime == value:
                 best_actions.append(action)
 
@@ -174,7 +178,7 @@ class MiniMax(MultiAgent):
         value, best_action = POSITIVE_INF, None
 
         for action in game.get_legal_actions():
-            value_prime, _ = self._max_value(game.get_successor(action), current_depth + 1)
+            value_prime, _ = self._max_value(self.get_successor(game, action), current_depth + 1)
             if value_prime < value:
                 value, best_action = value_prime, action
         return value, best_action
@@ -197,10 +201,10 @@ class AlphaBeta(MultiAgent):
             return self.evaluation_function(game, self.player), None
 
         value, best_actions = NEGATIVE_INF, []
-        ordered_actions = ActionQueue.reflex_action_queue(game, self.evaluation_function, self.player).get_actions()
+        ordered_actions = reflex_action_queue(game, self.evaluation_function, self.player).get_actions()
 
         for action in ordered_actions:
-            value_prime, _ = self._min_value(game.get_successor(action), current_depth, alpha, beta)
+            value_prime, _ = self._min_value(self.get_successor(game, action), current_depth, alpha, beta)
             if value_prime == value:
                 best_actions.append(action)
             if value_prime > value:
@@ -217,11 +221,10 @@ class AlphaBeta(MultiAgent):
             return self.evaluation_function(game, self.player), None
 
         value, best_action = POSITIVE_INF, None
-        ordered_actions = reversed(ActionQueue.
-                                   reflex_action_queue(game, self.evaluation_function, self.player).get_actions())
+        ordered_actions = reversed(reflex_action_queue(game, self.evaluation_function, self.player).get_actions())
 
         for action in ordered_actions:
-            value_prime, _ = self._max_value(game.get_successor(action), current_depth + 1, alpha, beta)
+            value_prime, _ = self._max_value(self.get_successor(game, action), current_depth + 1, alpha, beta)
             if value_prime < value:
                 value, best_action = value_prime, action
                 beta = min(beta, value)
@@ -230,7 +233,7 @@ class AlphaBeta(MultiAgent):
         return value, best_action
 
 
-class IterativeDeepening(MultiAgent):
+class IterativeDeepening(AlphaBeta):
     """
     A multi-agent which chooses an action at each choice point by attempting to maximize its utility and
     minimize the utility of its opponent.  Utility of a state is defined by an evaluation function.
@@ -249,9 +252,7 @@ class IterativeDeepening(MultiAgent):
         move = None
 
         if game.get_turn() == 0:
-            ordered_initial_queue = ActionQueue.reflex_action_queue(game, self.evaluation_function, self.player)
-            move = ordered_initial_queue.get_best_action()
-            return move
+            return reflex_action_queue(game, self.evaluation_function, self.player).get_best_action()
 
         # iterative deepening
         for current_depth_limit in range(0, self.absolute_depth_limit + 1):
@@ -268,15 +269,14 @@ class IterativeDeepening(MultiAgent):
         value, best_value_action_pairs = NEGATIVE_INF, []
 
         if current_depth not in self.best_known_moves:  # initialize actions for depth
-            self.best_known_moves[current_depth] = ActionQueue\
-                .reflex_action_queue(game, self.evaluation_function, self.player)
+            self.best_known_moves[current_depth] = reflex_action_queue(game, self.evaluation_function, self.player)
 
         legal_actions = tuple(game.get_legal_actions())
 
         for action in self.best_known_moves[current_depth]:
             if action in legal_actions:
                 if value <= beta:
-                    value_prime, _ = self._min_value(game.get_successor(action), current_depth, alpha, beta)
+                    value_prime, _ = self._min_value(self.get_successor(game, action), current_depth, alpha, beta)
                     if value_prime > value:
                         value = value_prime
                         alpha = max(alpha, value)
@@ -286,20 +286,3 @@ class IterativeDeepening(MultiAgent):
 
         self.best_known_moves[current_depth] = ActionQueue(best_value_action_pairs)
         return self.best_known_moves[current_depth].get_best_value_action_pair()
-
-    def _min_value(self, game, current_depth, alpha, beta):
-        if game.is_terminal_state():
-            return self.evaluation_function(game, self.player), None
-
-        value, best_action = POSITIVE_INF, None
-        ordered_actions = reversed(ActionQueue.
-                                   reflex_action_queue(game, self.evaluation_function, self.player).get_actions())
-
-        for action in ordered_actions:
-            value_prime, _ = self._max_value(game.get_successor(action), current_depth + 1, alpha, beta)
-            if value_prime < value:
-                value, best_action = value_prime, action
-                beta = min(beta, value)
-            if value < alpha:
-                break
-        return value, best_action

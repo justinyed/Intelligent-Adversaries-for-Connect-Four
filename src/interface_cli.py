@@ -1,10 +1,7 @@
-import sys
 from time import sleep
 from utils import constants_cli
 from game import ConnectFour
-from agent import Agent
-import numpy as np
-import timeit
+from intelligence import Agent
 
 
 class ConnectFourCLI:
@@ -30,7 +27,7 @@ class ConnectFourCLI:
         """
         The main method which handles orchestrating the game.
         """
-        table = dict()
+
         while True:
             print(self.get_display(game))
             try:
@@ -41,7 +38,7 @@ class ConnectFourCLI:
                     self.move = self.agent_2.get_action(game)
                     sleep(constants_cli.DROP_TIME)
 
-            except (ValueError): # typeError
+            except (ValueError, TypeError):
                 print(constants_cli.ILLEGAL_INPUT_MSG)
                 sleep(constants_cli.BAD_INPUT_TIME)
                 self.handler(game)

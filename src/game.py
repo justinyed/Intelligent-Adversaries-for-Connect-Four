@@ -1,5 +1,4 @@
 from board import BoardInterface, ArrayBoard
-from lru import LRU
 
 EMPTY = 0
 PLAYER1 = 1
@@ -8,7 +7,6 @@ TIE_CODE = 3
 X = 0
 Y = 1
 N_CONNECT = 4
-CACHE = LRU(size=100)  # Least Recently Used Cache
 
 
 class GameInterface:
@@ -79,7 +77,7 @@ class GameInterface:
         """
         self._board = board
 
-    def new_state(self) -> tuple:
+    def _new_state(self) -> tuple:
         """
         get tuple containing the tuple of the state at the start of a game
 
@@ -87,20 +85,11 @@ class GameInterface:
         """
         pass
 
-    def get_state(self) -> tuple:
+    def _get_state(self) -> tuple:
         """
         get tuple containing the tuple of the current state of the game
 
         :return: the state of the game as a tuple
-        """
-        pass
-
-    def _get_successor_state(self, action) -> tuple:
-        """
-        get the state after an action is performed on the current state
-
-        :param action: action that leads to returned state
-        :return: state after the applied action
         """
         pass
 
@@ -129,7 +118,7 @@ class GameInterface:
         """
         return self._status
 
-    def set_state(self, state):
+    def _set_state(self, state):
         """
         set the state of the game
         :param state: State to set
@@ -162,10 +151,10 @@ class GameInterface:
 
     def is_tie(self) -> bool:
         """
-        todo
-        :return:
+        boolean for if the game is in a tied state.
+        :return: True if tied status
         """
-        return self.get_status() == self._tie
+        return self.get_status() == self.get_tie_code()
 
     def perform_action(self, directive) -> int:
         """
@@ -183,6 +172,9 @@ class GameInterface:
         """
         pass
 
+    def __hash__(self):
+        return hash(self._board)
+
 
 class ConnectFour(GameInterface):
     """
@@ -194,7 +186,7 @@ class ConnectFour(GameInterface):
 
         # Initialize State
         if state is None:
-            self._board, self._turn, self._status = self.new_state()
+            self._board, self._turn, self._status = self._new_state()
         else:
             self._board, self._turn, self._status = state
 
@@ -224,35 +216,25 @@ class ConnectFour(GameInterface):
         """
         return self._board.get_legal_actions()
 
-    def new_state(self):
+    def _new_state(self):
         """
         :return: new _grid, new _turn counter, new _status
         """
         board = self._board_type()
         return board, 0, board.get_default()
 
-    def get_state(self):
+    def _get_state(self):
         return self._board.copy(), self._turn, self._status
 
-    def set_state(self, state):
+    def _set_state(self, state):
         self._board, self._turn, self._status = state
 
-    def _get_successor_state(self, action):
-        original_state = self.get_state()
-        self.perform_action(action)
-        new_state = self.get_state()
-
-        self.set_state(original_state)
-        return new_state
-
     def get_successor(self, action):
-        h = self.get_board().hash_board(action)
-        if h in CACHE:
-            return CACHE[h]
-        else:
-            g = ConnectFour(state=self._get_successor_state(action))
-            CACHE[h] = g  # todo may create problem without deep copy
-            return g
+        original_state = self._get_state()
+        self.perform_action(action)
+        new_state = self._get_state()
+        self._set_state(original_state)
+        return ConnectFour(state=new_state)
 
     def get_current_player(self):
         if self.get_status() != self._in_progress:
@@ -285,4 +267,4 @@ class ConnectFour(GameInterface):
         return self._max_turns == self._turn
 
     def copy(self):
-        return ConnectFour(state=self.get_state())
+        return ConnectFour(state=self._get_state())

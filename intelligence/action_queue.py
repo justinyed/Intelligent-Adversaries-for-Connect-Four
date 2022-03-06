@@ -1,5 +1,6 @@
 from collections import deque
 from random import choice
+from functools import lru_cache
 
 
 class ActionQueue:
@@ -59,20 +60,6 @@ class ActionQueue:
     def get_best_value(self):
         return self.__data[0][0]
 
-    @staticmethod
-    def reflex_action_queue(game, evaluation_function, current_player):
-        """
-        The reflex action queue builds a list of value action pairs based on
-        the static value of a game state as defined by an evaluation function.
-        :param game: game state
-        :param evaluation_function: evaluates the value of the game
-        :param current_player: maximizing current_player
-        :return: ActionQueue with value action pairs as defined above
-        """
-        value_action_pairs = list([(evaluation_function(game.get_successor(move), current_player), move)
-                                   for move in game.get_legal_actions()])
-        return ActionQueue(value_action_pairs)
-
     def to_list(self) -> list:
         return list([e for e in self.__data])
 
@@ -103,4 +90,21 @@ class ActionQueue:
     def __deepcopy__(self, memodict):
         return self.copy()
 
+    def __hash__(self):
+        return hash(self.__data)
 
+
+@lru_cache(maxsize=10000)
+def reflex_action_queue(game, evaluation_function, current_player):
+    """
+    The reflex action queue builds a list of value action pairs based on
+    the static value of a game state as defined by an evaluation function.
+    :param game: game state
+    :param evaluation_function: evaluates the value of the game
+    :param current_player: maximizing current_player
+    :return: ActionQueue with value action pairs as defined above
+    """
+    value_action_pairs = list([(evaluation_function(game.get_successor(move), current_player), move)
+                               for move in game.get_legal_actions()])
+
+    return ActionQueue(value_action_pairs)

@@ -1,8 +1,8 @@
 from colorama import Fore
 from interface_cli import Human
-import agent
-from utils.evaluation_function_wtsq import evaluation_function_weighted_square as wtsq
-from utils.evaluation_function_conv import evaluation_function_conv as conv
+import intelligence as agent
+from intelligence.evaluation_fn_wtsq import evaluation_function_weighted_square as wtsq
+from intelligence.evaluation_fn_conv import evaluation_function_conv as conv
 
 
 def agent_options(current_player):

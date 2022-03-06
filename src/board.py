@@ -261,13 +261,8 @@ class ArrayBoard(BoardInterface):
         return self._grid[abs(position[Y] - (self.get_height() - 1))][position[X]]
 
     def hash_board(self, action=None):
-        # h = 0
-        # for i in range(self.HEIGHT):
-        #     for j in range(self.WIDTH):
-        #         piece = self._grid[i, j]
-        #         if piece != 0:
-        #             h ^= ZOBRIST_TABLE[piece][i, j]
-        # if action is not None:
-        #     h ^= action
-        # return h
-        return (action + self.get_grid()).tobytes()
+        if action is not None:
+            h = (action + self.get_grid()).tobytes()
+        else:
+            h = self.get_grid().tobytes()
+        return h
