@@ -8,8 +8,8 @@ Y = 1
 class BoardInterface:
     """The Internal Representation of a Grid Style Board."""
 
-    _HEIGHT = 6
-    _WIDTH = 7
+    HEIGHT = 6
+    WIDTH = 7
     _DEFAULT = 0
     _N_CONNECT = 4
 
@@ -30,10 +30,10 @@ class BoardInterface:
             raise ValueError("_lowest and _grid must be provided together")
 
     def get_height(self):
-        return self._HEIGHT
+        return self.HEIGHT
 
     def get_width(self):
-        return self._WIDTH
+        return self.WIDTH
 
     def get_default(self):
         return self._DEFAULT
@@ -167,11 +167,18 @@ class BoardInterface:
     def is_legal_position(self, position):
         return 0 <= position[X] < self.get_width() and 0 <= position[Y] < self.get_height()
 
-    def __hash__(self):
-        return self.__str__()
+    def hash_board(self, action=None):
+        """
+        hash_board Function
+        :return: hash
+        """
+        pass
 
     def __str__(self):
         return str(self._grid)
+
+    def __hash__(self):
+        return hash(self.hash_board())
 
 
 class TupleBoard(BoardInterface):
@@ -210,6 +217,13 @@ class TupleBoard(BoardInterface):
         x, y = position
         return self._grid[x + self.get_width() * y]
 
+    def hash_board(self, action=None):
+        return self._grid
+
+# ZOBRIST_TABLE = {1: np.random.rand(BoardInterface.HEIGHT, BoardInterface.WIDTH).astype(int),
+#                       -1: np.random.rand(BoardInterface.HEIGHT, BoardInterface.WIDTH).astype(int)}
+
+Z = np.random.rand(BoardInterface.HEIGHT, BoardInterface.WIDTH).astype(int)
 
 class ArrayBoard(BoardInterface):
     """
@@ -246,5 +260,14 @@ class ArrayBoard(BoardInterface):
         """
         return self._grid[abs(position[Y] - (self.get_height() - 1))][position[X]]
 
-    def __hash__(self):
-        return tuple(self._grid.flatten())
+    def hash_board(self, action=None):
+        # h = 0
+        # for i in range(self.HEIGHT):
+        #     for j in range(self.WIDTH):
+        #         piece = self._grid[i, j]
+        #         if piece != 0:
+        #             h ^= ZOBRIST_TABLE[piece][i, j]
+        # if action is not None:
+        #     h ^= action
+        # return h
+        return (action + self.get_grid()).tobytes()

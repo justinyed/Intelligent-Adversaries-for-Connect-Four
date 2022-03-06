@@ -156,7 +156,7 @@ class MiniMax(MultiAgent):
         value, best_actions = NEGATIVE_INF, []
 
         for action in game.get_legal_actions():
-            value_prime, _ = self._min_value(game.get_successor_game(action), current_depth)
+            value_prime, _ = self._min_value(game.get_successor(action), current_depth)
             if value_prime == value:
                 best_actions.append(action)
 
@@ -174,7 +174,7 @@ class MiniMax(MultiAgent):
         value, best_action = POSITIVE_INF, None
 
         for action in game.get_legal_actions():
-            value_prime, _ = self._max_value(game.get_successor_game(action), current_depth + 1)
+            value_prime, _ = self._max_value(game.get_successor(action), current_depth + 1)
             if value_prime < value:
                 value, best_action = value_prime, action
         return value, best_action
@@ -197,10 +197,10 @@ class AlphaBeta(MultiAgent):
             return self.evaluation_function(game, self.player), None
 
         value, best_actions = NEGATIVE_INF, []
-        # ordered_actions = ActionQueue.reflex_action_queue(game, self.evaluation_function, self.player).get_actions()
+        ordered_actions = ActionQueue.reflex_action_queue(game, self.evaluation_function, self.player).get_actions()
 
-        for action in game.get_legal_actions():
-            value_prime, _ = self._min_value(game.get_successor_game(action), current_depth, alpha, beta)
+        for action in ordered_actions:
+            value_prime, _ = self._min_value(game.get_successor(action), current_depth, alpha, beta)
             if value_prime == value:
                 best_actions.append(action)
             if value_prime > value:
@@ -217,11 +217,11 @@ class AlphaBeta(MultiAgent):
             return self.evaluation_function(game, self.player), None
 
         value, best_action = POSITIVE_INF, None
-        # ordered_actions = reversed(ActionQueue.
-        #                            reflex_action_queue(game, self.evaluation_function, self.player).get_actions())
+        ordered_actions = reversed(ActionQueue.
+                                   reflex_action_queue(game, self.evaluation_function, self.player).get_actions())
 
-        for action in game.get_legal_actions():
-            value_prime, _ = self._max_value(game.get_successor_game(action), current_depth + 1, alpha, beta)
+        for action in ordered_actions:
+            value_prime, _ = self._max_value(game.get_successor(action), current_depth + 1, alpha, beta)
             if value_prime < value:
                 value, best_action = value_prime, action
                 beta = min(beta, value)
@@ -246,15 +246,15 @@ class IterativeDeepening(MultiAgent):
     def get_action(self, game):
         self._timer_start()
         self.best_known_moves.clear()
-        ordered_initial_queue = ActionQueue.reflex_action_queue(game, self.evaluation_function, self.player)
-        move = ordered_initial_queue.get_best_action()
+        move = None
 
         if game.get_turn() == 0:
+            ordered_initial_queue = ActionQueue.reflex_action_queue(game, self.evaluation_function, self.player)
+            move = ordered_initial_queue.get_best_action()
             return move
 
         # iterative deepening
         for current_depth_limit in range(0, self.absolute_depth_limit + 1):
-            print('perform iteration=', current_depth_limit)
             self.depth_limit = current_depth_limit
             _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF)
 
@@ -267,32 +267,36 @@ class IterativeDeepening(MultiAgent):
 
         value, best_value_action_pairs = NEGATIVE_INF, []
 
-        if current_depth not in self.best_known_moves.keys():
+        if current_depth not in self.best_known_moves:  # initialize actions for depth
             self.best_known_moves[current_depth] = ActionQueue\
                 .reflex_action_queue(game, self.evaluation_function, self.player)
 
-        for action in self.best_known_moves[current_depth].get_actions():
-            value_prime, _ = self._min_value(game.get_successor_game(action), current_depth, alpha, beta)
-            if value_prime > value:
-                value = value_prime
-                alpha = max(alpha, value)
-                best_value_action_pairs.clear()
-                best_value_action_pairs.append((value, action))
-            else:
-                best_value_action_pairs.append((value, action))
-            if value > beta:
-                break
-        self.best_known_moves[current_depth].extend(best_value_action_pairs)
-        return choice(best_value_action_pairs)
+        legal_actions = tuple(game.get_legal_actions())
 
-    def _min_value(self, game_state, current_depth, alpha, beta):
-        if game_state.is_terminal_state():
-            return self.evaluation_function(game_state, self.player), None
+        for action in self.best_known_moves[current_depth]:
+            if action in legal_actions:
+                if value <= beta:
+                    value_prime, _ = self._min_value(game.get_successor(action), current_depth, alpha, beta)
+                    if value_prime > value:
+                        value = value_prime
+                        alpha = max(alpha, value)
+                    best_value_action_pairs.append((value, action))
+                else:  # normally break here
+                    best_value_action_pairs.append((0, action))
+
+        self.best_known_moves[current_depth] = ActionQueue(best_value_action_pairs)
+        return self.best_known_moves[current_depth].get_best_value_action_pair()
+
+    def _min_value(self, game, current_depth, alpha, beta):
+        if game.is_terminal_state():
+            return self.evaluation_function(game, self.player), None
 
         value, best_action = POSITIVE_INF, None
+        ordered_actions = reversed(ActionQueue.
+                                   reflex_action_queue(game, self.evaluation_function, self.player).get_actions())
 
-        for action in game_state.get_legal_actions():
-            value_prime, _ = self._max_value(game_state.get_successor_game(action), current_depth + 1, alpha, beta)
+        for action in ordered_actions:
+            value_prime, _ = self._max_value(game.get_successor(action), current_depth + 1, alpha, beta)
             if value_prime < value:
                 value, best_action = value_prime, action
                 beta = min(beta, value)

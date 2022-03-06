@@ -15,14 +15,14 @@ def simulate_game(n=0):
         else:
             action = agent_2.get_action(game)
 
-        game.perform_action(action)
-        print(".", end="")
-
         if game.is_terminal_state():
             status = game.get_status()
             record[status] += 1
             print(f"\nFinished game={n + 1}\tstatus={status}")
             return
+
+        game.perform_action(action)
+        print(".", end="")
 
 
 if __name__ == '__main__':

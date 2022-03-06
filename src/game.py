@@ -1,4 +1,5 @@
 from board import BoardInterface, ArrayBoard
+from lru import LRU
 
 EMPTY = 0
 PLAYER1 = 1
@@ -7,6 +8,7 @@ TIE_CODE = 3
 X = 0
 Y = 1
 N_CONNECT = 4
+CACHE = LRU(size=100)  # Least Recently Used Cache
 
 
 class GameInterface:
@@ -93,7 +95,7 @@ class GameInterface:
         """
         pass
 
-    def get_successor_state(self, action) -> tuple:
+    def _get_successor_state(self, action) -> tuple:
         """
         get the state after an action is performed on the current state
 
@@ -102,7 +104,7 @@ class GameInterface:
         """
         pass
 
-    def get_successor_game(self, action) -> tuple:
+    def get_successor(self, action) -> tuple:
         """
         get the game object after an action is performed on the current state
 
@@ -174,6 +176,13 @@ class GameInterface:
         """
         pass
 
+    def copy(self):
+        """
+        creates a deep copy of the board
+        :return: copy
+        """
+        pass
+
 
 class ConnectFour(GameInterface):
     """
@@ -228,7 +237,7 @@ class ConnectFour(GameInterface):
     def set_state(self, state):
         self._board, self._turn, self._status = state
 
-    def get_successor_state(self, action):
+    def _get_successor_state(self, action):
         original_state = self.get_state()
         self.perform_action(action)
         new_state = self.get_state()
@@ -236,8 +245,14 @@ class ConnectFour(GameInterface):
         self.set_state(original_state)
         return new_state
 
-    def get_successor_game(self, action):
-        return ConnectFour(state=self.get_successor_state(action))
+    def get_successor(self, action):
+        h = self.get_board().hash_board(action)
+        if h in CACHE:
+            return CACHE[h]
+        else:
+            g = ConnectFour(state=self._get_successor_state(action))
+            CACHE[h] = g  # todo may create problem without deep copy
+            return g
 
     def get_current_player(self):
         if self.get_status() != self._in_progress:
@@ -256,6 +271,9 @@ class ConnectFour(GameInterface):
             self._status = self._in_progress
 
     def perform_action(self, directive):
+        if self.is_terminal_state():
+            raise ValueError("Game is in Terminal State, yet an action was attempted.")
+
         position = self._board.drop_piece(directive, self.get_current_player())
         self.__update_status(position)
         status = self.get_status()
@@ -265,3 +283,6 @@ class ConnectFour(GameInterface):
 
     def check_tie(self) -> bool:
         return self._max_turns == self._turn
+
+    def copy(self):
+        return ConnectFour(state=self.get_state())

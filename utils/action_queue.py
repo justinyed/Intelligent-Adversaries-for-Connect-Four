@@ -38,20 +38,26 @@ class ActionQueue:
     def clear(self) -> None:
         self.__data.clear()
 
-    def get_best_action(self):
+    def get_best_value_action_pair(self):
         if len(self) == 0:
             return None
 
-        best_value, best_actions = int(self.__data[0][0]), []
+        best_value, best_actions = self.get_best_value(), []
 
         for i in range(len(self)):
             e = self.__data[i]
-            if e[0] >= best_value:
+            if e[0] == best_value:
                 best_actions.append(e)
             else:
                 break
 
-        return choice(best_actions)[1]
+        return best_value, choice(best_actions)[1]
+
+    def get_best_action(self):
+        return self.get_best_value_action_pair()[1]
+
+    def get_best_value(self):
+        return self.__data[0][0]
 
     @staticmethod
     def reflex_action_queue(game, evaluation_function, current_player):
@@ -63,7 +69,7 @@ class ActionQueue:
         :param current_player: maximizing current_player
         :return: ActionQueue with value action pairs as defined above
         """
-        value_action_pairs = list([(evaluation_function(game.get_successor_game(move), current_player), move)
+        value_action_pairs = list([(evaluation_function(game.get_successor(move), current_player), move)
                                    for move in game.get_legal_actions()])
         return ActionQueue(value_action_pairs)
 
