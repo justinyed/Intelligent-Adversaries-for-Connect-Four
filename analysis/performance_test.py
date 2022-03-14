@@ -6,7 +6,7 @@ record = {-1: 0, 1: 0, 3: 0}
 
 def simulate_game(n=0):
     agent_1 = agent.IterativeDeepening(player=1, depth_limit=3)
-    agent_2 = agent.IterativeDeepening(player=-1, depth_limit=3)
+    agent_2 = agent.AlphaBeta(player=-1, depth_limit=3)
     game = ConnectFour()
 
     while True:

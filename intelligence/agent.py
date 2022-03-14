@@ -3,7 +3,7 @@ class Agent:
     An agent must define a get_action method
     """
 
-    def __init__(self, player, eval_fn):
+    def __init__(self, player, eval_fn=None):
         """
         Agent Interface
 

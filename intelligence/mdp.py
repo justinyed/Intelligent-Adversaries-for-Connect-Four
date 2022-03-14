@@ -14,26 +14,61 @@ class MDP:
     actions for each state.
     """
 
-    def __init__(self, initial_state, transition_model, reward_function):
-        self.initial_state = initial_state
-        self.transition_fn = transition_model
-        self.reward_fn = reward_function
+    def __init__(self, rewards):
+        self.rewards = rewards
+        self.living_reward = 0.0
+
+    def set_living_reward(self, reward):
+        """
+        The (negative) reward for exiting "normal" states.
+
+        This reward is on entering a state and therefore is not clearly part of the state's
+        future rewards.
+        """
+        self.living_reward = reward
 
     def reward(self, state):
         """
-        Return a numeric reward for this state.
+        Return a numeric reward for this state. The reward depends on only the current state.
         """
-        pass
+        if state.get_current_player() == state.get_player2:  # neutralize board
+            return self.rewards[-1 * state.get_board()]
+        return self.rewards[state.get_board()]
 
-    def transition(self, state, action):
+    @staticmethod
+    def transitions(state, action):
         """
         Transition model.  From a state and an action, return a list of (result-state, probability) pairs.
         """
-        pass
+        return transition(state, action)
 
-    def actions(self, state):
+    @staticmethod
+    def actions(state):
         """
         Set of actions that can be performed in this state.  By default, a fixed list of actions,
         except for terminal states. Override this method if you need to specialize by state.
         """
-        pass
+        if state.is_terminal():
+            return None
+        return state.get_legal_actions()
+
+    def is_terminal(self, state):
+        """
+        Returns true if the current state is a terminal state.  By convention,
+        a terminal state has zero future rewards.  Sometimes the terminal state(s)
+        may have no possible actions.  It is also common to think of the terminal
+        state as having a self-loop action 'pass' with zero reward; the formulations
+        are equivalent.
+         """
+        return state.is_terminal()
+
+
+@lru_cache(10000)
+def transition(state, action):
+    """
+    Transition model.  From a state and an action, return a list of (result-state, probability) pairs.
+    """
+    state = state.get_successor(action)
+    actions = state.get_legal_actions()
+    probability = 1 / len(actions)
+    return list([(state.get_successor(action), probability) for action in actions])

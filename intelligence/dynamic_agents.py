@@ -3,7 +3,30 @@ from intelligence.agent import Agent
 
 class Dynamic(Agent):
 
-    def get_action(self, game):
+    def __init__(self, player, learning_rate=1.0, exploration_rate=0.05, discount=0.8, num_training=10):
+        """
+        :param player: current player
+        :param learning_rate:
+        :param exploration_rate:
+        :param discount:
+        :param num_training:
+        """
+        super().__init__(player)
+        self.learning_rate = float(learning_rate)
+        self.exploration_rate = float(exploration_rate)
+        self.discount = float(discount)
+        self.num_training = int(num_training)
+
+    def get_action(self, state):
+        pass
+
+    def get_q_state(self, state, action):
+        """
+        Get state after transitioned with action
+        :param state:
+        :param action:
+        :return:
+        """
         pass
 
     def value_iteration(self, mdp, epsilon=0.001):
@@ -23,6 +46,9 @@ class Dynamic(Agent):
         :param utility_fn:
         :return:
         """
+        pass
+
+    def best_value(self, mdp):
         pass
 
     def expected_utility(self, mdp, utility_fn, action, state):

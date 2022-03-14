@@ -1,4 +1,4 @@
-from intelligence import Agent
+from intelligence.agent import Agent
 from intelligence.action_queue import ActionQueue, reflex_action_queue
 from intelligence.evaluation_fn_wtsq import evaluation_function_weighted_square as wtsq
 from random import choice
@@ -260,29 +260,3 @@ class IterativeDeepening(AlphaBeta):
             _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF)
 
         return move
-
-    def _max_value(self, game, current_depth, alpha, beta):
-        # todo handle when time has elapsed
-        if self._is_timer_elapsed() or game.is_terminal_state() or self._is_depth_max(game, current_depth):
-            return self.evaluation_function(game, self.player), None
-
-        value, best_value_action_pairs = NEGATIVE_INF, []
-
-        if current_depth not in self.best_known_moves:  # initialize actions for depth
-            self.best_known_moves[current_depth] = reflex_action_queue(game, self.evaluation_function, self.player)
-
-        legal_actions = tuple(game.get_legal_actions())
-
-        for action in self.best_known_moves[current_depth]:
-            if action in legal_actions:
-                if value <= beta:
-                    value_prime, _ = self._min_value(self.get_successor(game, action), current_depth, alpha, beta)
-                    if value_prime > value:
-                        value = value_prime
-                        alpha = max(alpha, value)
-                    best_value_action_pairs.append((value, action))
-                else:  # normally break here
-                    best_value_action_pairs.append((0, action))
-
-        self.best_known_moves[current_depth] = ActionQueue(best_value_action_pairs)
-        return self.best_known_moves[current_depth].get_best_value_action_pair()
