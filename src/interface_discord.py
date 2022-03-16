@@ -1,16 +1,18 @@
-import intelligence
+
 import os
 from time import sleep
 import uuid
-
 import discord
 from discord.ext import commands
 import constants_discord as constant
 from game import ConnectFour, PLAYER1, PLAYER2, EMPTY
 
 TOKEN = os.getenv("DISCORD_TOKEN")
-GUILD = os.getenv("DISCORD_GUILD")
 
+print('getcwd:      ', os.getcwd())
+print('__file__:    ', __file__)
+
+# import intelligence
 
 class ConnectFourBot(commands.Bot):
 
@@ -22,8 +24,7 @@ class ConnectFourBot(commands.Bot):
         self.agent2 = {}
         self.channels = {}
         print(f"discord.py version={discord.__version__}")
-        print(f"{self.user} is connected to the following guild:\n")
-        print(f"{self.guilds[0]}(id: {self.guilds[0].id})")
+        print(f"{self.user} is connected\n")
 
     @commands.command(name='challenge', aliases=['clg'],
                   description=constant.CLG_DESCRIPTION, help='help', pass_contaxt=True)
@@ -111,21 +112,21 @@ class ConnectFourBot(commands.Bot):
         return representation
 
 
-class Human(intelligence.Agent):
-    """Handles a Human Player's Input"""
-
-    def __init__(self, player_number, player_id):
-        super().__init__(player_number)
-
-    def get_action(self, game):
-        player = game.get_current_player()
-
-        move = None
-
-        if move in game.get_legal_actions():
-            return move
-        else:
-            raise ValueError()
+# class Human(intelligence.Agent):
+#     """Handles a Human Player's Input"""
+#
+#     def __init__(self, player_number, player_id):
+#         super().__init__(player_number)
+#
+#     def get_action(self, game):
+#         player = game.get_current_player()
+#
+#         move = None
+#
+#         if move in game.get_legal_actions():
+#             return move
+#         else:
+#             raise ValueError()
 
     # async def assemble_buttons(self, bot, msg):
     #     """

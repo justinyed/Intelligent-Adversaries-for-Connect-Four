@@ -1,7 +1,13 @@
 from time import sleep
 import constants_cli
 from game import ConnectFour
-from intelligence import Agent
+import os
+
+print('getcwd:      ', os.getcwd())
+print('__file__:    ', __file__)
+
+
+import intelligence
 
 
 class ConnectFourCLI:
@@ -67,7 +73,7 @@ class ConnectFourCLI:
         else:
             return constants_cli.PLAYER2
 
-    def select_agent(self, game, player) -> Agent:
+    def select_agent(self, game, player) -> intelligence.Agent:
         """
         Agent Selection Menu
         """
@@ -137,7 +143,7 @@ class ConnectFourCLI:
         return num_line
 
 
-class Human(Agent):
+class Human(intelligence.Agent):
     """Handles a Human Player's Input"""
 
     def get_action(self, game):

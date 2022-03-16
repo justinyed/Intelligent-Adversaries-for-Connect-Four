@@ -2,22 +2,18 @@ import os
 import pickle
 import time
 from random import choice
-
-from lru import LRU
-
+from functools import lru_cache
 from intelligence.action_queue import reflex_action_queue
 from intelligence.agent import Agent
 from intelligence.evaluation_fn_wtsq import evaluation_function_weighted_square as wtsq
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
-CACHE_FILE = '../data/successor_cache.pkl'
 
-if not os.path.isfile(CACHE_FILE):
-    with open(CACHE_FILE, 'wb') as file:
-        lru = LRU(10000)
-        lru['first'] = 0
-        pickle.dump(lru, file)  # Least Recently Used Cache
+
+@lru_cache(maxsize=10000)
+def get_successor(state, action):
+    return state.get_successor(action)
 
 
 def evaluation_function_simple(game, current_player):
@@ -107,8 +103,7 @@ class MultiAgent(Agent):
         self.get_depth_limit = depth_fn
         self.time_limit = None  # seconds
         self.start_time = None
-        with open(CACHE_FILE, 'rb') as file:
-            self._successor_cache = pickle.load(file)  # Least Recently Used Cache
+        self._successor_cache = None
 
     def timer_set(self, seconds: int) -> None:
         self.time_limit = seconds
@@ -126,20 +121,6 @@ class MultiAgent(Agent):
 
     def _is_depth_max(self, game, current_depth) -> bool:
         return current_depth >= self.get_depth_limit(game, self.depth_limit)
-
-    def get_successor(self, state, action):
-        h = state.get_board().hash_board(action)
-        if h in self._successor_cache:
-            return self._successor_cache[h]
-        else:
-            g = state.get_successor(action)
-            self._successor_cache[h] = g  # todo may create problems without deep copy?
-            return g
-
-    def __del__(self):
-        with open(CACHE_FILE, 'wb') as file:
-            pickle.dump(self._successor_cache, file)  # Least Recently Used Cache
-        del self._successor_cache
 
 
 class MiniMax(MultiAgent):
@@ -160,7 +141,7 @@ class MiniMax(MultiAgent):
         value, best_actions = NEGATIVE_INF, []
 
         for action in game.get_legal_actions():
-            value_prime, _ = self._min_value(self.get_successor(game, action), current_depth)
+            value_prime, _ = self._min_value(get_successor(game, action), current_depth)
             if value_prime == value:
                 best_actions.append(action)
 
@@ -178,7 +159,7 @@ class MiniMax(MultiAgent):
         value, best_action = POSITIVE_INF, None
 
         for action in game.get_legal_actions():
-            value_prime, _ = self._max_value(self.get_successor(game, action), current_depth + 1)
+            value_prime, _ = self._max_value(get_successor(game, action), current_depth + 1)
             if value_prime < value:
                 value, best_action = value_prime, action
         return value, best_action
@@ -204,7 +185,7 @@ class AlphaBeta(MultiAgent):
         ordered_actions = reflex_action_queue(game, self.evaluation_function, self.player).get_actions()
 
         for action in ordered_actions:
-            value_prime, _ = self._min_value(self.get_successor(game, action), current_depth, alpha, beta)
+            value_prime, _ = self._min_value(get_successor(game, action), current_depth, alpha, beta)
             if value_prime == value:
                 best_actions.append(action)
             if value_prime > value:
@@ -224,7 +205,7 @@ class AlphaBeta(MultiAgent):
         ordered_actions = reversed(reflex_action_queue(game, self.evaluation_function, self.player).get_actions())
 
         for action in ordered_actions:
-            value_prime, _ = self._max_value(self.get_successor(game, action), current_depth + 1, alpha, beta)
+            value_prime, _ = self._max_value(get_successor(game, action), current_depth + 1, alpha, beta)
             if value_prime < value:
                 value, best_action = value_prime, action
                 beta = min(beta, value)

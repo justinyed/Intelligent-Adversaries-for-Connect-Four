@@ -1,18 +1,16 @@
 from colorama import Fore
 from interface_cli import Human
-import intelligence as agent
-from intelligence.evaluation_fn_wtsq import evaluation_function_weighted_square as wtsq
-from intelligence.evaluation_fn_conv import evaluation_function_conv as conv
+import intelligence
 
 
 def agent_options(current_player):
     return {
         "Human Player": Human(current_player),
-        "Random Agent": agent.Random(current_player),
-        "Reflex Agent": agent.Reflex(current_player, eval_fn=wtsq),
-        "Minimax Agent": agent.MiniMax(current_player, eval_fn=conv, depth_limit=2),
-        "Alpha-Beta Agent": agent.AlphaBeta(current_player, eval_fn=wtsq, depth_limit=3),
-        "Iterative Agent": agent.IterativeDeepening(current_player, eval_fn=wtsq, depth_limit=4)
+        "Random Agent": intelligence.Random(current_player),
+        "Reflex Agent": intelligence.Reflex(current_player),
+        "Minimax Agent": intelligence.MiniMax(current_player, depth_limit=2),
+        "Alpha-Beta Agent": intelligence.AlphaBeta(current_player, depth_limit=3),
+        "Iterative Agent": intelligence.IterativeDeepening(current_player, depth_limit=4)
     }
 
 
