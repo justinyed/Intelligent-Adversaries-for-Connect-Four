@@ -1,9 +1,12 @@
+from intelligence.evaluation_fn_wtsq import evaluation_function_weighted_square as wtsq
+
+
 class Agent:
     """
     An agent must define a get_action method
     """
 
-    def __init__(self, player, eval_fn=None):
+    def __init__(self, player, eval_fn=wtsq):
         """
         Agent Interface
 

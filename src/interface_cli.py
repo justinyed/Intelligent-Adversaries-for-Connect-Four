@@ -2,11 +2,6 @@ from time import sleep
 import constants_cli
 from game import ConnectFour
 import os
-
-print('getcwd:      ', os.getcwd())
-print('__file__:    ', __file__)
-
-
 import intelligence
 
 
@@ -45,6 +40,7 @@ class ConnectFourCLI:
                     sleep(constants_cli.DROP_TIME)
 
             except (ValueError, TypeError):
+
                 print(constants_cli.ILLEGAL_INPUT_MSG)
                 sleep(constants_cli.BAD_INPUT_TIME)
                 self.handler(game)

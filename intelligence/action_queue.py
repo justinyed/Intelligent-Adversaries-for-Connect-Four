@@ -1,6 +1,9 @@
 from collections import deque
-from functools import lru_cache
 from random import choice
+import intelligence
+from lru import LRU
+
+cache = LRU(10000)
 
 
 class ActionQueue:
@@ -52,7 +55,7 @@ class ActionQueue:
             else:
                 break
 
-        return best_value, choice(best_actions)[1]
+        return choice(best_actions)
 
     def get_best_action(self):
         return self.get_best_value_action_pair()[1]
@@ -94,7 +97,6 @@ class ActionQueue:
         return hash(self.__data)
 
 
-@lru_cache(maxsize=10000)
 def reflex_action_queue(game, evaluation_function, current_player):
     """
     The reflex action queue builds a list of value action pairs based on
@@ -104,7 +106,7 @@ def reflex_action_queue(game, evaluation_function, current_player):
     :param current_player: maximizing current_player
     :return: ActionQueue with value action pairs as defined above
     """
-    value_action_pairs = list([(evaluation_function(game.get_successor(move), current_player), move)
+    value_action_pairs = list([(evaluation_function(intelligence.get_successor(game, move), current_player), move)
                                for move in game.get_legal_actions()])
 
     return ActionQueue(value_action_pairs)

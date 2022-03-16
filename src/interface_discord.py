@@ -1,4 +1,3 @@
-
 import os
 from time import sleep
 import uuid
@@ -6,13 +5,9 @@ import discord
 from discord.ext import commands
 import constants_discord as constant
 from game import ConnectFour, PLAYER1, PLAYER2, EMPTY
-
+import intelligence
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-print('getcwd:      ', os.getcwd())
-print('__file__:    ', __file__)
-
-# import intelligence
 
 class ConnectFourBot(commands.Bot):
 
@@ -23,8 +18,8 @@ class ConnectFourBot(commands.Bot):
         self.agent1 = {}
         self.agent2 = {}
         self.channels = {}
+        print(f"status={self.status}")
         print(f"discord.py version={discord.__version__}")
-        print(f"{self.user} is connected\n")
 
     @commands.command(name='challenge', aliases=['clg'],
                   description=constant.CLG_DESCRIPTION, help='help', pass_contaxt=True)
