@@ -1,70 +1,38 @@
-import discord
+import intelligence
 import os
-from discord.ext import commands
-from game import ConnectFour, PLAYER1, PLAYER2, EMPTY
 from time import sleep
+import uuid
 
-DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+import discord
+from discord.ext import commands
+import constants_discord as constant
+from game import ConnectFour, PLAYER1, PLAYER2, EMPTY
+
+TOKEN = os.getenv("DISCORD_TOKEN")
 GUILD = os.getenv("DISCORD_GUILD")
-CALLSIGN = "c4 "
-bot = commands.Bot(command_prefix=CALLSIGN)
-
-# ### CONSTANTS ###
-PLAYER1_PIECE = ":regional_indicator_x:"
-PLAYER2_PIECE = ":o2:"
-EMPTY_PIECE = ":white_large_square:"
-NUM_PLAYERS = 2
-DROP_TIME = 0.0
-ILLEGAL_INPUT_MSG = ""
-BAD_INPUT_TIME = 0.7
-
-PIECES = {
-    EMPTY: EMPTY_PIECE,
-    PLAYER1: PLAYER1_PIECE,
-    PLAYER2: PLAYER2_PIECE
-}
-
-ONE = u"\u2474"
-TWO = u"\u2475"
-THREE = u"\u2476"
-FOUR = u"\u2477"
-FIVE = u"\u2478"
-SIX = u"\u2479"
-SEVEN = u"\u247A"
-BUTTON_NUMBERS = (ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN)
-BUTTON_DECODER = dict(zip(BUTTON_NUMBERS, range(len(BUTTON_NUMBERS))))
 
 
-# This event triggers when your bot
-# allows the bot to sit in a ready state and wait for calls.
-@bot.event
-async def on_ready():
-    for guild in bot.guilds:
-        if guild.name == GUILD:
-            break
+class ConnectFourBot(commands.Bot):
 
-    print(
-        f"{bot.user} is connected to the following guild:\n"
-        f"{guild.name}(id: {guild.id})"
-    )
-
-
-class ConnectFourBot:
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, command_prefix, **options):
+        super().__init__(command_prefix, **options)
         self.games = {}
         self.last_moves = {}
         self.agent1 = {}
         self.agent2 = {}
+        self.channels = {}
+        print(f"discord.py version={discord.__version__}")
+        print(f"{self.user} is connected to the following guild:\n")
+        print(f"{self.guilds[0]}(id: {self.guilds[0].id})")
 
-    @bot.command(name='challenge',
-                 aliases=['clg'],
-                 brief='brief',
-                 description='Challenge a current_player or agent by providing the ID.  If no parameter is given, then a menu '
-                             'will assist.',
-                 help='help'
-                 )
+    @commands.command(name='challenge', aliases=['clg'],
+                  description=constant.CLG_DESCRIPTION, help='help', pass_contaxt=True)
     async def challenge(self, ctx, opponent=None):
+        """
+        Allows the player to challenge an opponent
+        :param ctx: context
+        :param opponent: opponent player to challenge; if none options are given.
+        """
         if opponent is None:  # Normally print dialog and request more info
             opponent = "Alpha-Beta Agent"
             await self.cfb_new(ctx.message.author, opponent, ctx.message.channel)
@@ -72,19 +40,29 @@ class ConnectFourBot:
             await ctx.send(f"Challenge {opponent}")
 
     async def cfb_new(self, challenger, opponent, channel):
-        self.games[challenger.id] = None
-        response = self.assemble_board(challenger)
-        response += "Your move:"
-        msg = await self.bot.send_message(channel, response)
-        await self.assemble_buttons(msg)
+        game_id = uuid.uuid1()
+        self.games[game_id] = ConnectFour()
+        self.agent1[game_id] = challenger
+        self.agent2[game_id] = opponent
+        self.last_moves[game_id] = None
+        self.channels[game_id] = channel
 
     async def game_handler(self, challenger, opponent, message, move):
+        """
+        Handles turns of game
+        :param challenger:
+        :param opponent:
+        :param message:
+        :param move:
+        :return:
+        """
         # SETUP
         print("ttt_move:{0}".format(challenger.id))
         uid = challenger.id
         if uid not in self.games:
             print("New game")
-            return await self.cfb_new(challenger, opponent, message.channel)
+            await self.cfb_new(challenger, opponent, message.channel)
+
         game = self.games[challenger]
 
         # DISPLAY BOARD
@@ -92,16 +70,16 @@ class ConnectFourBot:
 
         # REQUEST MOVE
         try:
-            if game._turn % NUM_PLAYERS == 0:
+            if game.get_turn() % constant.NUM_PLAYERS == 0:
                 self.last_moves[challenger] = self.agent1[challenger].get_action(game)
-                sleep(DROP_TIME)
+                sleep(constant.DROP_TIME)
             else:
                 self.last_moves[challenger] = self.agent2[challenger].get_action(game)
-                sleep(DROP_TIME)
+                sleep(constant.DROP_TIME)
 
         except (ValueError, TypeError):
-            print(ILLEGAL_INPUT_MSG)
-            sleep(BAD_INPUT_TIME)
+            print(constant.ILLEGAL_INPUT_MSG)
+            sleep(constant.BAD_INPUT_TIME)
             await self.game_handler(challenger, opponent, message, move)
 
         # MAKE MOVE
@@ -118,44 +96,61 @@ class ConnectFourBot:
         await self.bot.edit_message(message, new_content=self.assemble_board(challenger))
         await self.game_handler(challenger, opponent, message, move)
 
-    async def assemble_buttons(self, msg):
-        for n in BUTTON_NUMBERS:
-            await self.bot.add_reaction(msg, n)
-
-    async def on_reaction_add(self, reaction, challenger):
-        opponent = ""
-        if reaction.message.author.id == self.bot.user.id and not challenger.id == self.bot.user.id:
-            move = BUTTON_DECODER[(str(reaction.emoji))]
-            if move is not None:
-                await self.game_handler(challenger, opponent, reaction.message, move)
-
-    def assemble_board(self, user):
-        game = self.games[user]
+    def assemble_board(self, game):
+        """
+        Create the representation of the game
+        :param game: game state
+        :return: string representation of the game
+        """
         representation = ""
-        for y in range(game.get_board().height - 1, -1, -1):
-            for x in range(game.get_board().width):
+        for y in range(game.get_board().get_height() - 1, -1, -1):
+            for x in range(game.get_board().get_width()):
                 piece = game.get_board().get_piece((x, y))
-                representation += f"[{PIECES[piece]}]"
+                representation += f"{constant.PIECES[piece]}"
             representation += "\n"
-        return representation[:-1]
-
-    # @bot.command(name="leaderboard",
-    #              aliases=['lb'],
-    #              brief='brief',
-    #              description='Display the record for a current_player or agent by providing the ID. If no parameter is given, '
-    #                          'then a default leaderboard will be displayed.',
-    #              help='help'
-    #              )
-    # async def leaderboard(self, ctx, current_player=None):
-    #     if current_player is None:
-    #         await ctx.send("Print Default Leaderboard")
-    #     else:
-    #         await ctx.send(f"Display {current_player}'s Record")
+        return representation
 
 
-def setup(bot):
-    bot.add_cog(ConnectFourBot(bot))
+class Human(intelligence.Agent):
+    """Handles a Human Player's Input"""
+
+    def __init__(self, player_number, player_id):
+        super().__init__(player_number)
+
+    def get_action(self, game):
+        player = game.get_current_player()
+
+        move = None
+
+        if move in game.get_legal_actions():
+            return move
+        else:
+            raise ValueError()
+
+    # async def assemble_buttons(self, bot, msg):
+    #     """
+    #     Create reaction buttons
+    #     :param bot:
+    #     :param msg:
+    #     :return:
+    #     """
+    #     for n in constant.BUTTON_NUMBERS:
+    #         await bot.add_reaction(msg, n)
+    #
+    # async def on_reaction_add(self, bot, reaction, challenger):
+    #     """
+    #
+    #     :param reaction:
+    #     :param challenger:
+    #     :return:
+    #     """
+    #     opponent = ""
+    #     if reaction.message.author.id == bot.user.id and not challenger.id == bot.user.id:
+    #         move = constant.BUTTON_DECODER[(str(reaction.emoji))]
+    #         if move is not None:
+    #             await self.game_handler(challenger, opponent, reaction.message, move)
 
 
-setup(bot)
-bot.run(DISCORD_TOKEN)
+if __name__ == '__main__':
+    bot = ConnectFourBot("c4 ")
+    bot.run(TOKEN)

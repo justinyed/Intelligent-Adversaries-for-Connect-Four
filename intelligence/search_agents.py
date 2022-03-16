@@ -1,12 +1,13 @@
-from intelligence.agent import Agent
-from intelligence.action_queue import ActionQueue, reflex_action_queue
-from intelligence.evaluation_fn_wtsq import evaluation_function_weighted_square as wtsq
-from random import choice
-import time
-from lru import LRUCache as Lru
-import pickle
 import os
+import pickle
+import time
+from random import choice
 
+from lru import LRU
+
+from intelligence.action_queue import reflex_action_queue
+from intelligence.agent import Agent
+from intelligence.evaluation_fn_wtsq import evaluation_function_weighted_square as wtsq
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
@@ -14,7 +15,7 @@ CACHE_FILE = '../data/successor_cache.pkl'
 
 if not os.path.isfile(CACHE_FILE):
     with open(CACHE_FILE, 'wb') as file:
-        lru = Lru(10000)
+        lru = LRU(10000)
         lru['first'] = 0
         pickle.dump(lru, file)  # Least Recently Used Cache
 
@@ -139,7 +140,6 @@ class MultiAgent(Agent):
         with open(CACHE_FILE, 'wb') as file:
             pickle.dump(self._successor_cache, file)  # Least Recently Used Cache
         del self._successor_cache
-
 
 
 class MiniMax(MultiAgent):

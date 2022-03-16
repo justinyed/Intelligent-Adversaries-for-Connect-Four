@@ -8,7 +8,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.idea/sonarlint" />
       <excludeFolder url="file://$MODULE_DIR$/.idea/ZeppelinRemoteNotebooks" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.9 (capstone-project-s22)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.9 (capstone)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PackageRequirementsSettings">

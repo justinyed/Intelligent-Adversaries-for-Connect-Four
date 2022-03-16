@@ -1,5 +1,5 @@
 from time import sleep
-from utils import constants_cli
+import constants_cli
 from game import ConnectFour
 from intelligence import Agent
 

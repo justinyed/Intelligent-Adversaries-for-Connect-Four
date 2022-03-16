@@ -52,12 +52,11 @@ class Learning(Dynamic):
         self.num_episodes_completed += 1
 
         if self.num_episodes_completed >= self.num_training:
-            self.exploration_rate = 0.0     # no exploration
-            self.learning_rate = 0.0        # no learning
+            self.exploration_rate = 0.0  # no exploration
+            self.learning_rate = 0.0  # no learning
 
     def is_training(self):
         return self.num_episodes_completed < self.num_training
 
     def is_testing(self):
         return not self.is_training()
-

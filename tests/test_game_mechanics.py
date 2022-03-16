@@ -6,9 +6,9 @@ import numpy as np
 from parameterized import parameterized
 
 from src.game import ConnectFour
-from src.board import TupleBoard, ArrayBoard
+from src.board import TupleBoard
 from src.interface_cli import ConnectFourCLI
-from utils.constants_cli import PLAYER1_COLOR, PLAYER2_COLOR, RESET_COLOR
+from constants_cli import PLAYER1_COLOR, PLAYER2_COLOR, RESET_COLOR
 
 PLAYER1 = 'X'
 PLAYER2 = 'O'

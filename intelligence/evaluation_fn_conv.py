@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.signal import convolve2d
-from game import ConnectFour, PLAYER1, PLAYER2, EMPTY, TIE_CODE
+
+from game import ConnectFour
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")

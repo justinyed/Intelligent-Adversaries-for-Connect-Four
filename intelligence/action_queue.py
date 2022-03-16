@@ -1,6 +1,6 @@
 from collections import deque
-from random import choice
 from functools import lru_cache
+from random import choice
 
 
 class ActionQueue:

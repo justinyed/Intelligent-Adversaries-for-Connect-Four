@@ -12,10 +12,10 @@ class Dynamic(Agent):
         :param num_training:
         """
         super().__init__(player)
-        self.learning_rate = float(learning_rate)
-        self.exploration_rate = float(exploration_rate)
-        self.discount = float(discount)
-        self.num_training = int(num_training)
+        self.learning_rate = learning_rate
+        self.exploration_rate = exploration_rate
+        self.discount = discount
+        self.num_training = num_training
 
     def get_action(self, state):
         pass
