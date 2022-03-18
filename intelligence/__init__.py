@@ -6,3 +6,4 @@ from intelligence.evaluation_fn_wtsq import *
 from intelligence.learning_agents import *
 from intelligence.mdp import *
 from intelligence.search_agents import *
+from intelligence.successor_generator import *

@@ -1,4 +1,4 @@
-from game import ConnectFour, PLAYER1, PLAYER2, EMPTY
+from src.game import ConnectFour, PLAYER1, PLAYER2, EMPTY
 
 NUM_PLAYERS = 2
 DROP_TIME = 0.0

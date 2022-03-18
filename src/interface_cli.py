@@ -39,7 +39,7 @@ class ConnectFourCLI:
                     self.move = self.agent_2.get_action(game)
                     sleep(constants_cli.DROP_TIME)
 
-            except (ValueError, TypeError):
+            except (ValueError): # TypeError
 
                 print(constants_cli.ILLEGAL_INPUT_MSG)
                 sleep(constants_cli.BAD_INPUT_TIME)

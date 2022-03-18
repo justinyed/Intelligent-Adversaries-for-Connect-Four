@@ -1,5 +1,5 @@
 import numpy as np
-from game import ConnectFour, PLAYER2
+from src.game import ConnectFour, PLAYER2
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")

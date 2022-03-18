@@ -1,4 +1,4 @@
-from board import BoardInterface, ArrayBoard
+from src.board import BoardInterface, ArrayBoard
 
 EMPTY = 0
 PLAYER1 = 1
@@ -268,3 +268,13 @@ class ConnectFour(GameInterface):
 
     def copy(self):
         return ConnectFour(state=self._get_state())
+
+    def __eq__(self, other):
+        return self.__hash__() == hash(other)
+
+    def __hash__(self):
+        return hash(self._board)
+
+
+
+

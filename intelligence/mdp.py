@@ -1,6 +1,17 @@
 from functools import lru_cache
 
 
+def is_terminal(state):
+    """
+    Returns true if the current state is a terminal state.  By convention,
+    a terminal state has zero future rewards.  Sometimes the terminal state(s)
+    may have no possible actions.  It is also common to think of the terminal
+    state as having a self-loop action 'pass' with zero reward; the formulations
+    are equivalent.
+     """
+    return state.is_terminal()
+
+
 class MDP:
     """
     A Markov Decision Process, defined by an initial state, transition model,
@@ -32,11 +43,14 @@ class MDP:
         return self.rewards[state.get_board()]
 
     @staticmethod
-    def transitions(state, action):
+    def transitions(state):
         """
         Transition model.  From a state and an action, return a list of (result-state, probability) pairs.
         """
-        return transition(state, action)
+        state = state
+        actions = state.get_legal_actions()
+        probability = 1 / len(actions)
+        return list([(state.get_successor(action), probability) for action in actions])
 
     @staticmethod
     def actions(state):
@@ -47,24 +61,3 @@ class MDP:
         if state.is_terminal():
             return None
         return state.get_legal_actions()
-
-    def is_terminal(self, state):
-        """
-        Returns true if the current state is a terminal state.  By convention,
-        a terminal state has zero future rewards.  Sometimes the terminal state(s)
-        may have no possible actions.  It is also common to think of the terminal
-        state as having a self-loop action 'pass' with zero reward; the formulations
-        are equivalent.
-         """
-        return state.is_terminal()
-
-
-@lru_cache(10000)
-def transition(state, action):
-    """
-    Transition model.  From a state and an action, return a list of (result-state, probability) pairs.
-    """
-    state = state.get_successor(action)
-    actions = state.get_legal_actions()
-    probability = 1 / len(actions)
-    return list([(state.get_successor(action), probability) for action in actions])

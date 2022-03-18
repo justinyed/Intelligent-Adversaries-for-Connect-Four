@@ -167,18 +167,11 @@ class BoardInterface:
     def is_legal_position(self, position):
         return 0 <= position[X] < self.get_width() and 0 <= position[Y] < self.get_height()
 
-    def hash_board(self, action=None):
-        """
-        hash_board Function
-        :return: hash
-        """
-        pass
-
     def __str__(self):
         return str(self._grid)
 
     def __hash__(self):
-        return hash(self.hash_board())
+        return hash(self._grid)
 
 
 class TupleBoard(BoardInterface):
@@ -217,13 +210,6 @@ class TupleBoard(BoardInterface):
         x, y = position
         return self._grid[x + self.get_width() * y]
 
-    def hash_board(self, action=None):
-        return self._grid
-
-# ZOBRIST_TABLE = {1: np.random.rand(BoardInterface.HEIGHT, BoardInterface.WIDTH).astype(int),
-#                       -1: np.random.rand(BoardInterface.HEIGHT, BoardInterface.WIDTH).astype(int)}
-
-Z = np.random.rand(BoardInterface.HEIGHT, BoardInterface.WIDTH).astype(int)
 
 class ArrayBoard(BoardInterface):
     """
@@ -260,9 +246,8 @@ class ArrayBoard(BoardInterface):
         """
         return self._grid[abs(position[Y] - (self.get_height() - 1))][position[X]]
 
-    def hash_board(self, action=None):
-        if action is not None:
-            h = (action + self.get_grid()).tobytes()
-        else:
-            h = self.get_grid().tobytes()
-        return h
+    def __hash__(self):
+        return hash(self.get_grid().tostring())
+
+    def __eq__(self, other):
+        return self.__hash__() == hash(other)
