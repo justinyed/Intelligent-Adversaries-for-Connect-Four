@@ -118,7 +118,7 @@ class GameInterface:
         """
         return self._status
 
-    def _set_state(self, state):
+    def set_state(self, state):
         """
         set the state of the game
         :param state: State to set
@@ -226,14 +226,14 @@ class ConnectFour(GameInterface):
     def _get_state(self):
         return self._board.copy(), self._turn, self._status
 
-    def _set_state(self, state):
+    def set_state(self, state):
         self._board, self._turn, self._status = state
 
     def get_successor(self, action):
         original_state = self._get_state()
         self.perform_action(action)
         new_state = self._get_state()
-        self._set_state(original_state)
+        self.set_state(original_state)
         return ConnectFour(state=new_state)
 
     def get_current_player(self):

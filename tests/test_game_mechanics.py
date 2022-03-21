@@ -70,7 +70,7 @@ def load_layout(filepath, game=ConnectFour(board_type=BOARD_TYPE)):
 
             board = f.read()
             state = state_from_string(board)
-            game._set_state(state)
+            game.set_state(state)
 
             return game, action, expected_status
     except Exception as e:
