@@ -419,4 +419,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,linux,macos,jetbrains,pycharm,python,jupyternotebooks
-/discord_bot_/connect_four_config.json
+/discord_bot/connect_four_config.json

@@ -1,13 +1,14 @@
 import discord
 from discord_bot import constants_discord as constant
+import intelligence
 
-class Player:
 
-    def __init__(self, user_id: str, player_number: int, bot=False, intelligence=None):
+class Human(intelligence.Agent):
+
+    def __init__(self, player, user_id, message: discord.Message):
+        super().__init__(player)
         self._user_id = user_id
-        self._bot = bot
-        self._intelligence = intelligence
-        self._player_number = player_number
+        self._message = message
 
     def get_user_id(self):
         return self._user_id
@@ -19,30 +20,23 @@ class Player:
         :param game: current state of the game
         :return: The action chosen by the agent given the game
         """
-        if not self._bot:
+        await self.assemble_buttons()
 
-
-    async def assemble_buttons(self, msg: discord.Message):
+    async def assemble_buttons(self):
         """
         Create reaction buttons
         :param msg:
         :return:
         """
         for button in constant.BUTTON_NUMBERS:
-            await msg.add_reaction(button)
+            await self._message.add_reaction(button)
 
-    async def on_reaction_add(self, bot, reaction, challenger):
+    async def on_reaction_add(self, reaction, user):
         """
-
         :param reaction:
-        :param challenger:
         :return:
         """
-        opponent = ""
-        if reaction.message.author.id == bot.user.id and not challenger.id == bot.user.id:
+        if reaction.message.author.id == self.get_user_id():
             move = constant.BUTTON_DECODER[(str(reaction.emoji))]
             if move is not None:
-                await self.game_handler(challenger, opponent, reaction.message, move)
-
-
-
+                return move
