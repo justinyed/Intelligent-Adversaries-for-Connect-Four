@@ -20,13 +20,13 @@ PIECES = {
     PLAYER2: PLAYER2_PIECE
 }
 
-ONE = u"\u2474"
-TWO = u"\u2475"
-THREE = u"\u2476"
-FOUR = u"\u2477"
-FIVE = u"\u2478"
-SIX = u"\u2479"
-SEVEN = u"\u247A"
+ONE = ":one:"
+TWO = ":two:"
+THREE = ":three:"
+FOUR = ":four:"
+FIVE = ":five:"
+SIX = ":six:"
+SEVEN = ":seven:"
 
 BUTTON_NUMBERS = (ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN)
 BUTTON_DECODER = dict(zip(BUTTON_NUMBERS, range(len(BUTTON_NUMBERS))))

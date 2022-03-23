@@ -1,19 +1,20 @@
 import os
 
 import discord_bot.constants_discord as constant
-from discord.ext import commands
-from discord import embeds
 import discord
+from discord.ext import commands
+from discord import Button, ButtonStyle, ActionRow, SelectMenu, SelectOption, Emoji, interactions
 from random import shuffle
 from src.game import ConnectFour
-from discord import Button, ButtonStyle, ActionRow, SelectMenu, SelectOption, Emoji
 from intelligence.agent import Agent
 import intelligence
 import time
 import uuid
 from util import Util
 
-
+buttons1 = ActionRow(*list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.red) for i in range(1, 4)]))
+buttons2 = ActionRow(*list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.red) for i in range(4, 8)]))
+structure = ":blue_square:"
 G, P1, P2, LM = 'game', 'player1', 'player2', 'last_move'
 
 
@@ -21,26 +22,7 @@ class ChallengeHandler(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.registry = {}
-        self.legend = {}
         print("[ChallengeHandler Initialized]")
-
-    @commands.command()
-    async def buttons(self, ctx: commands.Context):
-
-        buttons1 = ActionRow(*list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.red) for i in range(1, 4)]))
-        buttons2 = ActionRow(*list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.red) for i in range(4, 8)]))
-        msg_with_buttons = await ctx.send('Hey here are some Buttons', components=[buttons1, buttons2])
-
-        def check_button(interaction: discord.Interaction, button):
-            return interaction.author == ctx.author and interaction.message == msg_with_buttons
-
-        interaction, button = await self.bot.wait_for('button_click', check=check_button)
-
-        embed = discord.Embed(title='You pressed a Button',
-                              description=f'You pressed a {button.custom_id} button.',
-                              color=discord.Color.random())
-        await interaction.respond(embed=embed)
 
     @commands.command(name='challenge', aliases=['clg'],
                       description=constant.CLG_DESCRIPTION, help='help', pass_contaxt=True)
@@ -53,12 +35,8 @@ class ChallengeHandler(commands.Cog):
         if opponent is not None:
             await ctx.send(f"New Challenge: {ctx.author} challenges {opponent}")
         else:
-
-            await self.opponent_selection(ctx)
-
-    async def opponent_selection(self, ctx: commands.Context):
-        users = list([user.name + "\n" for user in ctx.guild.members])
-        await ctx.send(f"Possible Opponents: \n{''.join(users)}")
+            msg = await ctx.send("Welcome to Connect Four!")
+            await self.game_handler(msg, *await self.new_game(ctx.author, 'AlphaBeta Agent'))
 
     async def new_game(self, player1, player2):
         """
@@ -67,85 +45,57 @@ class ChallengeHandler(commands.Cog):
         :param player2: Agent Object which handles interaction
         :return: gid where game, player1, player2 is stored.
         """
-        if player2 == 'bot':
-            player2 = intelligence.AlphaBeta(player=-1)
 
         # Shuffle Players
         players = [player1, player2]
-        shuffle(players)
-        gid = uuid.uuid1()
+        # shuffle(players)
         player1, player2 = players
         game = ConnectFour()
 
-        self.registry[gid] = {'game': game, 'player1': player1, 'player2': player2, 'last_move': None}
-        self.legend[str(player1) + str(player2)] = gid
-        return gid
+        return game, player1, player2
 
-    @commands.command(name="ping")
-    async def ping(self, ctx: commands.Context):
-        """Get the bot's current websocket latency"""
-        start_time = time.time()
-        message = await ctx.send("Testing Ping...")
-        end_time = time.time()
-        await message.edit(
-            content=f"Pong! {round(self.bot.latency * 1000)}ms\nAPI: {round((end_time - start_time) * 1000)}ms")
-
-    @commands.command()
-    async def select(self, ctx):
-        msg_with_selects = await ctx.send('Hey here is an nice Select-Menu', components=[
-            [
-                SelectMenu(custom_id='_select_it', options=[
-                    SelectOption(emoji='1️⃣', label='Option Nr° 1', value='1', description='The first option'),
-                    SelectOption(emoji='2️⃣', label='Option Nr° 2', value='2', description='The second option'),
-                    SelectOption(emoji='3️⃣', label='Option Nr° 3', value='3', description='The third option'),
-                    SelectOption(emoji='4️⃣', label='Option Nr° 4', value='4', description='The fourth option')],
-                           placeholder='Select some Options', max_values=3)
-            ]])
-
-        def check_selection(i: discord.Interaction, select_menu):
-            return i.author == ctx.author and i.message == msg_with_selects
-
-        interaction, select_menu = await self.bot.wait_for('selection_select', check=check_selection)
-
-        embed = discord.Embed(title='You have chosen:',
-                              description=f"You have chosen " + '\n'.join(
-                                  [f'\nOption Nr° {o}' for o in select_menu.values]),
-                              color=discord.Color.random())
-        await interaction.respond(embed=embed)
-
-    async def game_handler(self, msg: discord.Message, gid):
+    async def game_handler(self, msg: discord.Message, game, player1, player2):
         """
         Handles turns of game
         :return:
         """
-
-        game = self.registry[gid][G]
-
-        await msg.edit(embed=self.assemble_display(gid))
+        await msg.edit(embed=self.assemble_display(game, player1, player2), content="\n"+ChallengeHandler.assemble_board(game), components=[buttons1, buttons2])
 
         if game.get_turn() % constant.NUM_PLAYERS == 0:
-            self.registry[gid][LM] = self.registry[gid][P1].get_action(game)
-        else:
-            self.registry[gid][LM] = self.registry[gid][P2].get_action(game)
+            interaction, button = await self.bot.wait_for('button_click')
+            action = int(button.custom_id) - 1
+            await interaction.respond(f"Drop in Column {action+1}", delete_after=0.000000001)
 
-        game.perform_action(self.registry[gid][LM])
+        else:
+            a = intelligence.AlphaBeta(player=-1)
+            action = a.get_action(game)
+
+        game.perform_action(action)
 
         if game.is_terminal_state():
             if game.is_tie():
-                pass
-            else:
-                winning_player = game.get_current_player()
-                pass
+                await msg.edit(embed=discord.Embed(title="Connect Four",
+                                                   description=f"The game has been Tied."))
+                await msg.delete(delay=15)
+                return
+            else:  # winner
+                await msg.edit(embed=discord.Embed(title="Connect Four",
+                                                   description=f"{ChallengeHandler.which_player(game, player1, player2)} has Triumphed!"))
+                await msg.delete(delay=15)
+                return
 
-        self.registry[gid][G] = game
-        await self.game_handler(msg, gid)
+        await self.game_handler(msg, game, player1, player2)
 
-    def assemble_display(self, gid):
-        embed = discord.Embed(title="Connect Four", description=ChallengeHandler.assemble_board(self.registry[gid][G]))
-        embed.set_author(name=f"{self.registry[gid][P1]} vs {self.registry[gid][P2]}")
-        embed.add_field(name="Turn", value=self.registry[gid][G].get_turn(), inline=True)
-        embed.add_field(name="Status", value=self.registry[gid][G].get_status(), inline=True)
-        embed.add_field(name="Play", value=f"It is {self.registry[gid][G].get_current_player()}'s turn.", inline=False)
+    @staticmethod
+    def which_player(game, player1, player2):
+        if game.get_current_player() == -1:
+            return player2
+        else:
+            return player1
+
+    def assemble_display(self, game, player1, player2):
+        embed = discord.Embed()
+        embed.add_field(name="Play", value=f"It is {self.which_player(game, player1, player2)}'s turn.", inline=False)
         return embed
 
     @staticmethod
@@ -155,35 +105,23 @@ class ChallengeHandler(commands.Cog):
         :param game: game state
         :return: string representation of the game
         """
-        representation = ""
+        representation = structure + "".join(constant.BUTTON_NUMBERS) + structure + "\n"
         for y in range(game.get_board().get_height() - 1, -1, -1):
+            representation += structure
             for x in range(game.get_board().get_width()):
                 piece = game.get_board().get_piece((x, y))
                 representation += f"{constant.PIECES[piece]}"
-            representation += "\n"
-        return representation
+            representation += f"{structure}\n"
+        return representation + structure * 9
 
-    async def assemble_buttons(self, msg: discord.Message):
-        """
-        Create reaction buttons
-        :param msg:
-        :return:
-        """
-        for button in constant.BUTTON_NUMBERS:
-            await msg.add_reaction(button)
-
-    async def on_reaction_add(self, reaction, user):
-        """
-
-        :param reaction:
-        :param challenger:
-        :return:
-        """
-        opponent = ""
-        if reaction.message.author.id == bot.user.id and not user.id == bot.user.id:
-            move = constant.BUTTON_DECODER[(str(reaction.emoji))]
-            if move is not None:
-                return move
+    @commands.command(name="ping")
+    async def ping(self, ctx: commands.Context):
+        """Get the bot's current websocket latency"""
+        start_time = time.time()
+        message = await ctx.send("Testing Ping...")
+        end_time = time.time()
+        await message.edit(
+            content=f"Online! {round(self.bot.latency * 1000)}ms\nAPI: {round((end_time - start_time) * 1000)}ms")
 
 
 def setup(bot: commands.Bot):

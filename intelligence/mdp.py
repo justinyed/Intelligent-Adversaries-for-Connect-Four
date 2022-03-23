@@ -1,5 +1,3 @@
-from functools import lru_cache
-
 
 def is_terminal(state):
     """
