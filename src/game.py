@@ -118,6 +118,14 @@ class GameInterface:
         """
         return self._status
 
+    def set_status(self, status: int) -> None:
+        """
+        set _status of the game is an integer code representing the _status.
+
+        :param status: code (integer)
+        """
+        self._status = status
+
     def set_state(self, state):
         """
         set the state of the game

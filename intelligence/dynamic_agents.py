@@ -3,19 +3,19 @@ from intelligence.agent import Agent
 
 class Dynamic(Agent):
 
-    def __init__(self, player, learning_rate=1.0, exploration_rate=0.05, discount=0.8, num_training=10):
+    def __init__(self, player, learning_rate=1.0, exploration_rate=0.05, discount=0.8, iterations=100):
         """
         :param player: current player
         :param learning_rate:
         :param exploration_rate:
         :param discount:
-        :param num_training:
+        :param iterations:
         """
         super().__init__(player)
         self.learning_rate = learning_rate
         self.exploration_rate = exploration_rate
         self.discount = discount
-        self.num_training = num_training
+        self.iterations = iterations
 
     def get_action(self, state):
         pass
