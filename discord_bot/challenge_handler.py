@@ -1,21 +1,17 @@
 import os
-
-import discord_bot.constants_discord as constant
+import time
+from random import shuffle
 import discord
 from discord.ext import commands
-from discord import Button, ButtonStyle, ActionRow, SelectMenu, SelectOption, Emoji, interactions
-from random import shuffle
+from discord import Button, ButtonStyle, ActionRow, SelectMenu, SelectOption
+import discord_bot.constants_discord as constant
+from discord_bot.util import Util
 from src.game import ConnectFour
-from intelligence.agent import Agent
 import intelligence
-import time
-import uuid
-from util import Util
 
 buttons1 = ActionRow(*list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.red) for i in range(1, 4)]))
 buttons2 = ActionRow(*list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.red) for i in range(4, 8)]))
 structure = ":blue_square:"
-G, P1, P2, LM = 'game', 'player1', 'player2', 'last_move'
 
 
 class ChallengeHandler(commands.Cog):
@@ -80,22 +76,21 @@ class ChallengeHandler(commands.Cog):
                 return
             else:  # winner
                 await msg.edit(embed=discord.Embed(title="Connect Four",
-                                                   description=f"{ChallengeHandler.which_player(game, player1, player2)} has Triumphed!"))
+                                                   description=f"{ChallengeHandler.current_player(game, player1, player2)} has Triumphed!"))
                 await msg.delete(delay=15)
                 return
 
         await self.game_handler(msg, game, player1, player2)
 
     @staticmethod
-    def which_player(game, player1, player2):
+    def current_player(game, player1, player2):
         if game.get_current_player() == -1:
             return player2
         else:
             return player1
 
     def assemble_display(self, game, player1, player2):
-        embed = discord.Embed()
-        embed.add_field(name="Play", value=f"It is {self.which_player(game, player1, player2)}'s turn.", inline=False)
+        embed = discord.Embed().add_field(name="Play", value=f"It is {self.current_player(game, player1, player2)}'s turn.", inline=False)
         return embed
 
     @staticmethod
