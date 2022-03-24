@@ -1,5 +1,6 @@
 from random import shuffle
 import discord
+import asyncio
 from discord.ext import commands
 from discord import Button, ButtonStyle, ActionRow, SelectMenu, SelectOption
 import discord_bot.constants_discord as constant
@@ -30,25 +31,42 @@ class ChallengeHandler(commands.Cog):
             if opponent.display_name == self.bot.user.display_name:
                 opponent = await self._agent_selection(msg, ctx.author)
             else:
-
-                # verify opponent, ask for opponent to accept; if not accepted timeout.
-                await msg.edit(
-                    content=f"{opponent.mention}, {challenger.display_name} has challenged you to a Connect Four Match.",
-                    components=constant.ACCEPT_REJECT_BUTTONS
-                )
-
-                interaction, button = await \
-                    self.bot.wait_for('button_click', check=lambda i, b: i.message == msg and i.user_id == opponent.id)
-                await interaction.defer()
-
-                # check for rejection
-                if button.custom_id == "reject":
-                    await msg.edit(content=f"{opponent.display_name} has rejected the challenge.",
-                                   components=[],
-                                   delete_after=5)
+                if not await self._challenge_check(msg, challenger, opponent):
                     return
 
         await self._game_handler(msg, *await ChallengeHandler._new_game(challenger, opponent))
+
+    async def _challenge_check(self, msg: discord.Message, challenger, opponent):
+        """
+        verify opponent, ask for opponent to accept
+        :param msg:
+        :param challenger:
+        :param opponent:
+        :return:
+        """
+        await msg.edit(
+            content=f"{opponent.mention}, {challenger.display_name} has challenged you to a Connect Four Match.",
+            components=constant.ACCEPT_REJECT_BUTTONS
+        )
+
+        try:
+            interaction, button = await \
+                self.bot.wait_for('button_click', check=lambda i, b: i.message == msg and i.user_id == opponent.id, timeout=15)
+            await interaction.defer()
+
+            # check for rejection
+            if button.custom_id == "reject":
+                await msg.edit(content=f"{opponent.display_name} has rejected the challenge.",
+                               components=[],
+                               delete_after=5)
+                return False
+            else:
+                return True
+        except asyncio.TimeoutError:
+            await msg.edit(content=f"{opponent.display_name} has not responded to the challenge.",
+                           components=[],
+                           delete_after=5)
+            return False
 
     async def _game_handler(self, msg: discord.Message, game, player1, player2):
         """
@@ -94,10 +112,8 @@ class ChallengeHandler(commands.Cog):
         Initializes new game and shuffles players
         :param player1: Agent Object which handles interaction
         :param player2: Agent Object which handles interaction
-        :return: gid where game, player1, player2 is stored.
+        :return: game, player1, player2
         """
-
-        # Shuffle Players
         players = [player1, player2]
         shuffle(players)
         player1, player2 = players
