@@ -34,15 +34,33 @@ class ChallengeHandler(commands.Cog):
         :param opponent: opponent player to challenge; if none options are given.
         """
         msg = await ctx.send("Welcome to Connect Four!")
+        challenger = ctx.author
 
-        if opponent is None:
-            agent = await self.agent_selection(msg, ctx.author)
-            await self.game_handler(msg, *await ChallengeHandler.new_game(ctx.author, agent))
+        if opponent is None:  # Agent Selection
+            opponent = await self.agent_selection(msg, ctx.author)
         else:
-            # verify opponent, ask for opponent to accept; if not accepted timeout.
-            challenger = ctx.author
             opponent = await self.bot.fetch_user(opponent.strip("<@!>"))
-            await self.game_handler(msg, *await ChallengeHandler.new_game(challenger, opponent))
+
+            def check_button(i: discord.Interaction, b: discord.Button):
+                return i.message == msg and i.user_id == opponent.id
+
+            await msg.edit(
+                content=f"{opponent.mention}, {challenger.display_name} has challenged you to a Connect Four Match.",
+                components=[Button(label='Accept', custom_id='accept', style=ButtonStyle.green),
+                            Button(label='Reject', custom_id='reject', style=ButtonStyle.red)]
+            )
+
+            interaction, button = await self.bot.wait_for('button_click', check=check_button)
+            await interaction.defer()
+            if button.custom_id == "reject":
+                await msg.edit(content=f"{opponent.display_name} has rejected the challenge.",
+                               components=[],
+                               delete_after=4)
+                return
+
+            # verify opponent, ask for opponent to accept; if not accepted timeout.
+
+        await self.game_handler(msg, *await ChallengeHandler.new_game(challenger, opponent))
 
     @staticmethod
     async def new_game(player1, player2):
