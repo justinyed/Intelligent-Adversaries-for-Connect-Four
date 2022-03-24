@@ -1,6 +1,7 @@
 import os
 import pickle
 import time
+from abc import ABC
 from random import choice
 
 from intelligence.action_queue import reflex_action_queue
@@ -73,7 +74,7 @@ class Random(Agent):
 class Reflex(Agent):
     """
     A reflex agent chooses an action at each choice point by naively comparing
-    its alternatives via an evaluation function.
+    its options via an evaluation function.
     """
 
     def _get_action(self, game):
@@ -82,7 +83,7 @@ class Reflex(Agent):
         return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
 
 
-class MultiAgent(Agent):
+class MultiAgent(Agent, ABC):
     """
     An adversarial agent which chooses an action at each choice point by comparing
     its possible actions and the possible actions of its opponent via an evaluation function.
@@ -126,6 +127,10 @@ class MiniMax(MultiAgent):
 
     def _get_action(self, game):
         self._timer_start()
+
+        if game.get_turn() == 0:
+            return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
+
         _, move = self._max_value(game, 0)
         return move
 
@@ -169,6 +174,10 @@ class AlphaBeta(MultiAgent):
 
     def _get_action(self, game):
         self._timer_start()
+
+        if game.get_turn() == 0:
+            return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
+
         _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF)
         return move
 
@@ -180,7 +189,6 @@ class AlphaBeta(MultiAgent):
         ordered_actions = reflex_action_queue(game, self.evaluation_function, self._player).get_actions()
 
         for action in ordered_actions:
-
             value_prime, _ = self._min_value(get_successor(game, action), current_depth, alpha, beta)
             if value_prime == value:
                 best_actions.append(action)
@@ -212,7 +220,7 @@ class AlphaBeta(MultiAgent):
 
 class IterativeDeepening(AlphaBeta):
     """
-    A multi-agent which chooses an action at each choice point by attempting to maximize its utility and
+    A multiagent which chooses an action at each choice point by attempting to maximize its utility and
     minimize the utility of its opponent.  Utility of a state is defined by an evaluation function.
     Additionally, this agent will focus on evaluating relevant states by pruning subtrees with too few utility points.
     """
@@ -220,6 +228,7 @@ class IterativeDeepening(AlphaBeta):
     def __init__(self, eval_fn=wtsq, depth_limit=3, depth_fn=depth_function_simple):
         super().__init__(eval_fn, depth_limit, depth_fn)
         self.absolute_depth_limit = depth_limit
+        self.time_limit = 5.0
 
     def _get_action(self, game):
         self._timer_start()
@@ -228,9 +237,15 @@ class IterativeDeepening(AlphaBeta):
         if game.get_turn() == 0:
             return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
 
+        moves = []
+
         # iterative deepening
-        for current_depth_limit in range(0, self.absolute_depth_limit + 1):
+        for current_depth_limit in range(1, self.absolute_depth_limit + 1):
             self.depth_limit = current_depth_limit
             _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF)
+            moves.append(move)
 
-        return move
+        if self._is_timer_elapsed():
+            return moves[-2]
+
+        return moves[-1]

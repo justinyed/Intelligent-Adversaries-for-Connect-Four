@@ -32,14 +32,15 @@ def evaluation_function_weighted_square(game: ConnectFour, current_player: int):
     :return: static value in current state
     """
     # Check for terminal state
-    if game.get_status() is current_player:
+    if game.get_status() == current_player:
         return WINNING_VALUE
     elif game.is_terminal_state():
         return LOSING_VALUE
 
     grid = game.get_board().get_grid()
 
-    if current_player is PLAYER2:  # neutralize _grid
+    if current_player == PLAYER2:  # neutralize _grid
+        grid = np.copy(grid)
         grid *= -1
 
     return np.sum(WEIGHTS * grid)
