@@ -3,14 +3,14 @@ from interface_cli import Human
 import intelligence
 
 
-def agent_options(current_player):
+def agent_options():
     return {
-        "Human Player": Human(current_player),
-        "Random Agent": intelligence.Random(current_player),
-        "Reflex Agent": intelligence.Reflex(current_player),
-        "Minimax Agent": intelligence.MiniMax(current_player, depth_limit=2),
-        "Alpha-Beta Agent": intelligence.AlphaBeta(current_player, depth_limit=3),
-        "Iterative Agent": intelligence.IterativeDeepening(current_player, depth_limit=4)
+        "Human Player": Human(),
+        "Random Agent": intelligence.Random(),
+        "Reflex Agent": intelligence.Reflex(),
+        "Minimax Agent": intelligence.MiniMax(depth_limit=2),
+        "Alpha-Beta Agent": intelligence.AlphaBeta(depth_limit=3),
+        "Iterative Agent": intelligence.IterativeDeepening(depth_limit=4)
     }
 
 

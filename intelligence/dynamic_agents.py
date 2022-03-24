@@ -11,13 +11,13 @@ class Dynamic(Agent):
         :param discount:
         :param iterations:
         """
-        super().__init__(player)
+        super().__init__()
         self.learning_rate = learning_rate
         self.exploration_rate = exploration_rate
         self.discount = discount
         self.iterations = iterations
 
-    def get_action(self, state):
+    def _get_action(self, state):
         pass
 
     def get_q_state(self, state, action):

@@ -5,15 +5,15 @@ record = {-1: 0, 1: 0, 3: 0}
 
 
 def simulate_game(n=0):
-    agent_1 = agent.IterativeDeepening(player=1, depth_limit=3)
+    agent_1 = agent.IterativeDeepening(depth_limit=3)
     agent_2 = agent.AlphaBeta(player=-1, depth_limit=3)
     game = ConnectFour()
 
     while True:
         if game.get_turn() % game.get_player_count() == 0:
-            action = agent_1.get_action(game)
+            action = agent_1._get_action(game)
         else:
-            action = agent_2.get_action(game)
+            action = agent_2._get_action(game)
 
         if game.is_terminal_state():
             status = game.get_status()

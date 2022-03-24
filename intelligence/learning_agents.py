@@ -18,7 +18,7 @@ class Learning(Dynamic):
         self.accum_test_rewards = 0.0
         self.episode_rewards = 0.0
 
-    def get_action(self, state):
+    def _get_action(self, state):
         pass
 
     def update(self, state, action, next_state, reward):

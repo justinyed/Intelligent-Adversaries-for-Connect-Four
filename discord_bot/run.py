@@ -3,8 +3,8 @@ from challenge_handler import ChallengeHandler
 from util import Util
 from discord.ext import commands
 
-intents = discord.Intents.default()
-intents.members = True
+discord.MemberCacheFlags.all()
+intents = discord.Intents(messages=True, guilds=True)
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 ChallengeHandler.setup(bot)

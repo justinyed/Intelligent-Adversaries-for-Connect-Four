@@ -6,14 +6,14 @@ import intelligence
 class Human(intelligence.Agent):
 
     def __init__(self, player, user_id, message: discord.Message):
-        super().__init__(player)
+        super().__init__()
         self._user_id = user_id
         self._message = message
 
     def get_user_id(self):
         return self._user_id
 
-    async def get_action(self, game):
+    async def _get_action(self, game):
         """
         The Agent will receive a game and must return an action from the legal moves
 

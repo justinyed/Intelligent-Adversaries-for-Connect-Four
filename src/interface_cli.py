@@ -39,8 +39,7 @@ class ConnectFourCLI:
                     self.move = self.agent_2.get_action(game)
                     sleep(constants_cli.DROP_TIME)
 
-            except (ValueError): # TypeError
-
+            except (ValueError, TypeError):
                 print(constants_cli.ILLEGAL_INPUT_MSG)
                 sleep(constants_cli.BAD_INPUT_TIME)
                 self.handler(game)
@@ -75,7 +74,7 @@ class ConnectFourCLI:
         """
         menu = constants_cli.SELECT_AGENT_MSG
 
-        options = constants_cli.agent_options(player)
+        options = constants_cli.agent_options()
 
         keys = list(options.keys())
         for i in range(len(keys)):
@@ -142,7 +141,7 @@ class ConnectFourCLI:
 class Human(intelligence.Agent):
     """Handles a Human Player's Input"""
 
-    def get_action(self, game):
+    def _get_action(self, game):
         player = game.get_current_player()
         move = int(input(
             f"Player {ConnectFourCLI.player_number(game, player)} ("
