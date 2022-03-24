@@ -113,7 +113,7 @@ class ChallengeHandler(commands.Cog):
     @staticmethod
     def assemble_display(game, player1, player2):
         embed = discord.Embed()
-        s = f"It is {ChallengeHandler.current_player(game, player1, player2)}'s turn."
+        s = f"It is {ChallengeHandler.current_player(game, player1, player2).display_name}'s turn."
         embed.add_field(name=f"Play ( {constant.PIECES[game.get_current_player()]} )", value=s, inline=False)
         return embed
 

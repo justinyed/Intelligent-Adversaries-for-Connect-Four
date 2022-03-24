@@ -4,9 +4,6 @@ import os
 
 class Util:
 
-    def __init__(self):
-        pass
-
     @staticmethod
     def deserialise_json_file(json_file_path: str) -> dict:
         # Weak file check, simply check file extension is json..

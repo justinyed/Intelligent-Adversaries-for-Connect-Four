@@ -13,9 +13,9 @@ CLG_DESCRIPTION = 'Challenge a current_player or agent by providing the ID. ' \
                   'If no parameter is given, then a menu will assist.'
 
 BUTTONS = [
-    ActionRow(*list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.red) for i in range(1, 5)])),
-    ActionRow(*(list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.red) for i in range(5, 8)])
-                + [Button(label="\t", custom_id="empty", style=ButtonStyle.red, disabled=True)]))
+    ActionRow(*list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.blurple) for i in range(1, 5)])),
+    ActionRow(*(list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.blurple) for i in range(5, 8)])
+                + [Button(label="\t", custom_id="empty", style=ButtonStyle.blurple, disabled=True)]))
 ]
 
 AGENTS = {
@@ -36,7 +36,7 @@ AGENT_MENU = [
 PLAYER1_PIECE = ":regional_indicator_x:"
 PLAYER2_PIECE = ":o2:"
 EMPTY_PIECE = ":white_large_square:"
-structure = ":blue_square:"
+structure = ":yellow_square:"
 
 PIECES = {
     EMPTY: EMPTY_PIECE,
