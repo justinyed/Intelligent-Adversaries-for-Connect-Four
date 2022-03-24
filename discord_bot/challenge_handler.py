@@ -47,7 +47,7 @@ class ChallengeHandler(commands.Cog):
     @staticmethod
     async def new_game(player1, player2):
         """
-        Initializes new entry in registry (maps gid to game instance data) and legend (maps players to gid)
+        Initializes new game and shuffles players
         :param player1: Agent Object which handles interaction
         :param player2: Agent Object which handles interaction
         :return: gid where game, player1, player2 is stored.
@@ -132,22 +132,6 @@ class ChallengeHandler(commands.Cog):
                 representation += f"{constant.PIECES[piece]}"
             representation += f"{constant.structure}\n"
         return representation + constant.structure * 9
-
-    @commands.command(name="ping")
-    async def ping(self, ctx: commands.Context):
-        """Get the bot's current websocket latency"""
-        start_time = time.time()
-        message = await ctx.send("Testing Ping...", delete_after=5)
-        end_time = time.time()
-        await message.edit(
-            content=f"Online! {round(self.bot.latency * 1000)}ms\nAPI: {round((end_time - start_time) * 1000)}ms")
-
-    @commands.command(name='clean', pass_context=True)
-    async def clean(self, ctx: commands.Context):
-        if str(ctx.author) in constant.ADMINS:
-            await ctx.channel.purge()
-        else:
-            await ctx.send("You do not have permission for this command", delete_after=3)
 
     @staticmethod
     def setup(bot: commands.Bot):
