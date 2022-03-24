@@ -18,6 +18,9 @@ BUTTONS = [
                 + [Button(label="\t", custom_id="empty", style=ButtonStyle.blurple, disabled=True)]))
 ]
 
+ACCEPT_REJECT_BUTTONS = [Button(label='Accept', custom_id='accept', style=ButtonStyle.green),
+                         Button(label='Reject', custom_id='reject', style=ButtonStyle.red)]
+
 AGENTS = {
     "Random_Agent": intelligence.Random(),
     "Reflex_Agent": intelligence.Reflex(),
