@@ -126,7 +126,6 @@ class MiniMax(MultiAgent):
     """
 
     def _get_action(self, game):
-        self._timer_start()
 
         if game.get_turn() == 0:
             return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
@@ -135,7 +134,7 @@ class MiniMax(MultiAgent):
         return move
 
     def _max_value(self, game, current_depth):
-        if self._is_timer_elapsed() or game.is_terminal_state() or self._is_depth_max(game, current_depth):
+        if game.is_terminal_state() or self._is_depth_max(game, current_depth):
             return self.evaluation_function(game, self._player), None
 
         value, best_actions = NEGATIVE_INF, []
@@ -225,20 +224,19 @@ class IterativeDeepening(AlphaBeta):
     Additionally, this agent will focus on evaluating relevant states by pruning subtrees with too few utility points.
     """
 
-    def __init__(self, eval_fn=wtsq, depth_limit=3, depth_fn=depth_function_simple):
+    def __init__(self, eval_fn=wtsq, depth_limit=3, depth_fn=depth_function_simple, time_limit=5.0):
         super().__init__(eval_fn, depth_limit, depth_fn)
         self.absolute_depth_limit = depth_limit
-        self.time_limit = 5.0
+        self.time_limit = time_limit
 
     def _get_action(self, game):
         self._timer_start()
-        move = None
 
         if game.get_turn() == 0:
             return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
 
         moves = []
-
+        # todo - Keep the move order from the last Cycle; increases speed
         # iterative deepening
         for current_depth_limit in range(1, self.absolute_depth_limit + 1):
             self.depth_limit = current_depth_limit
@@ -246,6 +244,7 @@ class IterativeDeepening(AlphaBeta):
             moves.append(move)
 
         if self._is_timer_elapsed():
+            # then pick the last run that fully completed
             return moves[-2]
 
         return moves[-1]
