@@ -25,7 +25,6 @@ class ChallengeHandler(commands.Cog):
         await interaction.defer()
         return select_menu.values[0]
 
-
     @commands.command(name='challenge', aliases=['clg'],
                       description=constant.CLG_DESCRIPTION, help='help', pass_contaxt=True)
     async def challenge(self, ctx: commands.Context, opponent=None):
@@ -35,19 +34,15 @@ class ChallengeHandler(commands.Cog):
         :param opponent: opponent player to challenge; if none options are given.
         """
         msg = await ctx.send("Welcome to Connect Four!")
-        print(discord.utils.get(self.bot.users, name="justinyedinak"))
+
         if opponent is None:
             agent = await self.agent_selection(msg, ctx.author)
             await self.game_handler(msg, *await ChallengeHandler.new_game(ctx.author, agent))
         else:
-            opponent = opponent.lstrip("@")
-            print(opponent)
             # verify opponent, ask for opponent to accept; if not accepted timeout.
-            await self.game_handler(msg, *await ChallengeHandler.new_game(ctx.author, opponent))
-
-
-
-
+            challenger = ctx.author
+            opponent = await self.bot.fetch_user(opponent.strip("<@!>"))
+            await self.game_handler(msg, *await ChallengeHandler.new_game(challenger, opponent))
 
     @staticmethod
     async def new_game(player1, player2):
@@ -85,7 +80,7 @@ class ChallengeHandler(commands.Cog):
                 return
 
         def check_button(i: discord.Interaction, b: discord.Button):
-            if not i.message == msg and i.author == ChallengeHandler.current_player(game, player1, player2):
+            if not (i.message == msg and i.user_id == ChallengeHandler.current_player(game, player1, player2).id):
                 return False
             return (int(b.custom_id) - 1) in game.get_legal_actions()
 
@@ -110,10 +105,10 @@ class ChallengeHandler(commands.Cog):
 
     @staticmethod
     def current_player(game, player1, player2):
-        if game.get_current_player() == -1:
-            return player2
-        else:
+        if game.get_current_player() == 1:
             return player1
+        else:
+            return player2
 
     @staticmethod
     def assemble_display(game, player1, player2):
@@ -146,6 +141,13 @@ class ChallengeHandler(commands.Cog):
         end_time = time.time()
         await message.edit(
             content=f"Online! {round(self.bot.latency * 1000)}ms\nAPI: {round((end_time - start_time) * 1000)}ms")
+
+    @commands.command(name='clean', pass_context=True)
+    async def clean(self, ctx: commands.Context):
+        if str(ctx.author) in constant.ADMINS:
+            await ctx.channel.purge()
+        else:
+            await ctx.send("You do not have permission for this command", delete_after=3)
 
     @staticmethod
     def setup(bot: commands.Bot):

@@ -7,6 +7,8 @@ DROP_TIME = 0.0
 ILLEGAL_INPUT_MSG = ""
 BAD_INPUT_TIME = 0.7
 
+ADMINS = ["justinyedinak#2425"]
+
 CLG_DESCRIPTION = 'Challenge a current_player or agent by providing the ID. ' \
                   'If no parameter is given, then a menu will assist.'
 
@@ -24,9 +26,11 @@ AGENTS = {
     "Iterative_Agent": intelligence.IterativeDeepening(depth_limit=4)
 }
 
-AGENT_MENU = [SelectMenu(custom_id='_select_it',
-                        options=list([SelectOption(label=agent, value=agent) for agent in AGENTS.keys()]),
-                        placeholder='Select some Options', max_values=1)]
+AGENT_MENU = [
+    SelectMenu(custom_id='_select_it',
+               options=list([SelectOption(label=agent, value=agent) for agent in AGENTS.keys()]),
+               placeholder='Select some Options', max_values=1)
+]
 
 # ### Visual Components ###
 PLAYER1_PIECE = ":regional_indicator_x:"

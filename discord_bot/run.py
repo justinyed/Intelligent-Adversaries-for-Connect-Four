@@ -1,7 +1,7 @@
 import discord
+from discord.ext import commands
 from challenge_handler import ChallengeHandler
 from util import Util
-from discord.ext import commands
 
 discord.MemberCacheFlags.all()
 intents = discord.Intents(messages=True, guilds=True)
