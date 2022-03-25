@@ -15,10 +15,10 @@ NEGATIVE_INF = float("-inf")
 
 def evaluation_function_simple(game, current_player):
     """
-    Evaluates the state of the game and returns the static value of being in that state.
+    Evaluates the state of the game_components and returns the static value of being in that state.
 
     :param current_player:
-    :param game: game state to evaluate
+    :param game: game_components state to evaluate
     :return: static value in current state
     """
 
@@ -113,7 +113,8 @@ class MultiAgent(Agent, ABC):
         True if timer has elapsed; false otherwise
         :return: True if timer has elapsed; otherwise False
         """
-        return self.time_limit <= time.time() - self.start_time if self.time_limit is not None else False
+        return self.time_limit <= time.time() - self.start_time \
+            if self.time_limit is not None else False
 
     def _is_depth_max(self, game, current_depth) -> bool:
         return current_depth >= self.get_depth_limit(game, self.depth_limit)
@@ -241,10 +242,9 @@ class IterativeDeepening(AlphaBeta):
         for current_depth_limit in range(1, self.absolute_depth_limit + 1):
             self.depth_limit = current_depth_limit
             _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF)
-            moves.append(move)
-
-        if self._is_timer_elapsed():
-            # then pick the last run that fully completed
-            return moves[-2]
+            if self._is_timer_elapsed():
+                break
+            else:
+                moves.append(move)
 
         return moves[-1]

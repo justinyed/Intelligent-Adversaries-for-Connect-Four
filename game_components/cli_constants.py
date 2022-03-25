@@ -1,5 +1,5 @@
 from colorama import Fore
-from interface_cli import Human
+from game_components.cli_interface import Human
 import intelligence
 
 
@@ -10,7 +10,7 @@ def agent_options():
         "Reflex Agent": intelligence.Reflex(),
         "Minimax Agent": intelligence.MiniMax(depth_limit=2),
         "Alpha-Beta Agent": intelligence.AlphaBeta(depth_limit=3),
-        "Iterative Agent": intelligence.IterativeDeepening(depth_limit=4)
+        "Iterative Agent": intelligence.IterativeDeepening(depth_limit=6)
     }
 
 

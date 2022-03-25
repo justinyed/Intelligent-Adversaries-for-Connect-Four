@@ -3,8 +3,8 @@ import discord
 import asyncio
 from discord.ext import commands
 from discord import Button, ButtonStyle, ActionRow, SelectMenu, SelectOption
-import discord_bot.constants_discord as constant
-from src.game import ConnectFour
+import discord_constants as constant
+from game_components.connect_four import ConnectFour
 
 
 class ChallengeHandler(commands.Cog):
@@ -68,9 +68,10 @@ class ChallengeHandler(commands.Cog):
                            delete_after=5)
             return False
 
+    # todo - add a way to forfeit/quit
     async def _game_handler(self, msg: discord.Message, game, player1, player2):
         """
-        Handles turns of game
+        Handles turns of game_components
         :param msg: message to display to users
         :param game: ConnectFour Game Object
         :param player1: id
@@ -78,7 +79,7 @@ class ChallengeHandler(commands.Cog):
         """
         if game.is_terminal_state():
             if game.is_tie():
-                e = discord.Embed(title=f"The game has been Tied.")
+                e = discord.Embed(title=f"The game_components has been Tied.")
                 await msg.edit(content=ChallengeHandler._assemble_board(game), embed=e, components=[], delete_after=15)
                 return
             else:  # winner
@@ -109,10 +110,10 @@ class ChallengeHandler(commands.Cog):
     @staticmethod
     async def _new_game(player1, player2):
         """
-        Initializes new game and shuffles players
+        Initializes new game_components and shuffles players
         :param player1: Agent Object which handles interaction
         :param player2: Agent Object which handles interaction
-        :return: game, player1, player2
+        :return: game_components, player1, player2
         """
         players = [player1, player2]
         shuffle(players)
@@ -158,9 +159,9 @@ class ChallengeHandler(commands.Cog):
     @staticmethod
     def _assemble_board(game):
         """
-        Create the representation of the game
-        :param game: game state
-        :return: string representation of the game
+        Create the representation of the game_components
+        :param game: game_components state
+        :return: string representation of the game_components
         """
         representation = "\n" + constant.structure + "".join(constant.BUTTON_NUMBERS) + constant.structure + "\n"
         for y in range(game.get_board().get_height() - 1, -1, -1):

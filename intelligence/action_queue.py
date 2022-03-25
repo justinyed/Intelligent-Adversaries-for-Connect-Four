@@ -97,9 +97,9 @@ class ActionQueue:
 def reflex_action_queue(game, evaluation_function, current_player):
     """
     The reflex action queue builds a list of value action pairs based on
-    the static value of a game state as defined by an evaluation function.
-    :param game: game state
-    :param evaluation_function: evaluates the value of the game
+    the static value of a game_components state as defined by an evaluation function.
+    :param game: game_components state
+    :param evaluation_function: evaluates the value of the game_components
     :param current_player: maximizing current_player
     :return: ActionQueue with value action pairs as defined above
     """

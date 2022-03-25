@@ -52,9 +52,6 @@ class BoardInterface:
         """
         pass
 
-    def __deepcopy__(self, memo):
-        return self.copy()
-
     def new_grid(self):
         """
         initialize the _grid
@@ -65,27 +62,11 @@ class BoardInterface:
 
     def get_grid(self):
         """
-        get shallow copy of _grid
+        get copy of grid
 
-        :return: internal _grid
-        """
-        return self._grid
-
-    def get_grid_copy(self):
-        """
-        get deep copy of _grid
-
-        :return: deep copy of internal _grid
+        :return: deep copy internal grid
         """
         pass
-
-    def set_grid(self, grid):
-        """
-        set internal _grid
-
-        :param grid: internal _grid
-        """
-        self._grid = grid
 
     def set_piece(self, position, piece):
         """
@@ -187,9 +168,6 @@ class TupleBoard(BoardInterface):
         return tuple((self.get_default()
                       for _ in range(self.get_width() * self.get_height())))
 
-    def get_grid_copy(self):
-        return copy.deepcopy(self._grid)
-
     def copy(self):
         return TupleBoard(grid=copy.deepcopy(self.get_grid()), lowest=copy.deepcopy(self.get_lowest()))
 
@@ -198,8 +176,7 @@ class TupleBoard(BoardInterface):
         :param position: Tuple (x, y) of position to place piece
         :param piece: piece to place
         """
-        x, y = position
-        index = x + self.get_width() * y
+        index = position[X] + self.get_width() * position[Y]
         self._grid = self._grid[:index] + (piece,) + self._grid[index + 1:]
 
     def get_piece(self, position):
@@ -207,8 +184,7 @@ class TupleBoard(BoardInterface):
         :param position: Tuple (x, y) of position to get
         :return: piece at position
         """
-        x, y = position
-        return self._grid[x + self.get_width() * y]
+        return self._grid[position[X] + self.get_width() * position[Y]]
 
 
 class ArrayBoard(BoardInterface):
@@ -223,14 +199,11 @@ class ArrayBoard(BoardInterface):
         """
         return np.zeros((self.get_height(), self.get_width()), dtype=np.int8)
 
-    def get_grid_copy(self):
+    def get_grid(self):
         return np.copy(self._grid)
 
     def copy(self):
-        return ArrayBoard(grid=np.copy(self.get_grid()), lowest=copy.deepcopy(self.get_lowest()))
-
-    def __copy__(self):
-        return ArrayBoard(grid=self.get_grid(), lowest=self.get_lowest())
+        return ArrayBoard(grid=self.get_grid(), lowest=copy.deepcopy(self.get_lowest()))
 
     def set_piece(self, position, piece):
         """
@@ -251,3 +224,11 @@ class ArrayBoard(BoardInterface):
 
     def __eq__(self, other):
         return self.__hash__() == hash(other)
+
+    def __copy__(self):
+        return ArrayBoard(grid=self.get_grid(), lowest=self.get_lowest())
+
+    def __deepcopy__(self, memodict=None):
+        if memodict is None:
+            memodict = {}
+        return self.__copy__()

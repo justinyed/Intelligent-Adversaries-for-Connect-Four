@@ -1,6 +1,6 @@
 from time import sleep
-import constants_cli
-from game import ConnectFour
+from game_components import cli_constants
+from game_components.connect_four import ConnectFour
 import os
 import intelligence
 
@@ -14,11 +14,11 @@ class ConnectFourCLI:
         self.agent_1 = None
         self.agent_2 = None
         self.move = None  # Keep track of last move
-        self.num_players = constants_cli.NUM_PLAYERS
+        self.num_players = cli_constants.NUM_PLAYERS
 
     def start(self, game=ConnectFour()):
         """
-        Once initialized, use this method to start the game
+        Once initialized, use this method to start the game_components
         """
         self.agent_1 = self.select_agent(game, 1)
         self.agent_2 = self.select_agent(game, -1)  # player must be same as encoding
@@ -26,7 +26,7 @@ class ConnectFourCLI:
 
     def handler(self, game):
         """
-        The main method which handles orchestrating the game.
+        The main method which handles orchestrating the game_components.
         """
 
         while True:
@@ -34,14 +34,14 @@ class ConnectFourCLI:
             try:
                 if game.get_turn() % self.num_players == 0:
                     self.move = self.agent_1.get_action(game)
-                    sleep(constants_cli.DROP_TIME)
+                    sleep(cli_constants.DROP_TIME)
                 else:
                     self.move = self.agent_2.get_action(game)
-                    sleep(constants_cli.DROP_TIME)
+                    sleep(cli_constants.DROP_TIME)
 
             except (ValueError, TypeError):
-                print(constants_cli.ILLEGAL_INPUT_MSG)
-                sleep(constants_cli.BAD_INPUT_TIME)
+                print(cli_constants.ILLEGAL_INPUT_MSG)
+                sleep(cli_constants.BAD_INPUT_TIME)
                 self.handler(game)
 
             print("Performing Action:", self.move)
@@ -50,31 +50,31 @@ class ConnectFourCLI:
             # check for terminal states
             if game.is_tie():
                 print(self.get_display(game))
-                print(constants_cli.TIE_MSG)
+                print(cli_constants.TIE_MSG)
                 return
             if game.is_terminal_state():
                 print(self.get_display(game))
                 player = game.get_current_player()
-                msg = f"{constants_cli.COLORS[(player - 1)]}Player " + \
+                msg = f"{cli_constants.COLORS[(player - 1)]}Player " + \
                       f"{ConnectFourCLI.player_number(game, player)} " + \
-                      f"{constants_cli.WIN_MSG}{constants_cli.RESET_COLOR}"
+                      f"{cli_constants.WIN_MSG}{cli_constants.RESET_COLOR}"
                 print(msg)
                 return
 
     @staticmethod
     def player_number(game, piece):
         if game.get_player1() == piece:
-            return constants_cli.PLAYER1
+            return cli_constants.PLAYER1
         else:
-            return constants_cli.PLAYER2
+            return cli_constants.PLAYER2
 
     def select_agent(self, game, player) -> intelligence.Agent:
         """
         Agent Selection Menu
         """
-        menu = constants_cli.SELECT_AGENT_MSG
+        menu = cli_constants.SELECT_AGENT_MSG
 
-        options = constants_cli.agent_options()
+        options = cli_constants.agent_options()
 
         keys = list(options.keys())
         for i in range(len(keys)):
@@ -86,23 +86,23 @@ class ConnectFourCLI:
             return list(options.values())[choice]
 
         except (IndexError, ValueError):
-            print(constants_cli.BAD_INPUT_MSG)
-            sleep(constants_cli.BAD_INPUT_TIME)
+            print(cli_constants.BAD_INPUT_MSG)
+            sleep(cli_constants.BAD_INPUT_TIME)
             return self.select_agent(game, player)
 
     def get_display(self, game):
         """Build the Full Display for the round"""
-        return constants_cli.CLEAR_MSG + ConnectFourCLI.get_display_board(game) + "\n" + \
+        return cli_constants.CLEAR_MSG + ConnectFourCLI.get_display_board(game) + "\n" + \
                self.__get_display_numbers(game) + "\n"
 
     @staticmethod
     def get_display_piece(game, piece):
         if piece == game.get_player1():
-            return constants_cli.PLAYER1_PIECE
+            return cli_constants.PLAYER1_PIECE
         elif piece == game.get_player2():
-            return constants_cli.PLAYER2_PIECE
+            return cli_constants.PLAYER2_PIECE
         else:
-            return constants_cli.EMPTY_PIECE
+            return cli_constants.EMPTY_PIECE
 
     @staticmethod
     def get_display_board(game):
@@ -112,9 +112,9 @@ class ConnectFourCLI:
         representation = ""
 
         if current_player in game.get_players():
-            representation += f"{constants_cli.COLORS[(current_player - 1)]}Player " + \
+            representation += f"{cli_constants.COLORS[(current_player - 1)]}Player " + \
                               f"{ConnectFourCLI.player_number(game, current_player)}'s" + \
-                              f"{constants_cli.RESET_COLOR} Turn\n"
+                              f"{cli_constants.RESET_COLOR} Turn\n"
 
         representation += f"turn={game.get_turn()} \n" + f"status={game.get_status()}\n"
 
@@ -131,7 +131,7 @@ class ConnectFourCLI:
         num_line += "["
         for i in range(1, game.get_board().get_width() + 1):
             if self.move is not None and i == self.move + 1:
-                num_line += f"{constants_cli.LAST_MOVE_COLOR}{i}{constants_cli.RESET_COLOR}]["
+                num_line += f"{cli_constants.LAST_MOVE_COLOR}{i}{cli_constants.RESET_COLOR}]["
             else:
                 num_line += f"{i}]["
         num_line = f"{num_line[:-2]}]"

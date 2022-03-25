@@ -1,4 +1,4 @@
-from src.game import ConnectFour
+from connect_four import ConnectFour
 import intelligence as agent
 
 record = {-1: 0, 1: 0, 3: 0}

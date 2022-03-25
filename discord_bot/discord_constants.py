@@ -1,4 +1,5 @@
-from src.game import ConnectFour, PLAYER1, PLAYER2, EMPTY
+from game_components.game import PLAYER1, PLAYER2, EMPTY
+from game_components.connect_four import ConnectFour
 from discord import Button, ButtonStyle, ActionRow, SelectOption, SelectMenu
 import intelligence
 
@@ -26,13 +27,13 @@ AGENTS = {
     "Reflex_Agent": intelligence.Reflex(),
     "Minimax_Agent": intelligence.MiniMax(depth_limit=2),
     "AlphaBeta_Agent": intelligence.AlphaBeta(depth_limit=3),
-    "Iterative_Agent": intelligence.IterativeDeepening(depth_limit=4)
+    "Iterative_Agent": intelligence.IterativeDeepening(depth_limit=10)
 }
 
 AGENT_MENU = [
     SelectMenu(custom_id='_select_it',
                options=list([SelectOption(label=agent, value=agent) for agent in AGENTS.keys()]),
-               placeholder='Select some Options', max_values=1)
+               placeholder='Select an Agent', max_values=1)
 ]
 
 # ### Visual Components ###

@@ -6,7 +6,7 @@ class Util:
 
     @staticmethod
     def deserialise_json_file(json_file_path: str) -> dict:
-        # Weak file check, simply check file extension is json..
+        # Weak file check, simply check file extension is json.
         if json_file_path[-5:] != ".json":
             return None
 

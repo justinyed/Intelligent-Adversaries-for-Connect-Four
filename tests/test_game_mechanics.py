@@ -5,10 +5,10 @@ from os.path import isfile, join
 import numpy as np
 from parameterized import parameterized
 
-from src.game import ConnectFour
-from src.board import TupleBoard
-from src.interface_cli import ConnectFourCLI
-from constants_cli import PLAYER1_COLOR, PLAYER2_COLOR, RESET_COLOR
+from connect_four import ConnectFour
+from game_components.board import TupleBoard
+from game_components.cli_interface import ConnectFourCLI
+from cli_constants import PLAYER1_COLOR, PLAYER2_COLOR, RESET_COLOR
 
 PLAYER1 = 'X'
 PLAYER2 = 'O'

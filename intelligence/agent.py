@@ -18,10 +18,10 @@ class Agent:
 
     def get_action(self, game):
         """
-        The Agent will receive a game and must return an action from the legal moves
+        The Agent will receive a game_components and must return an action from the legal moves
 
-        :param game: current state of the game
-        :return: The action chosen by the agent given the game
+        :param game: current state of the game_components
+        :return: The action chosen by the agent given the game_components
         """
         self._player = game.get_current_player()
         self._opponent = -1 * self._player
