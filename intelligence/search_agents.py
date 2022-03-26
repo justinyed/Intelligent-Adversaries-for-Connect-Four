@@ -246,5 +246,5 @@ class IterativeDeepening(AlphaBeta):
                 break
             else:
                 moves.append(move)
-
+        print(moves)
         return moves[-1]

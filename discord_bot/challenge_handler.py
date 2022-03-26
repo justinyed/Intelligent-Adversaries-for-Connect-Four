@@ -5,6 +5,7 @@ from discord.ext import commands
 from discord import Button, ButtonStyle, ActionRow, SelectMenu, SelectOption
 import discord_constants as constant
 from game_components.connect_four import ConnectFour
+from record import Record
 
 
 class ChallengeHandler(commands.Cog):
@@ -69,7 +70,7 @@ class ChallengeHandler(commands.Cog):
             return False
 
     # todo - add a way to forfeit/quit
-    async def _game_handler(self, msg: discord.Message, game, player1, player2):
+    async def _game_handler(self, msg: discord.Message, game, player1, player2, record):
         """
         Handles turns of game_components
         :param msg: message to display to users
@@ -77,15 +78,24 @@ class ChallengeHandler(commands.Cog):
         :param player1: id
         :param player2: id
         """
+
         if game.is_terminal_state():
+            record.game_finished(game.get_status())
+
+            try:
+                await record.save()
+            except Exception as e:
+                print(e)
+                pass
+
             if game.is_tie():
                 e = discord.Embed(title=f"The game_components has been Tied.")
-                await msg.edit(content=ChallengeHandler._assemble_board(game), embed=e, components=[], delete_after=15)
+                await msg.edit(content=ChallengeHandler._assemble_board(game), embed=e, components=[])
                 return
             else:  # winner
                 e = discord.Embed(
                     title=f"{ChallengeHandler.current_player_name(game, player1, player2)} has Triumphed!")
-                await msg.edit(content=ChallengeHandler._assemble_board(game), embed=e, components=[], delete_after=15)
+                await msg.edit(content=ChallengeHandler._assemble_board(game), embed=e, components=[])
                 return
 
         def check_button(i: discord.Interaction, b: discord.Button):
@@ -105,7 +115,9 @@ class ChallengeHandler(commands.Cog):
             await interaction.defer()
 
         game.perform_action(action)
-        await self._game_handler(msg, game, player1, player2)
+        record.add_move(action)
+
+        await self._game_handler(msg, game, player1, player2, record)
 
     @staticmethod
     async def _new_game(player1, player2):
@@ -119,8 +131,8 @@ class ChallengeHandler(commands.Cog):
         shuffle(players)
         player1, player2 = players
         game = ConnectFour()
-
-        return game, player1, player2
+        record = Record(player1, player2)
+        return game, player1, player2, record
 
     async def _agent_selection(self, msg: discord.Message, challenger):
         await msg.edit(content='Select an Artificially Intelligent Adversary', components=constant.AGENT_MENU)

@@ -27,7 +27,7 @@ AGENTS = {
     "Reflex_Agent": intelligence.Reflex(),
     "Minimax_Agent": intelligence.MiniMax(depth_limit=2),
     "AlphaBeta_Agent": intelligence.AlphaBeta(depth_limit=3),
-    "Iterative_Agent": intelligence.IterativeDeepening(depth_limit=10)
+    "Iterative_Agent": intelligence.IterativeDeepening(depth_limit=100)
 }
 
 AGENT_MENU = [
