@@ -16,11 +16,13 @@ WEIGHTS = np.array([[3, 4, 5, 7, 5, 4, 3],
                     [4, 6, 8, 10, 8, 6, 4],
                     [3, 4, 5, 7, 5, 4, 3]])
 
-POSITIVE_INF = float("inf")
-NEGATIVE_INF = float("-inf")
-WINNING_VALUE = POSITIVE_INF
-LOSING_VALUE = -9999 * np.sum(WEIGHTS)
-TIE_VALUE = -99 * np.sum(WEIGHTS)
+
+WINNING_VALUE = (10.0 ** 9) * np.sum(WEIGHTS)
+LOSING_VALUE = -1 * (10.0 ** 6) * np.sum(WEIGHTS)
+TIE_VALUE = -1 * (10.0 ** 3) * np.sum(WEIGHTS)
+LIVING_PENALTY = 0.1
+
+# todo - tweak the eval func
 
 
 def evaluation_function_weighted_square(game: ConnectFour, current_player: int):
@@ -33,17 +35,18 @@ def evaluation_function_weighted_square(game: ConnectFour, current_player: int):
     :param game: game_components state to evaluate
     :return: static value in current state
     """
+
     # Check for terminal state
     if game.get_status() == current_player:
-        return WINNING_VALUE
+        return (1 / (game.get_turn() + 1)) * WINNING_VALUE
     elif game.is_tie():
         return TIE_VALUE
     elif game.is_terminal_state():
-        return LOSING_VALUE
+        return (1 / (game.get_turn() + 1)) * LOSING_VALUE  # todo - not sure about this part
 
     grid = game.get_board().get_grid()
 
-    if current_player == PLAYER2:  # neutralize _grid
+    if current_player == PLAYER2:  # neutralize grid
         grid *= -1
 
     return np.sum(WEIGHTS * grid)
