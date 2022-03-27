@@ -12,19 +12,15 @@ My first semester at CNU I took CPSC 250 (Python). Towards the end of the semest
 
 ---
 
-## Dependencies
+## Setup
 
 ### Install Requirements:
+
+See dependencies in the `requirements.txt` file.
+
 ```shell
 python -m pip install -r requirements.txt
 ```
-
-### Requirements
-
-- `discord.py` for the Discord Interface Component.
-- `colorama` to add color to the Command Line Interface Component.
-- `numpy`, `scipy`, and `scikit-learn` as utilities for the Intelligence & Game Components.
-- `jupyter`, `pandas`, `matplotlib`, and `seaborn` for the Analysis Component.
 
 [//]: # (Generated Requirements File with:)
 [//]: # (```shell)
@@ -35,6 +31,10 @@ python -m pip install -r requirements.txt
 ```bash
 pip install -e .
 ```
+
+### Run Setup File
+
+Run the `setup.py` file to set up the `PYTHONPATH`.
 
 ---
 
@@ -50,7 +50,7 @@ pip install -e .
 | Minimax                | Choices a move which maximizes its own utility and minimizes the utility of its opponent                           |
 | Alpha-Beta Minimax     | Extension of Minimax which focuses on evaluating relevant states by pruning sub-trees with too few utility points. |
 | Iterative Deepening    | Minimax with Anytime Iterative Deepening.                                                                          |
-| Reinforcement Learning | Utilizes Reinforcement Learning to Develop Policies.                                                               |
+| Reinforcement Learning | Utilizes Reinforcement Learning (specifically Q-Learning) to Develop Policies.                                     |
 
 ### Command Line Interface
 
@@ -98,11 +98,11 @@ pip install -e .
 ### Directory Structure
 | Directory         | Description                                       |
 |-------------------|---------------------------------------------------|
-| `analysis`        | Notebooks & scripts for analysis.                 |
-| `docs`            | General Documentation                             |
 | `discord_bot`     | Discord Bot Interface                             |
 | `game_components` | Connect Four Game Engine & Command Line Interface |
 | `inteliigence`    | Various Agents/Opponents for Connect Four         |
+| `analysis`        | Notebooks & scripts for analysis.                 |
+| `docs`            | General Documentation                             |
 
 ---
 
