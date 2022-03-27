@@ -49,9 +49,8 @@ pip install -e .
 | Reflex                 | Choices a move based only on an evaluation function                                                                |
 | Minimax                | Choices a move which maximizes its own utility and minimizes the utility of its opponent                           |
 | Alpha-Beta Minimax     | Extension of Minimax which focuses on evaluating relevant states by pruning sub-trees with too few utility points. |
-| Iterative Deepening    | Minimax with Iterative Deepening.                                                                                  |
-| Dynamic Programming    | Utilizes Value Iteration and Policy Iteration on Markov Decision Processes                                         |
-| Reinforcement Learning | Utilizes reinforcement learning algorithms.                                                                        |
+| Iterative Deepening    | Minimax with Anytime Iterative Deepening.                                                                          |
+| Reinforcement Learning | Utilizes Reinforcement Learning to Develop Policies.                                                               |
 
 ### Command Line Interface
 
@@ -67,7 +66,6 @@ pip install -e .
 #### Features:
 - Challenge Handler
 - Leaderboard System
-- Move Timer
 - Help Dialog
 
 #### Basic Bot Usage:
@@ -98,15 +96,13 @@ pip install -e .
 | Analysis     | Analyze the performance and behavior of these techniques generally & when challenging each other during Connect Four battles.   |
 
 ### Directory Structure
-| Directory  | Description                                      |
-|------------|--------------------------------------------------|
-| `analysis` | Notebooks & scripts for analysis.                |
-| `data`     | Data produced by or used by the application.     |
-| `docs`     | General Documentation                            |
-| `proto`    | Notebooks & scripts for prototyping.             |
-| `src`      | Source Code for interface, game, & Intelligence. |
-| `tests`    | Scripts for any tests that have been made.       |
-| `utils`    | Utility functions                                |
+| Directory         | Description                                       |
+|-------------------|---------------------------------------------------|
+| `analysis`        | Notebooks & scripts for analysis.                 |
+| `docs`            | General Documentation                             |
+| `discord_bot`     | Discord Bot Interface                             |
+| `game_components` | Connect Four Game Engine & Command Line Interface |
+| `inteliigence`    | Various Agents/Opponents for Connect Four         |
 
 ---
 
