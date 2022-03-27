@@ -13,6 +13,10 @@ ADMINS = ["justinyedinak#2425"]
 CLG_DESCRIPTION = 'Challenge a current_player or agent by providing the ID. ' \
                   'If no parameter is given, then a menu will assist.'
 
+LB_DESCRIPTION = 'Leaderboard'  # todo
+
+REC_DESCRIPTION = 'Record'  # todo
+
 BUTTONS = [
     ActionRow(*list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.blurple) for i in range(1, 5)])),
     ActionRow(*(list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.blurple) for i in range(5, 8)])

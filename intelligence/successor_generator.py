@@ -1,23 +1,19 @@
 from lru import LRU
-from functools import lru_cache
-import cachetools
 
 
-# todo fix cache
-# class SuccessorGenerator:
-#
-#     def __init__(self, max_size=100000):
-#         self._cache = LRU(max_size)
+class SuccessorGenerator:
 
-def get_successor(state, action):
-    return state.get_successor(action)
+    def __init__(self, max_size=100000):
+        self._cache = LRU(max_size)
 
-    # h = state.get_board().hash_board(action)
-    # if h in self._cache:
-    #     return self._cache[h]
-    # else:  # store
-    #     g = state.get_successor(action)
-    #     self._cache[h] = g
-    #     return g
+    def get_successor(self, state, action):
+        h = hash((state, action))
+        if h in self._cache:
+            return self._cache[h]
+        else:  # store
+            g = state.get_successor(action)
+            self._cache[h] = g
+            return g
 
-# GENERATOR = SuccessorGenerator()
+
+GENERATOR = SuccessorGenerator()

@@ -1,5 +1,3 @@
-import os
-import pickle
 import time
 from abc import ABC
 from random import choice
@@ -7,7 +5,7 @@ from random import choice
 from intelligence.action_queue import reflex_action_queue
 from intelligence.agent import Agent
 from intelligence.evaluation_fn_wtsq import evaluation_function_weighted_square as wtsq
-from intelligence.successor_generator import get_successor
+from intelligence.successor_generator import GENERATOR
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
@@ -141,7 +139,7 @@ class MiniMax(MultiAgent):
         value, best_actions = NEGATIVE_INF, []
 
         for action in game.get_legal_actions():
-            value_prime, _ = self._min_value(get_successor(game, action), current_depth)
+            value_prime, _ = self._min_value(GENERATOR.get_successor(game, action), current_depth)
             if value_prime == value:
                 best_actions.append(action)
 
@@ -159,7 +157,7 @@ class MiniMax(MultiAgent):
         value, best_action = POSITIVE_INF, None
 
         for action in game.get_legal_actions():
-            value_prime, _ = self._max_value(get_successor(game, action), current_depth + 1)
+            value_prime, _ = self._max_value(GENERATOR.get_successor(game, action), current_depth + 1)
             if value_prime < value:
                 value, best_action = value_prime, action
         return value, best_action
@@ -189,7 +187,7 @@ class AlphaBeta(MultiAgent):
         ordered_actions = reflex_action_queue(game, self.evaluation_function, self._player).get_actions()
 
         for action in ordered_actions:
-            value_prime, _ = self._min_value(get_successor(game, action), current_depth, alpha, beta)
+            value_prime, _ = self._min_value(GENERATOR.get_successor(game, action), current_depth, alpha, beta)
             if value_prime == value:
                 best_actions.append(action)
             if value_prime > value:
@@ -209,7 +207,7 @@ class AlphaBeta(MultiAgent):
         ordered_actions = reversed(reflex_action_queue(game, self.evaluation_function, self._player).get_actions())
 
         for action in ordered_actions:
-            value_prime, _ = self._max_value(get_successor(game, action), current_depth + 1, alpha, beta)
+            value_prime, _ = self._max_value(GENERATOR.get_successor(game, action), current_depth + 1, alpha, beta)
             if value_prime < value:
                 value, best_action = value_prime, action
                 beta = min(beta, value)

@@ -1,6 +1,6 @@
 from collections import deque
 from random import choice
-from intelligence.successor_generator import get_successor
+from intelligence.successor_generator import GENERATOR
 
 
 class ActionQueue:
@@ -104,7 +104,7 @@ def reflex_action_queue(game, evaluation_function, current_player):
     :return: ActionQueue with value action pairs as defined above
     """
 
-    value_action_pairs = list([(evaluation_function(get_successor(game, move), current_player), move)
+    value_action_pairs = list([(evaluation_function(GENERATOR.get_successor(game, move), current_player), move)
                                for move in game.get_legal_actions()])
 
     return ActionQueue(value_action_pairs)

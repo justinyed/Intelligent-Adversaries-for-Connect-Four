@@ -5,17 +5,17 @@ from os.path import isfile, join
 import numpy as np
 from parameterized import parameterized
 
-from connect_four import ConnectFour
-from game_components.board import TupleBoard
+from game_components.connect_four import ConnectFour
+from game_components.board import TupleBoard, ArrayBoard
 from game_components.cli_interface import ConnectFourCLI
-from cli_constants import PLAYER1_COLOR, PLAYER2_COLOR, RESET_COLOR
+from game_components.cli_constants import PLAYER1_COLOR, PLAYER2_COLOR, RESET_COLOR
 
 PLAYER1 = 'X'
 PLAYER2 = 'O'
 EMPTY = ' '
 REMINDER = f'P1={PLAYER1_COLOR}{PLAYER1}{RESET_COLOR}; P2={PLAYER2_COLOR}{PLAYER2}{RESET_COLOR}'
 DIRECTORY = 'layouts'
-BOARD_TYPE = TupleBoard
+BOARD_TYPE = ArrayBoard
 
 
 def state_from_string(layout, game_type=ConnectFour, board_type=BOARD_TYPE):
@@ -92,9 +92,9 @@ def get_test_layout(filepath):
     return actual, expected, msg
 
 
-path = join('.', DIRECTORY)
+path = join('', DIRECTORY)
 files = [f for f in listdir(path) if isfile(join(path, f))]
-params = list([[f'{file.split(".")[0]}', *get_test_layout(join('.', DIRECTORY, file))] for file in files])
+params = list([[f'{file.split(".")[0]}', *get_test_layout(join('', DIRECTORY, file))] for file in files])
 
 
 class TestSequence(unittest.TestCase):

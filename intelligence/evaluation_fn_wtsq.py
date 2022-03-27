@@ -20,9 +20,6 @@ WEIGHTS = np.array([[3, 4, 5, 7, 5, 4, 3],
 WINNING_VALUE = (10.0 ** 9) * np.sum(WEIGHTS)
 LOSING_VALUE = -1 * (10.0 ** 6) * np.sum(WEIGHTS)
 TIE_VALUE = -1 * (10.0 ** 3) * np.sum(WEIGHTS)
-LIVING_PENALTY = 0.1
-
-# todo - tweak the eval func
 
 
 def evaluation_function_weighted_square(game: ConnectFour, current_player: int):
@@ -38,7 +35,7 @@ def evaluation_function_weighted_square(game: ConnectFour, current_player: int):
 
     # Check for terminal state
     if game.get_status() == current_player:
-        return (1 / (game.get_turn() + 1)) * WINNING_VALUE
+        return (1 / (game.get_turn() + 1)) * WINNING_VALUE  # without the living penalty it trolls the opponent
     elif game.is_tie():
         return TIE_VALUE
     elif game.is_terminal_state():
