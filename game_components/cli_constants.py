@@ -1,18 +1,16 @@
 from colorama import Fore
-
-import intelligence.agent
 from game_components.cli_interface import Human
-import intelligence
+from intelligence import Reflex, Random, MiniMax, AlphaBeta, IterativeDeepening
 
 
 def agent_options():
     return {
         "Human Player": Human(),
-        "Random Agent": intelligence.agent.Random(),
-        "Reflex Agent": intelligence.agent.Reflex(),
-        "Minimax Agent": intelligence.MiniMax(depth_limit=2),
-        "Alpha-Beta Agent": intelligence.AlphaBeta(depth_limit=3),
-        "Iterative Agent": intelligence.IterativeDeepening(depth_limit=6)
+        "Random Agent": Random(),
+        "Reflex Agent": Reflex(),
+        "Minimax Agent": MiniMax(depth_limit=2),
+        "Alpha-Beta Agent": AlphaBeta(depth_limit=3),
+        "Iterative Agent": IterativeDeepening(depth_limit=6)
     }
 
 

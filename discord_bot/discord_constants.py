@@ -1,4 +1,3 @@
-import intelligence.agent
 from game_components.game import PLAYER1, PLAYER2, EMPTY
 from game_components.connect_four import ConnectFour
 from discord import Button, ButtonStyle, ActionRow, SelectOption, SelectMenu

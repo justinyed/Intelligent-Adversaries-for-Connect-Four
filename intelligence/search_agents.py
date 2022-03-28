@@ -4,8 +4,7 @@ from random import choice
 
 from intelligence.action_queue import reflex_action_queue
 from intelligence.agent import Agent
-from intelligence.evaluation_functions import evaluation_function_weighted_square as wtsq
-from intelligence.successor_generator import GENERATOR
+from intelligence.evaluation_functions import evaluation_function_weighted_matrix as weighted_matrix
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
@@ -48,7 +47,7 @@ class MultiAgent(Agent, ABC):
     its possible actions and the possible actions of its opponent via an evaluation function.
     """
 
-    def __init__(self, eval_fn=wtsq, depth_limit=2, depth_fn=depth_function_simple):
+    def __init__(self, eval_fn=weighted_matrix, depth_limit=2, depth_fn=depth_function_simple):
         """
         :param depth_limit: depth limit on the MiniMax depth search
         :param eval_fn: evaluation function (returns the static value of a state)
@@ -96,7 +95,7 @@ class MiniMax(MultiAgent):
         value, best_actions = NEGATIVE_INF, []
 
         for action in game.get_legal_actions():
-            value_prime, _ = self._min_value(GENERATOR.get_successor(game, action), current_depth)
+            value_prime, _ = self._min_value(self.get_successor(game, action), current_depth)
             if value_prime == value:
                 best_actions.append(action)
 
@@ -114,7 +113,7 @@ class MiniMax(MultiAgent):
         value, best_action = POSITIVE_INF, None
 
         for action in game.get_legal_actions():
-            value_prime, _ = self._max_value(GENERATOR.get_successor(game, action), current_depth + 1)
+            value_prime, _ = self._max_value(self.get_successor(game, action), current_depth + 1)
             if value_prime < value:
                 value, best_action = value_prime, action
         return value, best_action
@@ -145,7 +144,8 @@ class AlphaBeta(MultiAgent):
         ordered_actions = reflex_action_queue(game, self.evaluation_function, self._player).get_actions()
 
         for action in ordered_actions:
-            value_prime, _ = self._min_value(GENERATOR.get_successor(game, action), current_depth, alpha, beta, time_start)
+            value_prime, _ = self._min_value(self.get_successor(game, action),
+                                             current_depth, alpha, beta, time_start)
             if value_prime == value:
                 best_actions.append(action)
             if value_prime > value:
@@ -165,7 +165,8 @@ class AlphaBeta(MultiAgent):
         ordered_actions = reversed(reflex_action_queue(game, self.evaluation_function, self._player).get_actions())
 
         for action in ordered_actions:
-            value_prime, _ = self._max_value(GENERATOR.get_successor(game, action), current_depth + 1, alpha, beta, time_start)
+            value_prime, _ = self._max_value(self.get_successor(game, action),
+                                             current_depth + 1, alpha, beta, time_start)
             if value_prime < value:
                 value, best_action = value_prime, action
                 beta = min(beta, value)
@@ -181,7 +182,7 @@ class IterativeDeepening(AlphaBeta):
     Additionally, this agent will focus on evaluating relevant states by pruning subtrees with too few utility points.
     """
 
-    def __init__(self, eval_fn=wtsq, depth_limit=3, depth_fn=depth_function_simple, time_limit=5.0):
+    def __init__(self, eval_fn=weighted_matrix, depth_limit=3, depth_fn=depth_function_simple, time_limit=5.0):
         super().__init__(eval_fn, depth_limit, depth_fn)
         self.absolute_depth_limit = depth_limit
         self.time_limit = time_limit

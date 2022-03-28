@@ -8,7 +8,6 @@ from intelligence.successor_generator import GENERATOR
 from tqdm import tqdm
 
 
-
 class Reinforcement(Learning, ABC):
     """
     Reinforcement Agent: which estimates Q-Values (as well as policies) from experience rather than a model.
@@ -214,5 +213,5 @@ class QLearning(Reinforcement):
                 learner.observe_transition(state, action, next_state, reward)
 
             learner.stop_episode()
-            
+
             # todo - return hyperparams and values data

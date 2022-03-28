@@ -1,8 +1,8 @@
 from random import choice
-
-from intelligence.action_queue import reflex_action_queue
-from intelligence.evaluation_functions import evaluation_function_weighted_square as wtsq
 import time
+from intelligence.action_queue import reflex_action_queue
+from intelligence.evaluation_functions import evaluation_function_weighted_matrix as weighted_matrix
+from intelligence.successor_generator import GENERATOR
 
 
 class Agent:
@@ -10,7 +10,7 @@ class Agent:
     An agent must define a get_action method
     """
 
-    def __init__(self, eval_fn=wtsq):
+    def __init__(self, eval_fn=weighted_matrix, get_successor=GENERATOR.get_successor):
         """
         Agent Interface
 
@@ -19,6 +19,7 @@ class Agent:
         self.evaluation_function = eval_fn
         self._player = None
         self._opponent = None
+        self.get_successor=get_successor
 
     def get_action(self, game):
         """
