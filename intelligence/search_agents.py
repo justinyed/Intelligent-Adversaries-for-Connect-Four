@@ -1,11 +1,9 @@
 import time
 from abc import ABC
 from random import choice
-
-from intelligence.action_queue import reflex_action_queue
-from intelligence.agent import Agent
-from intelligence.evaluation_functions import evaluation_function_weighted_matrix as weighted_matrix
-
+import intelligence.agent
+import intelligence.action_queue
+import intelligence.evaluation_functions
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
 
@@ -41,13 +39,13 @@ def depth_function_turn_bonus(game, depth_limit) -> int:
         return depth_limit
 
 
-class MultiAgent(Agent, ABC):
+class MultiAgent(intelligence.agent.Agent, ABC):
     """
     An adversarial agent which chooses an action at each choice point by comparing
     its possible actions and the possible actions of its opponent via an evaluation function.
     """
 
-    def __init__(self, eval_fn=weighted_matrix, depth_limit=2, depth_fn=depth_function_simple):
+    def __init__(self, eval_fn=intelligence.evaluation_functions.evaluation_function_weighted_matrix, depth_limit=2, depth_fn=depth_function_simple):
         """
         :param depth_limit: depth limit on the MiniMax depth search
         :param eval_fn: evaluation function (returns the static value of a state)
@@ -81,9 +79,9 @@ class MiniMax(MultiAgent):
     """
 
     def _get_action(self, game, time_start):
-
+        self.looks = 0
         if game.get_turn() == 0:
-            return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
+            return intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
 
         _, move = self._max_value(game, 0)
         return move
@@ -129,7 +127,7 @@ class AlphaBeta(MultiAgent):
     def _get_action(self, game, time_start):
 
         if game.get_turn() == 0:
-            return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
+            return intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
 
         _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF, time_start)
         return move
@@ -141,7 +139,7 @@ class AlphaBeta(MultiAgent):
             return self.evaluation_function(game, self._player), None
 
         value, best_actions = NEGATIVE_INF, []
-        ordered_actions = reflex_action_queue(game, self.evaluation_function, self._player).get_actions()
+        ordered_actions = intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_actions()
 
         for action in ordered_actions:
             value_prime, _ = self._min_value(self.get_successor(game, action),
@@ -162,7 +160,7 @@ class AlphaBeta(MultiAgent):
             return self.evaluation_function(game, self._player), None
 
         value, best_action = POSITIVE_INF, None
-        ordered_actions = reversed(reflex_action_queue(game, self.evaluation_function, self._player).get_actions())
+        ordered_actions = reversed(intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_actions())
 
         for action in ordered_actions:
             value_prime, _ = self._max_value(self.get_successor(game, action),
@@ -182,7 +180,7 @@ class IterativeDeepening(AlphaBeta):
     Additionally, this agent will focus on evaluating relevant states by pruning subtrees with too few utility points.
     """
 
-    def __init__(self, eval_fn=weighted_matrix, depth_limit=3, depth_fn=depth_function_simple, time_limit=5.0):
+    def __init__(self, eval_fn=intelligence.evaluation_functions.evaluation_function_weighted_matrix, depth_limit=3, depth_fn=depth_function_simple, time_limit=5.0):
         super().__init__(eval_fn, depth_limit, depth_fn)
         self.absolute_depth_limit = depth_limit
         self.time_limit = time_limit
@@ -190,7 +188,7 @@ class IterativeDeepening(AlphaBeta):
     def _get_action(self, game, time_start):
 
         if game.get_turn() == 0:
-            return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
+            return intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
 
         moves = []
         # todo - Keep the move order from the last Cycle; increases speed

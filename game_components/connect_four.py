@@ -1,13 +1,13 @@
-from game_components.board import ArrayBoard
-from game_components.game import GameInterface, N_CONNECT
+import game_components.board as board
+import game_components.game as game
 
 
-class ConnectFour(GameInterface):
+class ConnectFour(game.GameInterface):
     """
     Internal Representation of the Game.
     """
 
-    def __init__(self, board_type=ArrayBoard, state=None):
+    def __init__(self, board_type=board.ArrayBoard, state=None):
         super().__init__(board_type)
 
         # Initialize State
@@ -19,7 +19,7 @@ class ConnectFour(GameInterface):
         self._max_turns = self._board.get_size() - 1  # -1 since turns start at 0
         self._player1 = self._players[0]
         self._player2 = self._players[1]
-        self._n_connect = N_CONNECT
+        self._n_connect = game.N_CONNECT
         self._in_progress = self._board.get_default()
 
     # --- Game Methods ---

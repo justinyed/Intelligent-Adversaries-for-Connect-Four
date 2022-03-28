@@ -1,4 +1,4 @@
-from game_components.board import BoardInterface
+import game_components.board as board
 
 EMPTY = 0
 PLAYER1 = 1
@@ -61,7 +61,7 @@ class GameInterface:
         """
         pass
 
-    def get_board(self) -> BoardInterface:
+    def get_board(self) -> board.BoardInterface:
         """
         get internal _board
 

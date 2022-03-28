@@ -1,5 +1,3 @@
-from game_components.game import PLAYER1, PLAYER2, EMPTY
-from game_components.connect_four import ConnectFour
 from discord import Button, ButtonStyle, ActionRow, SelectOption, SelectMenu
 import intelligence
 
@@ -27,8 +25,8 @@ ACCEPT_REJECT_BUTTONS = [Button(label='Accept', custom_id='accept', style=Button
                          Button(label='Reject', custom_id='reject', style=ButtonStyle.red)]
 
 AGENTS = {
-    "Random_Agent": intelligence.agent.Random(),
-    "Reflex_Agent": intelligence.agent.Reflex(),
+    "Random_Agent": intelligence.Random(),
+    "Reflex_Agent": intelligence.Reflex(),
     "Minimax_Agent": intelligence.MiniMax(depth_limit=2),
     "AlphaBeta_Agent": intelligence.AlphaBeta(depth_limit=3),
     "Iterative_Agent": intelligence.IterativeDeepening(depth_limit=100)
@@ -47,9 +45,9 @@ EMPTY_PIECE = ":white_large_square:"
 structure = ":yellow_square:"
 
 PIECES = {
-    EMPTY: EMPTY_PIECE,
-    PLAYER1: PLAYER1_PIECE,
-    PLAYER2: PLAYER2_PIECE
+    0: EMPTY_PIECE,
+    1: PLAYER1_PIECE,
+    -1: PLAYER2_PIECE
 }
 
 ONE = ":one:"

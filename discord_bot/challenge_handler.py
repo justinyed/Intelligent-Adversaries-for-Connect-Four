@@ -1,10 +1,10 @@
 from random import shuffle
 import discord
-import asyncio
-from discord.ext import commands
 from discord import Button, ButtonStyle, ActionRow, SelectMenu, SelectOption
+from discord.ext import commands
+import asyncio
 import discord_constants as constant
-from game_components.connect_four import ConnectFour
+import game_components
 from record import Record
 
 
@@ -130,7 +130,7 @@ class ChallengeHandler(commands.Cog):
         players = [player1, player2]
         shuffle(players)
         player1, player2 = players
-        game = ConnectFour()
+        game = game_components.ConnectFour()
         record = Record(player1, player2)
         return game, player1, player2, record
 

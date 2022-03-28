@@ -1,11 +1,8 @@
 from abc import ABC
-from collections import Counter
-from intelligence.agent import Agent
-import random
-import game_components
+import intelligence.agent
 
 
-class Learning(Agent, ABC):
+class Learning(intelligence.agent.Agent, ABC):
 
     def __init__(self, learning_rate: float = 1.0, exploration_rate: float = 0.05, discount_factor: float = 0.8,
                  iterations: int = 10):

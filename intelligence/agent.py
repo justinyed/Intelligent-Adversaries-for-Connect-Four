@@ -1,8 +1,8 @@
 from random import choice
 import time
-from intelligence.action_queue import reflex_action_queue
-from intelligence.evaluation_functions import evaluation_function_weighted_matrix as weighted_matrix
-from intelligence.successor_generator import GENERATOR
+import intelligence.action_queue
+import intelligence.evaluation_functions
+import intelligence.successor_generator as gen
 
 
 class Agent:
@@ -10,7 +10,7 @@ class Agent:
     An agent must define a get_action method
     """
 
-    def __init__(self, eval_fn=weighted_matrix, get_successor=GENERATOR.get_successor):
+    def __init__(self, eval_fn=intelligence.evaluation_functions.evaluation_function_weighted_matrix, get_successor=gen.GENERATOR.get_successor):
         """
         Agent Interface
 
@@ -19,7 +19,7 @@ class Agent:
         self.evaluation_function = eval_fn
         self._player = None
         self._opponent = None
-        self.get_successor=get_successor
+        self.get_successor = get_successor
 
     def get_action(self, game):
         """
@@ -34,6 +34,9 @@ class Agent:
 
     def _get_action(self, game, time_start):
         raise NotImplementedError()
+
+    def get_player(self):
+        return self._player
 
 
 class Random(Agent):
@@ -56,4 +59,4 @@ class Reflex(Agent):
     def _get_action(self, game, time_start):
         if game.is_terminal_state():
             return None
-        return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
+        return intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()

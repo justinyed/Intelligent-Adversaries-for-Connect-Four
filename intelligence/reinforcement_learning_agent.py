@@ -1,16 +1,30 @@
 from abc import ABC
-from collections import Counter
-from intelligence.agent import Agent
-from intelligence.learning_agent import Learning
+from collections import defaultdict
 import random
-import game_components
-from intelligence.successor_generator import GENERATOR
-from tqdm import tqdm
+import intelligence.learning_agent as learning
+import intelligence.agent as agent
+import game_components.connect_four as c4
+import intelligence.successor_generator as gen
 
 PLAYER2 = -1
+WINNING_VALUE = 1000000
+LOSING_VALUE = -1000000
+TIE_VALUE = -10000
 
 
-class Reinforcement(Learning, ABC):
+def reward_function(game, current_player):
+    # Check for terminal state
+    if game.get_status() == current_player:
+        return (1 / (game.get_turn() + 1)) * WINNING_VALUE  # without the living penalty it trolls the opponent
+    elif game.is_tie():
+        return TIE_VALUE
+    elif game.is_terminal_state():
+        return (1 / (game.get_turn() + 1)) * LOSING_VALUE
+
+    return 0.0
+
+
+class Reinforcement(learning.Learning, ABC):
     """
     Reinforcement Agent: which estimates Q-Values (as well as policies) from experience rather than a model.
     """
@@ -96,8 +110,8 @@ class Reinforcement(Learning, ABC):
         raise NotImplementedError
 
     @staticmethod
-    def train(learning_rate: float = 1.0, exploration_rate: float = 0.05, discount_factor: float = 0.8,
-              iterations: int = 10, reward_function=None, opponent_swap_rate=0, *opponents):
+    def train(opponent, learning_rate: float = 1.0, exploration_rate: float = 0.05, discount_factor: float = 0.8,
+              iterations: int = 10, reward_function=None):
         raise NotImplementedError
 
 
@@ -112,11 +126,7 @@ class QLearning(Reinforcement):
         :param args:
         """
         super().__init__(*args)
-
-        if values is None:
-            self.values = Counter()
-        else:
-            self.values = values
+        self.values = defaultdict(lambda: 0.0)
 
     def get_q_value(self, state, action):
         """
@@ -128,7 +138,7 @@ class QLearning(Reinforcement):
         """
         Returns max_action Q(state,action) over the legal actions.
         """
-        if state.is_terminal():
+        if state.is_terminal_state():
             return 0.0
 
         value = float('-inf')
@@ -162,11 +172,11 @@ class QLearning(Reinforcement):
         Compute the action to take in the current state.
         With probability self.exploration_rate a random action is taken, otherwise take on-policy action.
         """
-        if state.is_terminal():
+        if state.is_terminal_state():
             return None
 
         if random.random() < self.exploration_rate:
-            action = random.choice(state.get_legal_actions())
+            action = random.choice(list(state.get_legal_actions()))
         else:
             action = self.get_policy(self._neutralize_state(state))
         return action
@@ -175,7 +185,7 @@ class QLearning(Reinforcement):
         if self._player == PLAYER2:
             internal_state = state.get_state()
             internal_state[0] *= -1
-            state = game_components.ConnectFour(state=internal_state)
+            state = c4.ConnectFour(state=internal_state)
         return state
 
     def update(self, state, action, next_state, reward):
@@ -194,50 +204,57 @@ class QLearning(Reinforcement):
         return self.compute_value_from_q_values(state)
 
     @staticmethod
-    def train(learning_rate: float = 1.0, exploration_rate: float = 0.05, discount_factor: float = 0.8,
-              iterations: int = 10, reward_function=None, opponent_swap_rate=0, *opponents):
+    def train(opponent, learning_rate: float = 1.0, exploration_rate: float = 0.05, discount_factor: float = 0.8,
+              iterations: int = 10, reward_function=reward_function):
         """ todo
+        :param opponent:
         :param learning_rate:
         :param exploration_rate:
         :param discount_factor:
         :param iterations:
         :param reward_function:
-        :param opponent_swap_rate:
-        :param opponents:
         :return: dictionary of parameters used, learned values
         """
+        print("[Start Training]")
 
         learner = QLearning(learning_rate, exploration_rate, discount_factor, iterations)
 
         # todo - add progress bar and stats
+
+        # Simulate Episodes
         while learner.is_training():
+            print("Start Episode:", learner.current_iteration)
             learner.start_episode()
 
-            state = game_components.ConnectFour()  # initial state
+            # Initialize Game
+            players = [learner, opponent]
+            random.shuffle(players)
+            player1, player2 = players
+            state = c4.ConnectFour()
 
-            while state.is_active_state():
-                # todo
-                # Shuffle Players
-                players = [learner, opponents]
-                random.shuffle(players)
-                player1, player2 = players
-
+            # Simulate Game
+            print("\tSimulate Game")
+            while not state.is_terminal_state():
+                print("\t\tTurn Passed")
                 if state.get_current_player() == 1:
                     action = player1.get_action(state)
                 else:
                     action = player2.get_action(state)
 
-                next_state = GENERATOR.get_successor(state, action)
-                reward = reward_function(next_state)  # todo - some reward function
+                next_state = gen.GENERATOR.get_successor(state, action)
+                reward = reward_function(next_state, learner.get_player())
 
                 learner.observe_transition(state, action, next_state, reward)
 
             learner.stop_episode()
 
-            return {'learning_rate': learning_rate,
-                    'exploration_rate': exploration_rate,
-                    'discount_factor': discount_factor,
-                    'reward_function': reward_function,
-                    'opponent_swap_rate': opponent_swap_rate,
-                    'opponents': opponents
-                    }, learner.values
+        return {'opponents': opponent,
+                'learning_rate': learning_rate,
+                'exploration_rate': exploration_rate,
+                'discount_factor': discount_factor,
+                'reward_function': reward_function,
+                }, learner.values
+
+
+if __name__ == '__main__':
+    print(QLearning.train(agent.Reflex()))

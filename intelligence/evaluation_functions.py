@@ -1,9 +1,8 @@
 import numpy as np
-from game_components.game import PLAYER2
-from game_components.connect_four import ConnectFour
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
+PLAYER2 = -1
 
 
 def evaluation_function_simple(game, current_player):
@@ -41,7 +40,7 @@ LOSING_VALUE = -1 * (10.0 ** 6) * np.sum(WEIGHTS)
 TIE_VALUE = -1 * (10.0 ** 3) * np.sum(WEIGHTS)
 
 
-def evaluation_function_weighted_matrix(game: ConnectFour, current_player: int):
+def evaluation_function_weighted_matrix(game, current_player: int):
     """
     Uses the 69 unique line method by Martin Stenmark to evaluate the state of the game_components and
     returns the static value of being in that state.
