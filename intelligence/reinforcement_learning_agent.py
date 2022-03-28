@@ -206,6 +206,7 @@ class QLearning(Reinforcement):
         :param opponents:
         :return: dictionary of parameters used, learned values
         """
+
         learner = QLearning(learning_rate, exploration_rate, discount_factor, iterations)
 
         # todo - add progress bar and stats
@@ -227,7 +228,7 @@ class QLearning(Reinforcement):
                     action = player2.get_action(state)
 
                 next_state = GENERATOR.get_successor(state, action)
-                reward = reward_function(next_state)  # some reward function
+                reward = reward_function(next_state)  # todo - some reward function
 
                 learner.observe_transition(state, action, next_state, reward)
 

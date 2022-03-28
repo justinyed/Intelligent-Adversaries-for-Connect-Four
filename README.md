@@ -102,7 +102,6 @@ Run the `setup.py` file to set up the `PYTHONPATH`.
 | `game_components` | Connect Four Game Engine & Command Line Interface |
 | `inteliigence`    | Various Agents/Opponents for Connect Four         |
 | `analysis`        | Notebooks & scripts for analysis.                 |
-| `docs`            | General Documentation                             |
 
 ---
 
