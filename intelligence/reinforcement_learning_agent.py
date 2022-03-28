@@ -4,6 +4,9 @@ from intelligence.agent import Agent
 from intelligence.learning_agent import Learning
 import random
 import game_components
+from intelligence.successor_generator import GENERATOR
+from tqdm import tqdm
+
 
 
 class Reinforcement(Learning, ABC):
@@ -49,7 +52,7 @@ class Reinforcement(Learning, ABC):
         if self.current_iteration >= self.iterations:
             # Take off the training wheels
             self.exploration_rate = 0.0  # no exploration
-            self.learning_rate = 0.0     # no learning
+            self.learning_rate = 0.0  # no learning
 
     def is_training(self):
         return self.current_iteration < self.iterations
@@ -59,8 +62,7 @@ class Reinforcement(Learning, ABC):
 
     def update(self, state, action, next_state, reward):
         """
-        This class will call this function, which you write, after
-        observing a transition and reward
+        will be called after observing a transition and reward
         """
         raise NotImplementedError
 
@@ -92,26 +94,28 @@ class Reinforcement(Learning, ABC):
         """
         raise NotImplementedError
 
+    @staticmethod
+    def train(learning_rate: float = 1.0, exploration_rate: float = 0.05, discount_factor: float = 0.8,
+              iterations: int = 10, reward_function=None, opponent_swap_rate=0, *opponents):
+        raise NotImplementedError
+
 
 class QLearning(Reinforcement):
     """
-      Q-Learning Agent
-
-      todo Functions you should fill in:
-        - compute_value_from_q_values
-        - compute_action_from_q_values
-        - get_q_value
-        - get_action
-        - update
+    Q-Learning Agent
     """
 
-    def __init__(self, **args):
+    def __init__(self, values=None, *args):
         """
         You can initialize Q-values here...
         :param args:
         """
-        super().__init__()
-        self.values = Counter()
+        super().__init__(*args)
+
+        if values is None:
+            self.values = Counter()
+        else:
+            self.values = values
 
     def get_q_value(self, state, action):
         """
@@ -172,10 +176,43 @@ class QLearning(Reinforcement):
         """
 
         sample = reward + self.discount_factor * self.compute_value_from_q_values(next_state)
-        self.values[(state, action)] = (1.0 - self.learning_rate) * self.get_q_value(state, action) + self.learning_rate * sample
+        self.values[(state, action)] = (1.0 - self.learning_rate) * self.get_q_value(state,
+                                                                                     action) + self.learning_rate * sample
 
     def get_policy(self, state):
         return self.compute_action_from_q_values(state)
 
     def get_value(self, state):
         return self.compute_value_from_q_values(state)
+
+    @staticmethod
+    def train(learning_rate: float = 1.0, exploration_rate: float = 0.05, discount_factor: float = 0.8,
+              iterations: int = 10, reward_function=None, opponent_swap_rate=0, *opponents):
+        learner = QLearning(learning_rate, exploration_rate, discount_factor, iterations)
+
+        # todo - add progress bar and states
+        while learner.is_training():
+            learner.start_episode()
+
+            state = game_components.ConnectFour()  # initial state
+
+            while state.is_active_state():
+                # todo
+                # Shuffle Players
+                players = [learner, opponents]
+                random.shuffle(players)
+                player1, player2 = players
+
+                if state.get_current_player() == 1:
+                    action = player1.get_action(state)
+                else:
+                    action = player2.get_action(state)
+
+                next_state = GENERATOR.get_successor(state, action)
+                reward = reward_function(next_state)  # some reward function
+
+                learner.observe_transition(state, action, next_state, reward)
+
+            learner.stop_episode()
+            
+            # todo - return hyperparams and values data
