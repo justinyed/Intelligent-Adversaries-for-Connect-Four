@@ -1,3 +1,4 @@
+import intelligence.agent
 from game_components.game import PLAYER1, PLAYER2, EMPTY
 from game_components.connect_four import ConnectFour
 from discord import Button, ButtonStyle, ActionRow, SelectOption, SelectMenu
@@ -27,8 +28,8 @@ ACCEPT_REJECT_BUTTONS = [Button(label='Accept', custom_id='accept', style=Button
                          Button(label='Reject', custom_id='reject', style=ButtonStyle.red)]
 
 AGENTS = {
-    "Random_Agent": intelligence.Random(),
-    "Reflex_Agent": intelligence.Reflex(),
+    "Random_Agent": intelligence.agent.Random(),
+    "Reflex_Agent": intelligence.agent.Reflex(),
     "Minimax_Agent": intelligence.MiniMax(depth_limit=2),
     "AlphaBeta_Agent": intelligence.AlphaBeta(depth_limit=3),
     "Iterative_Agent": intelligence.IterativeDeepening(depth_limit=100)

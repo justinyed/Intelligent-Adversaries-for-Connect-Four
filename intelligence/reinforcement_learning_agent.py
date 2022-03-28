@@ -156,7 +156,7 @@ class QLearning(Reinforcement):
 
         return best_action
 
-    def _get_action(self, state):
+    def _get_action(self, state, time_start):
         """
         Compute the action to take in the current state.
         With probability self.exploration_rate a random action is taken, otherwise take on-policy action.
@@ -190,7 +190,7 @@ class QLearning(Reinforcement):
               iterations: int = 10, reward_function=None, opponent_swap_rate=0, *opponents):
         learner = QLearning(learning_rate, exploration_rate, discount_factor, iterations)
 
-        # todo - add progress bar and states
+        # todo - add progress bar and stats
         while learner.is_training():
             learner.start_episode()
 

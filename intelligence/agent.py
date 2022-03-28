@@ -1,4 +1,8 @@
-from intelligence.evaluation_fn_wtsq import evaluation_function_weighted_square as wtsq
+from random import choice
+
+from intelligence.action_queue import reflex_action_queue
+from intelligence.evaluation_functions import evaluation_function_weighted_square as wtsq
+import time
 
 
 class Agent:
@@ -25,7 +29,30 @@ class Agent:
         """
         self._player = game.get_current_player()
         self._opponent = -1 * self._player
-        return self._get_action(game)
+        return self._get_action(game, time.time())
 
-    def _get_action(self, game):
+    def _get_action(self, game, time_start):
         raise NotImplementedError()
+
+
+class Random(Agent):
+    """
+    A random agent chooses an action at random.
+    """
+
+    def _get_action(self, game, time_start):
+        if game.is_active_state():
+            return choice(list(game.get_legal_actions()))
+        return None
+
+
+class Reflex(Agent):
+    """
+    A reflex agent chooses an action at each choice point by naively comparing
+    its options via an evaluation function.
+    """
+
+    def _get_action(self, game, time_start):
+        if game.is_terminal_state():
+            return None
+        return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()

@@ -4,27 +4,11 @@ from random import choice
 
 from intelligence.action_queue import reflex_action_queue
 from intelligence.agent import Agent
-from intelligence.evaluation_fn_wtsq import evaluation_function_weighted_square as wtsq
+from intelligence.evaluation_functions import evaluation_function_weighted_square as wtsq
 from intelligence.successor_generator import GENERATOR
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
-
-
-def evaluation_function_simple(game, current_player):
-    """
-    Evaluates the state of the game_components and returns the static value of being in that state.
-
-    :param current_player:
-    :param game: game_components state to evaluate
-    :return: static value in current state
-    """
-
-    if game.get_status() == current_player:
-        return POSITIVE_INF  # win
-    elif game.is_terminal_state():
-        return NEGATIVE_INF  # loss or tie
-    return 0
 
 
 def depth_function_simple(game, depth_limit) -> int:
@@ -58,29 +42,6 @@ def depth_function_turn_bonus(game, depth_limit) -> int:
         return depth_limit
 
 
-class Random(Agent):
-    """
-    A random agent chooses an action at random.
-    """
-
-    def _get_action(self, game):
-        if game.is_active_state():
-            return choice(list(game.get_legal_actions()))
-        return None
-
-
-class Reflex(Agent):
-    """
-    A reflex agent chooses an action at each choice point by naively comparing
-    its options via an evaluation function.
-    """
-
-    def _get_action(self, game):
-        if game.is_terminal_state():
-            return None
-        return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
-
-
 class MultiAgent(Agent, ABC):
     """
     An adversarial agent which chooses an action at each choice point by comparing
@@ -97,22 +58,18 @@ class MultiAgent(Agent, ABC):
         self.depth_limit = depth_limit
         self.get_depth_limit = depth_fn
         self.time_limit = None  # seconds
-        self.start_time = None
 
     def timer_set(self, seconds: int) -> None:
         self.time_limit = seconds
 
-    def _timer_start(self) -> None:
-        if self.time_limit is not None:
-            self.start_time = time.time()
-
-    def _is_timer_elapsed(self) -> bool:
+    @staticmethod
+    def is_timer_elapsed(time_limit, time_start) -> bool:
         """
         True if timer has elapsed; false otherwise
         :return: True if timer has elapsed; otherwise False
         """
-        return self.time_limit <= time.time() - self.start_time \
-            if self.time_limit is not None else False
+        return time_limit <= time.time() - time_start \
+            if time_limit is not None else False
 
     def _is_depth_max(self, game, current_depth) -> bool:
         return current_depth >= self.get_depth_limit(game, self.depth_limit)
@@ -124,7 +81,7 @@ class MiniMax(MultiAgent):
     minimize the utility of its opponent. Utility of a state is defined by an evaluation function.
     """
 
-    def _get_action(self, game):
+    def _get_action(self, game, time_start):
 
         if game.get_turn() == 0:
             return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
@@ -170,24 +127,25 @@ class AlphaBeta(MultiAgent):
     Additionally, this agent will focus on evaluating relevant states by pruning subtrees with too few utility points.
     """
 
-    def _get_action(self, game):
-        self._timer_start()
+    def _get_action(self, game, time_start):
 
         if game.get_turn() == 0:
             return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
 
-        _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF)
+        _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF, time_start)
         return move
 
-    def _max_value(self, game, current_depth, alpha, beta):
-        if self._is_timer_elapsed() or game.is_terminal_state() or self._is_depth_max(game, current_depth):
+    def _max_value(self, game, current_depth, alpha, beta, time_start):
+        if MultiAgent.is_timer_elapsed(self.time_limit, time_start) \
+                or game.is_terminal_state() \
+                or self._is_depth_max(game, current_depth):
             return self.evaluation_function(game, self._player), None
 
         value, best_actions = NEGATIVE_INF, []
         ordered_actions = reflex_action_queue(game, self.evaluation_function, self._player).get_actions()
 
         for action in ordered_actions:
-            value_prime, _ = self._min_value(GENERATOR.get_successor(game, action), current_depth, alpha, beta)
+            value_prime, _ = self._min_value(GENERATOR.get_successor(game, action), current_depth, alpha, beta, time_start)
             if value_prime == value:
                 best_actions.append(action)
             if value_prime > value:
@@ -199,7 +157,7 @@ class AlphaBeta(MultiAgent):
                 break
         return value, choice(best_actions)
 
-    def _min_value(self, game, current_depth, alpha, beta):
+    def _min_value(self, game, current_depth, alpha, beta, time_start):
         if game.is_terminal_state():
             return self.evaluation_function(game, self._player), None
 
@@ -207,7 +165,7 @@ class AlphaBeta(MultiAgent):
         ordered_actions = reversed(reflex_action_queue(game, self.evaluation_function, self._player).get_actions())
 
         for action in ordered_actions:
-            value_prime, _ = self._max_value(GENERATOR.get_successor(game, action), current_depth + 1, alpha, beta)
+            value_prime, _ = self._max_value(GENERATOR.get_successor(game, action), current_depth + 1, alpha, beta, time_start)
             if value_prime < value:
                 value, best_action = value_prime, action
                 beta = min(beta, value)
@@ -218,7 +176,7 @@ class AlphaBeta(MultiAgent):
 
 class IterativeDeepening(AlphaBeta):
     """
-    A multiagent which chooses an action at each choice point by attempting to maximize its utility and
+    A multi-agent which chooses an action at each choice point by attempting to maximize its utility and
     minimize the utility of its opponent.  Utility of a state is defined by an evaluation function.
     Additionally, this agent will focus on evaluating relevant states by pruning subtrees with too few utility points.
     """
@@ -228,8 +186,7 @@ class IterativeDeepening(AlphaBeta):
         self.absolute_depth_limit = depth_limit
         self.time_limit = time_limit
 
-    def _get_action(self, game):
-        self._timer_start()
+    def _get_action(self, game, time_start):
 
         if game.get_turn() == 0:
             return reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
@@ -239,8 +196,8 @@ class IterativeDeepening(AlphaBeta):
         # iterative deepening
         for current_depth_limit in range(1, self.absolute_depth_limit + 1):
             self.depth_limit = current_depth_limit
-            _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF)
-            if self._is_timer_elapsed():
+            _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF, time_start)
+            if MultiAgent.is_timer_elapsed(self.time_limit, time_start):
                 break
             else:
                 moves.append(move)

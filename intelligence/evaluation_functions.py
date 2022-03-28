@@ -2,6 +2,26 @@ import numpy as np
 from game_components.game import PLAYER2
 from game_components.connect_four import ConnectFour
 
+POSITIVE_INF = float("inf")
+NEGATIVE_INF = float("-inf")
+
+
+def evaluation_function_simple(game, current_player):
+    """
+    Evaluates the state of the game_components and returns the static value of being in that state.
+
+    :param current_player:
+    :param game: game_components state to evaluate
+    :return: static value in current state
+    """
+
+    if game.get_status() == current_player:
+        return POSITIVE_INF  # win
+    elif game.is_terminal_state():
+        return NEGATIVE_INF  # loss or tie
+    return 0
+
+
 """
 The value of each line is the sum of the values of its 4 individual squares, 
 and the value of the _board is the sum of the values of the 69 potential winning lines. 
@@ -15,7 +35,6 @@ WEIGHTS = np.array([[3, 4, 5, 7, 5, 4, 3],
                     [5, 8, 11, 13, 11, 8, 5],
                     [4, 6, 8, 10, 8, 6, 4],
                     [3, 4, 5, 7, 5, 4, 3]])
-
 
 WINNING_VALUE = (10.0 ** 9) * np.sum(WEIGHTS)
 LOSING_VALUE = -1 * (10.0 ** 6) * np.sum(WEIGHTS)
