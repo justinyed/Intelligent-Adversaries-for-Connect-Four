@@ -7,6 +7,8 @@ import game_components
 from intelligence.successor_generator import GENERATOR
 from tqdm import tqdm
 
+PLAYER2 = -1
+
 
 class Reinforcement(Learning, ABC):
     """
@@ -166,8 +168,15 @@ class QLearning(Reinforcement):
         if random.random() < self.exploration_rate:
             action = random.choice(state.get_legal_actions())
         else:
-            action = self.get_policy(state)
+            action = self.get_policy(self._neutralize_state(state))
         return action
+
+    def _neutralize_state(self, state):
+        if self._player == PLAYER2:
+            internal_state = state.get_state()
+            internal_state[0] *= -1
+            state = game_components.ConnectFour(state=internal_state)
+        return state
 
     def update(self, state, action, next_state, reward):
         """
@@ -187,6 +196,16 @@ class QLearning(Reinforcement):
     @staticmethod
     def train(learning_rate: float = 1.0, exploration_rate: float = 0.05, discount_factor: float = 0.8,
               iterations: int = 10, reward_function=None, opponent_swap_rate=0, *opponents):
+        """ todo
+        :param learning_rate:
+        :param exploration_rate:
+        :param discount_factor:
+        :param iterations:
+        :param reward_function:
+        :param opponent_swap_rate:
+        :param opponents:
+        :return: dictionary of parameters used, learned values
+        """
         learner = QLearning(learning_rate, exploration_rate, discount_factor, iterations)
 
         # todo - add progress bar and stats
@@ -214,4 +233,10 @@ class QLearning(Reinforcement):
 
             learner.stop_episode()
 
-            # todo - return hyperparams and values data
+            return {'learning_rate': learning_rate,
+                    'exploration_rate': exploration_rate,
+                    'discount_factor': discount_factor,
+                    'reward_function': reward_function,
+                    'opponent_swap_rate': opponent_swap_rate,
+                    'opponents': opponents
+                    }, learner.values

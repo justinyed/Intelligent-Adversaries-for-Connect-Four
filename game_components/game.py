@@ -85,7 +85,7 @@ class GameInterface:
         """
         pass
 
-    def _get_state(self) -> tuple:
+    def get_state(self) -> tuple:
         """
         get tuple containing the tuple of the current state of the game_components
 

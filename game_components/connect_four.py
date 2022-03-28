@@ -49,16 +49,16 @@ class ConnectFour(GameInterface):
         board = self._board_type()
         return board, 0, board.get_default()
 
-    def _get_state(self):
+    def get_state(self):
         return self._board.copy(), self._turn, self._status
 
     def set_state(self, state):
         self._board, self._turn, self._status = state
 
     def get_successor(self, action):
-        original_state = self._get_state()
+        original_state = self.get_state()
         self.perform_action(action)
-        new_state = self._get_state()
+        new_state = self.get_state()
         self.set_state(original_state)
         return ConnectFour(state=new_state)
 
@@ -93,7 +93,7 @@ class ConnectFour(GameInterface):
         return self._max_turns == self._turn
 
     def copy(self):
-        return ConnectFour(state=self._get_state())
+        return ConnectFour(state=self.get_state())
 
     def __eq__(self, other):
         return self.__hash__() == hash(other)
