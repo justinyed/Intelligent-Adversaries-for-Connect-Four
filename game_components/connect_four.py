@@ -100,3 +100,6 @@ class ConnectFour(game.GameInterface):
 
     def __hash__(self):
         return hash(self._board)
+
+    def __str__(self):
+        return str(self._board)

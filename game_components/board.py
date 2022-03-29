@@ -68,6 +68,14 @@ class BoardInterface:
         """
         pass
 
+    def set_grid(self, grid):
+        """
+        set internal grid
+
+        :param grid:
+        """
+        self._grid = grid
+
     def set_piece(self, position, piece):
         """
         set piece in _grid

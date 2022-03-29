@@ -3,9 +3,11 @@ from collections import defaultdict
 import random
 import intelligence.learning_agent as learning
 import intelligence.agent as agent
+import intelligence.search_agents as sa
 import game_components.connect_four as c4
 import intelligence.successor_generator as gen
-
+import os
+import json
 PLAYER2 = -1
 WINNING_VALUE = 1000000
 LOSING_VALUE = -1000000
@@ -120,19 +122,22 @@ class QLearning(Reinforcement):
     Q-Learning Agent
     """
 
-    def __init__(self, values=None, *args):
+    def __init__(self, values=None, learning_rate: float = 1.0, exploration_rate: float = 0.05, discount_factor: float = 0.8,
+                 iterations: int = 10):
         """
         You can initialize Q-values here...
-        :param args:
         """
-        super().__init__(*args)
-        self.values = defaultdict(lambda: 0.0)
+        super().__init__(learning_rate, exploration_rate, discount_factor, iterations)
+        if values is None:
+            self.values = defaultdict(lambda: 0.0)
+        else:
+            self.values = values
 
     def get_q_value(self, state, action):
         """
         Returns Q(state,action), otherwise 0.0 if state has never been seen.
         """
-        return self.values[(state, action)]
+        return self.values[hash(state) ^ hash(action)]
 
     def compute_value_from_q_values(self, state):
         """
@@ -154,7 +159,7 @@ class QLearning(Reinforcement):
         """
         best_action = None
 
-        if state.is_terminal():
+        if state.is_terminal_state():
             return None
 
         value = float('-inf')
@@ -178,15 +183,17 @@ class QLearning(Reinforcement):
         if random.random() < self.exploration_rate:
             action = random.choice(list(state.get_legal_actions()))
         else:
-            action = self.get_policy(self._neutralize_state(state))
+            action = self.get_policy(state)
         return action
 
-    def _neutralize_state(self, state):
-        if self._player == PLAYER2:
-            internal_state = state.get_state()
-            internal_state[0] *= -1
-            state = c4.ConnectFour(state=internal_state)
-        return state
+    # def _neutralize_state(self, state):
+    #     if self._player == PLAYER2:
+    #         board, turn, status = state.get_state()
+    #         grid = board.get_grid()
+    #         grid *= -1
+    #         board.set_grid(grid)
+    #         state = c4.ConnectFour(state=(board, turn, status))
+    #     return state
 
     def update(self, state, action, next_state, reward):
         """
@@ -194,7 +201,7 @@ class QLearning(Reinforcement):
         """
 
         sample = reward + self.discount_factor * self.compute_value_from_q_values(next_state)
-        self.values[(state, action)] = (1.0 - self.learning_rate) * self.get_q_value(state,
+        self.values[hash(state) ^ hash(action)] = (1.0 - self.learning_rate) * self.get_q_value(state,
                                                                                      action) + self.learning_rate * sample
 
     def get_policy(self, state):
@@ -217,7 +224,7 @@ class QLearning(Reinforcement):
         """
         print("[Start Training]")
 
-        learner = QLearning(learning_rate, exploration_rate, discount_factor, iterations)
+        learner = QLearning(None, learning_rate, exploration_rate, discount_factor, iterations)
 
         # todo - add progress bar and stats
 
@@ -228,14 +235,13 @@ class QLearning(Reinforcement):
 
             # Initialize Game
             players = [learner, opponent]
-            random.shuffle(players)
+            # random.shuffle(players)
             player1, player2 = players
             state = c4.ConnectFour()
 
             # Simulate Game
             print("\tSimulate Game")
             while not state.is_terminal_state():
-                print("\t\tTurn Passed")
                 if state.get_current_player() == 1:
                     action = player1.get_action(state)
                 else:
@@ -246,15 +252,29 @@ class QLearning(Reinforcement):
 
                 learner.observe_transition(state, action, next_state, reward)
 
+                state = next_state
+
+            print(f"\tt={state.get_turn():03d}; s={state.get_status()}")
             learner.stop_episode()
 
-        return {'opponents': opponent,
-                'learning_rate': learning_rate,
-                'exploration_rate': exploration_rate,
-                'discount_factor': discount_factor,
-                'reward_function': reward_function,
-                }, learner.values
+
+        return learner.values
 
 
 if __name__ == '__main__':
-    print(QLearning.train(agent.Reflex()))
+    values = QLearning.train(sa.AlphaBeta(depth_limit=1), iterations=1000, exploration_rate=.60, learning_rate=0.0001, discount_factor=.9)
+    file = "./data/values.json"
+
+    try:
+        with open(file, "w") as write:
+            json.dump(values, fp=write, sort_keys=True, indent=2)
+            print("Save Successfully")
+
+    except FileNotFoundError:
+        print("File not Found.")
+
+    except IOError:
+        print("IO Error")
+
+
+
