@@ -103,3 +103,6 @@ class ConnectFour(game.GameInterface):
 
     def __str__(self):
         return str(self._board)
+
+    def __lt__(self, other):
+        return str(self._board) < str(self._board)

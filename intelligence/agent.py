@@ -1,3 +1,4 @@
+import random
 from random import choice
 import time
 import intelligence.action_queue
@@ -60,3 +61,23 @@ class Reflex(Agent):
         if game.is_terminal_state():
             return None
         return intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
+
+
+class Insane(Agent):
+    """
+    Chooses the same move every time
+    """
+
+    def __init__(self, move):
+        super().__init__()
+        self.possible_actions = [0, 1, 2, 3, 4, 5, 6]
+        self.move = random.choice(self.possible_actions)
+
+    def _get_action(self, game, time_start):
+        if game.is_terminal_state():
+            return None
+        if self.move in list(game.get_legal_actions()):
+            return self.move
+        else:
+            return random.choice(list(game.get_legal_actions()))
+

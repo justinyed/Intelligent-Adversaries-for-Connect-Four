@@ -7,6 +7,7 @@ import discord_constants as constant
 import game_components
 from record import Record
 
+# todo - don't let users challenge themselves
 
 class ChallengeHandler(commands.Cog):
 

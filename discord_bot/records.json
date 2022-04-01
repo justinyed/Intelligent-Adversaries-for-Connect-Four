@@ -99,5 +99,33 @@
     "player2": "Iterative_Agent",
     "time_begin": "2022-03-26 17:00:13.756012",
     "time_end": "2022-03-26 17:08:26.901056"
+  },
+  "31-03-2022_18:06:33,AlphaBeta_Agent,justinyedinak#2425": {
+    "end_status": 1,
+    "moves": [
+      3,
+      2,
+      3,
+      3,
+      3,
+      3,
+      2,
+      6,
+      2,
+      4,
+      2,
+      2,
+      4,
+      0,
+      4,
+      4,
+      4,
+      5,
+      5
+    ],
+    "player1": "AlphaBeta_Agent",
+    "player2": "justinyedinak#2425",
+    "time_begin": "2022-03-31 18:06:33.849061",
+    "time_end": "2022-03-31 18:10:30.458624"
   }
 }

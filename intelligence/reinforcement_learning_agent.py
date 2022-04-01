@@ -1,6 +1,9 @@
 from abc import ABC
 from collections import defaultdict
 import random
+from functools import lru_cache
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 import numpy as np
 
@@ -12,11 +15,12 @@ import intelligence.successor_generator as gen
 import intelligence.evaluation_functions as eval_fn
 import os
 import json
+import tqdm
 
 PLAYER2 = -1
 WINNING_VALUE = 1000000
-LOSING_VALUE = -1000000
-TIE_VALUE = -10000
+LOSING_VALUE = -1000
+TIE_VALUE = -100
 
 
 def reward_function(game, current_player):
@@ -46,6 +50,7 @@ class Reinforcement(learning.Learning, ABC):
         self.last_state = None
         self.last_action = None
         self.iteration_rewards = 0.0
+        self.values = {}
 
     def observe_transition(self, state, action, next_state, delta_reward):
         """
@@ -77,10 +82,10 @@ class Reinforcement(learning.Learning, ABC):
             self.learning_rate = 0.0  # no learning
 
     def is_training(self):
-        return self.current_iteration < self.iterations
+        return self.iterations is not None and self.current_iteration < self.iterations
 
     def is_testing(self):
-        return not self.is_training()
+        return self.iterations is None
 
     def update(self, state, action, next_state, reward):
         """
@@ -127,15 +132,15 @@ class QLearning(Reinforcement):
     Q-Learning Agent
     """
 
-    def __init__(self, values=None, learning_rate: float = 1.0, exploration_rate: float = 0.05,
-                 discount_factor: float = 0.8,
-                 iterations: int = 10):
+    def __init__(self, values=None, learning_rate: float = 0.0, exploration_rate: float = 0.0,
+                 discount_factor: float = 0.0,
+                 iterations=None):
         """
         You can initialize Q-values here...
         """
         super().__init__(learning_rate, exploration_rate, discount_factor, iterations)
         if values is None:
-            self.values = defaultdict(lambda: 0.0)
+            self.values = defaultdict(lambda: 0)
         else:
             self.values = values
 
@@ -176,11 +181,6 @@ class QLearning(Reinforcement):
         for action in state.get_legal_actions():
             q = self.get_q_value(state, action)
 
-            if q == 0.0:
-                self.unseen_states += 1
-            else:
-                self.seen_states += 1
-
             if value < q:
                 best_action = action
                 value = q
@@ -194,6 +194,12 @@ class QLearning(Reinforcement):
         """
         if state.is_terminal_state():
             return None
+        if self.is_testing():
+            if len(list([i for i in [hash((state, a)) for a in state.get_legal_actions()] if
+                         i in self.values.keys()])) == 0:
+                self.unseen_states += 1
+            else:
+                self.seen_states += 1
 
         if random.random() < self.exploration_rate:
             action = random.choice(list(state.get_legal_actions()))
@@ -221,7 +227,6 @@ class QLearning(Reinforcement):
         """
         Called during transition observations, performs a Q-Value update.
         """
-
         sample = reward + self.discount_factor * self.compute_value_from_q_values(next_state)
         self.values[hash((state, action))] = (1.0 - self.learning_rate) * self.get_q_value(state,
                                                                                            action) + self.learning_rate * sample
@@ -238,9 +243,15 @@ class QLearning(Reinforcement):
     def get_value(self, state):
         return self.compute_value_from_q_values(state)
 
+    def get_params(self):
+        return {"learning_rate": self.learning_rate,
+                "exploration_rate": self.exploration_rate,
+                "discount_factor": self.discount_factor,
+                "iterations": self.iterations}
+
     @staticmethod
     def train(opponent, learning_rate: float = 1.0, exploration_rate: float = 0.05, discount_factor: float = 0.7,
-              iterations: int = 10, reward_function=eval_fn.evaluation_function_weighted_matrix):
+              iterations: int = 10, reward_function=reward_function):
         """ todo
         :param opponent:
         :param learning_rate:
@@ -250,15 +261,17 @@ class QLearning(Reinforcement):
         :param reward_function:
         :return: dictionary of parameters used, learned values
         """
-        print("[Start Training]")
 
         learner = QLearning(None, learning_rate, exploration_rate, discount_factor, iterations)
+        record = []
+        print("[Using Parameters]")
+        print(learner.get_params())
 
-        # todo - add progress bar and stats
+        print("[Start Training]")
+        pbar = tqdm.tqdm(total=iterations)
 
         # Simulate Episodes
         while learner.is_training():
-            print("Start Episode:", learner.current_iteration)
             learner.start_episode()
 
             # Initialize Game
@@ -268,8 +281,7 @@ class QLearning(Reinforcement):
             state = c4.ConnectFour()
 
             # Simulate Game
-            print("\tSimulate Game")
-            while not state.is_terminal_state():
+            while state.get_turn() <= 15 and state.is_active_state():  # is_terminal_state()
                 if state.get_current_player() == 1:
                     action = player1.get_action(state)
                 else:
@@ -279,23 +291,32 @@ class QLearning(Reinforcement):
                 reward = reward_function(next_state, learner.get_player())
 
                 learner.observe_transition(state, action, next_state, reward)
-                learner.observe_transition(QLearning.get_mirror_state(state), abs(action - 6), QLearning.get_mirror_state(next_state), reward)
+                # mirror state
+                # learner.observe_transition(QLearning.get_mirror_state(state), abs(action - 6), QLearning.get_mirror_state(next_state), reward)
 
                 state = next_state
 
-            print(f"\tt={state.get_turn():03d}; s={state.get_status()}")
+            pbar.update(1)
+            record.append(state.get_status())
             learner.stop_episode()
-
-        return learner.values
+        pbar.close()
+        return learner.values, record
 
 
 if __name__ == '__main__':
-    values = QLearning.train(sa.MiniMax(depth_limit=1),
-                             iterations=10000,
-                             exploration_rate=0.70,
-                             learning_rate=0.001,
-                             discount_factor=0.90)
+    iterations = 1000
+
+    values, record = QLearning.train(sa.AlphaBeta(depth_limit=1),
+                                     iterations=iterations,
+                                     exploration_rate=0.70,
+                                     learning_rate=1.0,
+                                     discount_factor=0.90)
     file = "./data/values.json"
+    r = np.array(record)
+    value, count = np.unique(r, return_counts=True)
+    rate = np.copy(count) / iterations
+
+    print(value, rate)
 
     try:
         with open(file, "w") as write:

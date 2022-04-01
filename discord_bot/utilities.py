@@ -21,7 +21,7 @@ class Utilities(commands.Cog):
         await message.edit(
             content=f"Online! {round(self.bot.latency * 1000)}ms\nAPI: {round((end_time - start_time) * 1000)}ms")
 
-    @commands.command(name='clean', pass_context=True)
+    @commands.command(name='clean', alias=['clear'], pass_context=True)
     async def clean(self, ctx: commands.Context):
         if str(ctx.author) in constant.ADMINS:
             await ctx.channel.purge()
