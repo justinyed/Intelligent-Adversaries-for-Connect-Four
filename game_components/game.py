@@ -157,7 +157,7 @@ class GameInterface:
         """
         return not self.is_terminal_state()
 
-    def is_tie(self) -> bool:
+    def is_tied(self) -> bool:
         """
         boolean for if the game is in a tied state.
         :return: True if tied status
@@ -169,7 +169,7 @@ class GameInterface:
         boolean for if the game is in a tied state.
         :return: True if win status
         """
-        return self.is_terminal_state() and not self.is_tie()
+        return self.is_terminal_state() and not self.is_tied()
 
     def perform_action(self, directive) -> int:
         """

@@ -46,7 +46,7 @@ class ConnectFourCLI:
             game.perform_action(self.move)
 
             # check for terminal states
-            if game.is_tie():
+            if game.is_tied():
                 print(self.get_display(game))
                 print(constant.TIE_MSG)
                 return

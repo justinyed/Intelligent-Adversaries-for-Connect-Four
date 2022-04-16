@@ -8,7 +8,7 @@ import pandas as pd
 sql.register_adapter(UUID, lambda u: u.bytes_le)
 sql.register_converter('GUID', lambda b: UUID(bytes_le=b))
 
-DATABASE = "./leaderboard.db"
+
 MEMORY = ":memory:"
 
 
@@ -20,7 +20,7 @@ class Leaderboard:
         self._initialize_leaderboard()
 
     @staticmethod
-    def create_connection(db_file=DATABASE):
+    def create_connection(db_file):
         """
         create a database connection to the SQLite database specified by db_file
         :param db_file: database file
@@ -48,7 +48,10 @@ class Leaderboard:
 
     def __del__(self):
         try:
+            print("Disconnecting from the Database...")
             self.connection.close()
+            print("Successfully Disconnected.")
+
         except Error as e:
             print(e)
 
@@ -63,7 +66,7 @@ class Leaderboard:
         self.connection.commit()
         return cursor.lastrowid
 
-    def update_player(self, player_id, is_win, is_tie):
+    def update_player(self, player_id, is_win, is_tie=False):
         cursor = self.connection.cursor()
         cursor.execute("SELECT win_amount, loss_amount, tie_amount, games_played FROM players WHERE player_id=?",
                        (player_id,))
@@ -168,10 +171,18 @@ class Leaderboard:
 
 
 if __name__ == '__main__':
+    DATABASE = "../data/leaderboard.db"
     lb = Leaderboard(DATABASE)
     g = uuid1()
+
+    lb.add_player('spartanyed')
+    lb.add_player('justinyedinak')
     lb.add_game(g, "justinyedinak", "spartanyed", "justinyedinak", "spartanyed")
+
     lb.update_move(g, 1)
     lb.update_move(g, 4)
     lb.update_move(g, 6)
-    lb.end_game(g, 2, 'spartanyed')
+    lb.end_game(g, 'spartanyed', 2)
+
+    lb.update_player('spartanyed', True)
+

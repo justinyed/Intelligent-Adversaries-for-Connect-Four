@@ -27,7 +27,7 @@ def reward_function(game, current_player):
     # Check for terminal state
     if game.get_status() == current_player:
         return (1 / (game.get_turn() + 1)) * WINNING_VALUE  # without the living penalty it trolls the opponent
-    elif game.is_tie():
+    elif game.is_tied():
         return TIE_VALUE
     elif game.is_terminal_state():
         return (1 / (game.get_turn() + 1)) * LOSING_VALUE

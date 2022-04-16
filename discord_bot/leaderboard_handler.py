@@ -49,7 +49,7 @@ class LeaderBoardHandler(commands.Cog):
     async def add_player(self, player_id):
         self.leaderboard.add_player(player_id)
 
-    async def update_player(self, player_id, is_win, is_tie):
+    async def update_player(self, player_id, is_win, is_tie=False):
         self.leaderboard.update_player(player_id, is_win, is_tie)
 
     async def add_game(self, uid, challenger, opponent, player1, player2):

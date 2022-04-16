@@ -100,24 +100,34 @@ class ChallengeHandler(commands.Cog):
         """
 
         if game.is_terminal_state():
-            try:
-                await self.leaderboard_handler.end_game(uid, self.current_player_name(game, player1, player2),
-                                                        game.get_status)
-            except Exception as e:
-                print(e)
-                pass
 
-            if game.is_tie():
+            if game.is_tied():
+
+                # update leaderboard
+                await self.leaderboard_handler.end_game(uid, 'tied', game.get_status())
+                await self.leaderboard_handler.update_player(str(player1), is_win=False, is_tie=True)
+                await self.leaderboard_handler.update_player(str(player2), is_win=False, is_tie=True)
+
                 e = discord.Embed(title=MESSAGE.tie)
                 await msg.edit(content=ChallengeHandler._assemble_board(game), embed=e, components=[])
-                return
 
             if game.is_won():
+
+                # update leaderboard
+                winner = str(self.current_player(game, player1, player2))
+                loser = str(self.other_player(game, player1, player2))
+                print(winner, loser)
+
+                await self.leaderboard_handler.end_game(uid, winner, game.get_status())
+                await self.leaderboard_handler.update_player(winner, is_win=True, is_tie=False)
+                await self.leaderboard_handler.update_player(loser, is_win=False, is_tie=False)
+
                 e = discord.Embed(
                     title=MESSAGE.tell_winner(ChallengeHandler.current_player_name(game, player1, player2))
                 )
                 await msg.edit(content=ChallengeHandler._assemble_board(game), embed=e, components=[])
-                return
+
+            return
 
         def check_button(i: discord.Interaction, b: discord.Button):
             if not (i.message == msg and i.user_id == ChallengeHandler.current_player(game, player1, player2).id):
@@ -137,7 +147,6 @@ class ChallengeHandler(commands.Cog):
 
         game.perform_action(action)
         await self.leaderboard_handler.update_move(uid, action)
-
         await self._game_handler(msg, game, player1, player2, uid)
 
     async def _new_game(self, player1, player2):
@@ -188,6 +197,14 @@ class ChallengeHandler(commands.Cog):
             return player1
         else:
             return player2
+
+    @staticmethod
+    def other_player(game, player1, player2):
+        if game.get_current_player() == -1:
+            return player1
+        else:
+            return player2
+
 
     @staticmethod
     def current_player_name(game, player1, player2):
