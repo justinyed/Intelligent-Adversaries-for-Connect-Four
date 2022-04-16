@@ -1,4 +1,35 @@
 {
+  "03-04-2022_15:10:34,justinyedinak#2425,Iterative_Agent": {
+    "end_status": -1,
+    "moves": [
+      5,
+      3,
+      5,
+      5,
+      3,
+      3,
+      0,
+      3,
+      3,
+      5,
+      5,
+      3,
+      6,
+      2,
+      1,
+      2,
+      4,
+      2,
+      2,
+      2,
+      4,
+      4
+    ],
+    "player1": "justinyedinak#2425",
+    "player2": "Iterative_Agent",
+    "time_begin": "2022-04-03 15:10:34.365986",
+    "time_end": "2022-04-03 15:14:54.549878"
+  },
   "25-03-2022_21:11:35,Iterative_Agent,spartanyed#8603": {
     "end_status": 1,
     "moves": [

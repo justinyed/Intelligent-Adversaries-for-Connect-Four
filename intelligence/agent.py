@@ -14,7 +14,6 @@ class Agent:
     def __init__(self, eval_fn=intelligence.evaluation_functions.evaluation_function_weighted_matrix, get_successor=gen.GENERATOR.get_successor):
         """
         Agent Interface
-
         :param eval_fn: evaluation function (returns the static value of a state)
         """
         self.evaluation_function = eval_fn
@@ -25,7 +24,6 @@ class Agent:
     def get_action(self, game):
         """
         The Agent will receive a game_components and must return an action from the legal moves
-
         :param game: current state of the game_components
         :return: The action chosen by the agent given the game_components
         """
@@ -41,9 +39,7 @@ class Agent:
 
 
 class Random(Agent):
-    """
-    A random agent chooses an action at random.
-    """
+    """A random agent chooses an action at random."""
 
     def _get_action(self, game, time_start):
         if game.is_active_state():

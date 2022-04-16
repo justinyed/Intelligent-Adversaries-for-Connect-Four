@@ -44,7 +44,7 @@ class ConnectFour(game.GameInterface):
 
     def _new_state(self):
         """
-        :return: new _grid, new _turn counter, new _status
+        :return: new grid, new turn counter, new status
         """
         board = self._board_type()
         return board, 0, board.get_default()
@@ -86,7 +86,7 @@ class ConnectFour(game.GameInterface):
         self.__update_status(position)
         status = self.get_status()
         if status == self._board.get_default():
-            self._turn += 1  # increment _turn, move was actually made
+            self._turn += 1  # increment turn, move was actually made
         return status
 
     def check_tie(self) -> bool:

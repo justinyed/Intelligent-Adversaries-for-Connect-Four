@@ -15,9 +15,9 @@ class BoardInterface:
 
     def __init__(self, grid=None, lowest=None):
         """
-        constructor for _board object
+        constructor for board object
 
-        :param grid: if one wants to copy an existing _board
+        :param grid: if one wants to copy an existing board
         """
 
         if grid is None and lowest is None:
@@ -54,7 +54,7 @@ class BoardInterface:
 
     def new_grid(self):
         """
-        initialize the _grid
+        initialize the grid
 
         :return: New Grid
         """
@@ -78,7 +78,7 @@ class BoardInterface:
 
     def set_piece(self, position, piece):
         """
-        set piece in _grid
+        set piece in grid
 
         :param position: Tuple (x, y) of position to place piece
         :param piece: piece to place
@@ -87,7 +87,7 @@ class BoardInterface:
 
     def get_piece(self, position):
         """
-        get piece at position in _grid
+        get piece at position in grid
 
         :param position: Tuple (x, y) of position to get
         :return: piece at position
@@ -96,11 +96,11 @@ class BoardInterface:
 
     def drop_piece(self, column, piece):
         """
-        drop piece into slot in _grid
+        drop piece into slot in grid
 
         :param piece: piece to place
         :param column: column to drop piece
-        :return: new _status after action
+        :return: new status after action
         """
         position = column, self._lowest[column]
         if self.is_legal_position(position):
@@ -122,7 +122,7 @@ class BoardInterface:
 
     def check_win(self, drop_position, current_piece):
         """
-        Local Win Check. Checks Starting from the dropped piece (change on _grid)
+        Local Win Check. Checks Starting from the dropped piece (change on grid)
         :param current_piece: current piece
         :param drop_position: Position of Dropped Piece
         :return: True if Win was found, otherwise False

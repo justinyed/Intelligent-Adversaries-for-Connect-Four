@@ -1,21 +1,13 @@
 from discord import Button, ButtonStyle, ActionRow, SelectOption, SelectMenu
 import intelligence
 
-NUM_PLAYERS = 2
-DROP_TIME = 0.0
-ILLEGAL_INPUT_MSG = ""
-BAD_INPUT_TIME = 0.7
-
 ADMINS = ["justinyedinak#2425"]
+DATABASE = "./leaderboard.db"
 
-CLG_DESCRIPTION = 'Challenge a current_player or agent by providing the ID. ' \
+CLG_DESCRIPTION = 'Challenge a Current Player or Bot by providing the ID. ' \
                   'If no parameter is given, then a menu will assist.'
 
-LB_DESCRIPTION = 'Leaderboard'  # todo
-
-REC_DESCRIPTION = 'Record'  # todo
-
-BUTTONS = [
+PLAY_BUTTONS = [
     ActionRow(*list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.blurple) for i in range(1, 5)])),
     ActionRow(*(list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.blurple) for i in range(5, 8)])
                 + [Button(label="\t", custom_id="empty", style=ButtonStyle.blurple, disabled=True)]))
@@ -38,6 +30,13 @@ AGENT_MENU = [
                placeholder='Select an Agent', max_values=1)
 ]
 
+
+class TIME:
+    rejection_timeout = 5
+    challenge_timeout_message = 5
+    challenge_timeout = 15
+
+
 # ### Visual Components ###
 PLAYER1_PIECE = ":regional_indicator_x:"
 PLAYER2_PIECE = ":o2:"
@@ -50,13 +49,35 @@ PIECES = {
     -1: PLAYER2_PIECE
 }
 
-ONE = ":one:"
-TWO = ":two:"
-THREE = ":three:"
-FOUR = ":four:"
-FIVE = ":five:"
-SIX = ":six:"
-SEVEN = ":seven:"
+DISPLAY_NUMBERS = (":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:")
 
-BUTTON_NUMBERS = (ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN)
-BUTTON_DECODER = dict(zip(BUTTON_NUMBERS, range(len(BUTTON_NUMBERS))))
+
+class MESSAGE:
+    tie = 'The game has been Tied.'
+    select_agent = 'Select an Artificially Intelligent Adversary'
+    welcome = "Welcome to Connect Four!"
+    turn_prompt = "Make a Selection"
+
+    @staticmethod
+    def tell_turn_start(challenger, piece):
+        return f"It is {challenger}'s ( {piece} ) turn."
+
+    @staticmethod
+    def tell_challenge(challenger, opponent):
+        return f"{opponent}, {challenger} has challenged you to a Connect Four Match."
+
+    @staticmethod
+    def tell_winner(player):
+        return f"{player} has Triumphed!"
+
+    @staticmethod
+    def tell_challenger_declined(opponent):
+        return f"{opponent} has rejected the challenge."
+
+    @staticmethod
+    def tell_challenger_timed_out(opponent):
+        return f"{opponent} has not responded to the challenge."
+
+    @staticmethod
+    def tell_challenger_self(challenger):
+        return f"@{challenger}, you cannot challenge yourself."

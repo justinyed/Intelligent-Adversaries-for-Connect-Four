@@ -7,10 +7,10 @@ PLAYER2 = -1
 
 def evaluation_function_simple(game, current_player):
     """
-    Evaluates the state of the game_components and returns the static value of being in that state.
+    Evaluates the state of the game and returns the static value of being in that state.
 
     :param current_player:
-    :param game: game_components state to evaluate
+    :param game: state to evaluate
     :return: static value in current state
     """
 
@@ -47,7 +47,7 @@ def evaluation_function_weighted_matrix(game, current_player: int):
     Acts as a heuristic and evaluation function.
 
     :param current_player:
-    :param game: game_components state to evaluate
+    :param game: state to evaluate
     :return: static value in current state
     """
 

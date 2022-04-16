@@ -16,7 +16,7 @@ class ConnectFourCLI:
 
     def start(self, game=c4.ConnectFour()):
         """
-        Once initialized, use this method to start the game_components
+        Once initialized, use this method to start the game
         """
         self.agent_1 = self.select_agent(game, 1)
         self.agent_2 = self.select_agent(game, -1)  # player must be same as encoding
@@ -24,7 +24,7 @@ class ConnectFourCLI:
 
     def handler(self, game):
         """
-        The main method which handles orchestrating the game_components.
+        The main method which handles orchestrating the game
         """
 
         while True:

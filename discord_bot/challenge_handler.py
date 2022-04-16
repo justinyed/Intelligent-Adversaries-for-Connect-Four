@@ -1,42 +1,51 @@
+import uuid
 from random import shuffle
 import discord
-from discord import Button, ButtonStyle, ActionRow, SelectMenu, SelectOption
 from discord.ext import commands
 import asyncio
-import discord_constants as constant
+import discord_config as config
+from discord_config import MESSAGE, TIME
 import game_components
-from record import Record
 
-# todo - don't let users challenge themselves
 
 class ChallengeHandler(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.leaderboard_handler = None
         print("[ChallengeHandler Initialized]")
 
     @commands.command(name='challenge', aliases=['clg'],
-                      description=constant.CLG_DESCRIPTION, help='help', pass_contaxt=True)
+                      description=config.CLG_DESCRIPTION, help='help', pass_contaxt=True)
     async def challenge(self, ctx: commands.Context, opponent=None):
         """
         Allows the player to challenge an opponent
         :param ctx: context
         :param opponent: opponent player to challenge; if none options are given.
         """
-        msg = await ctx.send("Welcome to Connect Four!")
+        msg = await ctx.send(MESSAGE.welcome)
         challenger = ctx.author
 
-        if opponent is None:  # Agent Selection
+        # Direct Agent Selection?
+        if opponent is None:
             opponent = await self._agent_selection(msg, ctx.author)
         else:
             opponent = await self.bot.fetch_user(opponent.strip("<@!>"))
+
+            # Challenged Bot?
             if opponent.display_name == self.bot.user.display_name:
                 opponent = await self._agent_selection(msg, ctx.author)
-            else:
-                if not await self._challenge_check(msg, challenger, opponent):
-                    return
 
-        await self._game_handler(msg, *await ChallengeHandler._new_game(challenger, opponent))
+            # Challenged Self?
+            elif opponent == challenger:
+                await ctx.send(MESSAGE.tell_challenger_self(challenger), delete_after=5)
+                return
+
+            # Challenged Other Player?
+            elif not await self._challenge_check(msg, challenger, opponent):
+                return
+
+        await self._game_handler(msg, *await self._new_game(challenger, opponent))
 
     async def _challenge_check(self, msg: discord.Message, challenger, opponent):
         """
@@ -46,34 +55,44 @@ class ChallengeHandler(commands.Cog):
         :param opponent:
         :return:
         """
+        # query opponent
         await msg.edit(
-            content=f"{opponent.mention}, {challenger.display_name} has challenged you to a Connect Four Match.",
-            components=constant.ACCEPT_REJECT_BUTTONS
+            content=MESSAGE.tell_challenge(challenger.display_name, opponent.mention),
+            components=config.ACCEPT_REJECT_BUTTONS
         )
 
+        # handle button press
         try:
-            interaction, button = await \
-                self.bot.wait_for('button_click', check=lambda i, b: i.message == msg and i.user_id == opponent.id, timeout=15)
+            interaction, button = await self.bot.wait_for(
+                'button_click', check=lambda i, b: i.message == msg and i.user_id == opponent.id,
+                timeout=TIME.challenge_timeout
+            )
+
             await interaction.defer()
 
             # check for rejection
             if button.custom_id == "reject":
-                await msg.edit(content=f"{opponent.display_name} has rejected the challenge.",
-                               components=[],
-                               delete_after=5)
+                await msg.edit(
+                    content=MESSAGE.tell_challenger_declined(opponent.display_name),
+                    components=[],
+                    delete_after=TIME.rejection_timeout
+                )
                 return False
             else:
                 return True
+
         except asyncio.TimeoutError:
-            await msg.edit(content=f"{opponent.display_name} has not responded to the challenge.",
-                           components=[],
-                           delete_after=5)
+            await msg.edit(
+                content=MESSAGE.tell_challenger_timed_out(opponent.display_name),
+                components=[],
+                delete_after=TIME.challenge_timeout_message
+            )
             return False
 
     # todo - add a way to forfeit/quit
-    async def _game_handler(self, msg: discord.Message, game, player1, player2, record):
+    async def _game_handler(self, msg: discord.Message, game, player1, player2, uid):
         """
-        Handles turns of game_components
+        Handles turns of game
         :param msg: message to display to users
         :param game: ConnectFour Game Object
         :param player1: id
@@ -81,21 +100,22 @@ class ChallengeHandler(commands.Cog):
         """
 
         if game.is_terminal_state():
-            record.game_finished(game.get_status())
-
             try:
-                await record.save()
+                await self.leaderboard_handler.end_game(uid, self.current_player_name(game, player1, player2),
+                                                        game.get_status)
             except Exception as e:
                 print(e)
                 pass
 
             if game.is_tie():
-                e = discord.Embed(title=f"The game_components has been Tied.")
+                e = discord.Embed(title=MESSAGE.tie)
                 await msg.edit(content=ChallengeHandler._assemble_board(game), embed=e, components=[])
                 return
-            else:  # winner
+
+            if game.is_won():
                 e = discord.Embed(
-                    title=f"{ChallengeHandler.current_player_name(game, player1, player2)} has Triumphed!")
+                    title=MESSAGE.tell_winner(ChallengeHandler.current_player_name(game, player1, player2))
+                )
                 await msg.edit(content=ChallengeHandler._assemble_board(game), embed=e, components=[])
                 return
 
@@ -108,44 +128,59 @@ class ChallengeHandler(commands.Cog):
 
         current_player = ChallengeHandler.current_player_name(game, player1, player2)
 
-        if current_player in constant.AGENTS.keys():
-            action = constant.AGENTS[current_player].get_action(game)
+        if current_player in config.AGENTS.keys():
+            action = config.AGENTS[current_player].get_action(game)
         else:
             interaction, button = await self.bot.wait_for('button_click', check=check_button)
             action = int(button.custom_id) - 1
             await interaction.defer()
 
         game.perform_action(action)
-        record.add_move(action)
+        await self.leaderboard_handler.update_move(uid, action)
 
-        await self._game_handler(msg, game, player1, player2, record)
+        await self._game_handler(msg, game, player1, player2, uid)
 
-    @staticmethod
-    async def _new_game(player1, player2):
+    async def _new_game(self, player1, player2):
         """
-        Initializes new game_components and shuffles players
+        Initializes new game and shuffles players
         :param player1: Agent Object which handles interaction
         :param player2: Agent Object which handles interaction
-        :return: game_components, player1, player2
+        :return: game, player1, player2
         """
+        # Shuffle who starts
+        challenger, opponent = str(player1), str(player2)
         players = [player1, player2]
         shuffle(players)
         player1, player2 = players
+
+        # start game
         game = game_components.ConnectFour()
-        record = Record(player1, player2)
-        return game, player1, player2, record
+
+        # Initialize Leaderboard Entries
+        uid = uuid.uuid1()
+        await self.leaderboard_handler.add_player(challenger)
+        await self.leaderboard_handler.add_player(opponent)
+        await self.leaderboard_handler.add_game(uid, challenger, opponent, str(player1), str(player2))
+
+        return game, player1, player2, uid
 
     async def _agent_selection(self, msg: discord.Message, challenger):
-        await msg.edit(content='Select an Artificially Intelligent Adversary', components=constant.AGENT_MENU)
-        interaction, select_menu = await \
-            self.bot.wait_for('selection_select', check=lambda i, b: i.author == challenger and i.message == msg)
+        await msg.edit(content=MESSAGE.select_agent, components=config.AGENT_MENU)
+
+        interaction, select_menu = await self.bot.wait_for(
+            'selection_select', check=lambda i, b: i.author == challenger and i.message == msg
+        )
+
         await interaction.defer()
         return select_menu.values[0]
 
     @staticmethod
     async def _update_display(msg: discord.Message, game, player1, player2):
-        await msg.edit(embed=ChallengeHandler._assemble_display(game, player1, player2),
-                       content=ChallengeHandler._assemble_board(game), components=constant.BUTTONS)
+        await msg.edit(
+            embed=ChallengeHandler._assemble_display(game, player1, player2),
+            content=ChallengeHandler._assemble_board(game),
+            components=config.PLAY_BUTTONS
+        )
 
     @staticmethod
     def current_player(game, player1, player2):
@@ -157,6 +192,7 @@ class ChallengeHandler(commands.Cog):
     @staticmethod
     def current_player_name(game, player1, player2):
         p = ChallengeHandler.current_player(game, player1, player2)
+
         if type(p) is not str:
             return p.display_name
         else:
@@ -164,27 +200,37 @@ class ChallengeHandler(commands.Cog):
 
     @staticmethod
     def _assemble_display(game, player1, player2):
+        current_player = ChallengeHandler.current_player_name(game, player1, player2)
+        current_piece = config.PIECES[game.get_current_player()]
+        turn_message = MESSAGE.tell_turn_start(current_player, current_piece)
+
         embed = discord.Embed()
-        n = f"It is {ChallengeHandler.current_player_name(game, player1, player2)}'s ( {constant.PIECES[game.get_current_player()]} ) turn."
-        embed.add_field(name=n, value="Make a Selection", inline=False)
+        embed.add_field(name=turn_message, value=MESSAGE.turn_prompt, inline=False)
         return embed
 
     @staticmethod
     def _assemble_board(game):
         """
-        Create the representation of the game_components
-        :param game: game_components state
-        :return: string representation of the game_components
+        Create the representation of the game
+        :param game: game state
+        :return: string representation of the game
         """
-        representation = "\n" + constant.structure + "".join(constant.BUTTON_NUMBERS) + constant.structure + "\n"
+        # header
+        representation = "\n" + config.structure + "".join(config.DISPLAY_NUMBERS) + config.structure + "\n"
+
+        # board
         for y in range(game.get_board().get_height() - 1, -1, -1):
-            representation += constant.structure
+            representation += config.structure
+
             for x in range(game.get_board().get_width()):
                 piece = game.get_board().get_piece((x, y))
-                representation += f"{constant.PIECES[piece]}"
-            representation += f"{constant.structure}\n"
-        return representation + constant.structure * 9
+                representation += config.PIECES[piece]
+
+            representation += config.structure + "\n"
+        return representation + config.structure * 9
 
     @staticmethod
-    def setup(bot: commands.Bot):
-        bot.add_cog(ChallengeHandler(bot))
+    def setup(bot: commands.Bot, leaderboard_handler):
+        ch = ChallengeHandler(bot)
+        bot.add_cog(ch)
+        ch.leaderboard_handler = leaderboard_handler

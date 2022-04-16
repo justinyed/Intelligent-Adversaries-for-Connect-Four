@@ -2,7 +2,7 @@ import os
 from random import shuffle
 import discord
 from discord.ext import commands
-import discord_constants as constant
+import discord_config as constant
 import time
 
 

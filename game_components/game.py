@@ -17,9 +17,9 @@ class GameInterface:
         Constructor for Game
 
         :param players: tuple of _players; default=(PLAYER1, PLAYER2)
-        :param tie: _tie code to use for games in _tie _status; default=TIE_CODE
-        :param turn: starting _turn; default=0
-        :param status: starting _status; default=0
+        :param tie: tie code to use for games in tie status; default=TIE_CODE
+        :param turn: starting turn; default=0
+        :param status: starting status; default=0
         """
         self._board = None
         self._board_type = board_type
@@ -31,9 +31,9 @@ class GameInterface:
 
     def get_tie_code(self) -> int:
         """
-        get code used for _tie games
+        get code used for tie games
 
-        :return: _tie code
+        :return: tie code
         """
         return self._tie
 
@@ -41,37 +41,37 @@ class GameInterface:
         """
         get tuple of pLayers
 
-        :return: tuple of _players
+        :return: tuple of players
         """
         return self._players
 
     def get_player_count(self) -> int:
         """
-        get number of _players
+        get number of players
 
-        :return: count of _players as int
+        :return: count of players as int
         """
         return self._player_count
 
     def get_current_player(self) -> int:
         """
-        get the current current_player from the tuple of _players
+        get the current player from the tuple of players
 
-        :return: current current_player
+        :return: current player
         """
         pass
 
     def get_board(self) -> board.BoardInterface:
         """
-        get internal _board
+        get internal board
 
-        :return: internal _board
+        :return: internal board
         """
         return self._board
 
     def set_board(self, board):
         """
-        set internal _board
+        set internal board
 
         :param board: to set
         """
@@ -79,17 +79,17 @@ class GameInterface:
 
     def _new_state(self) -> tuple:
         """
-        get tuple containing the tuple of the state at the start of a game_components
+        get tuple containing the tuple of the state at the start of a game
 
-        :return: tuple of the state at the start of a game_components
+        :return: tuple of the state at the start of a game
         """
         pass
 
     def get_state(self) -> tuple:
         """
-        get tuple containing the tuple of the current state of the game_components
+        get tuple containing the tuple of the current state of the game
 
-        :return: the state of the game_components as a tuple
+        :return: the state of the game as a tuple
         """
         pass
 
@@ -97,8 +97,8 @@ class GameInterface:
         """
         get the game_components object after an action is performed on the current state
 
-        :param action: that leads to returned game_components
-        :return: game_components after the applied action
+        :param action: that leads to returned game
+        :return: game after the applied action
         """
         pass
 
@@ -112,15 +112,15 @@ class GameInterface:
 
     def get_status(self) -> int:
         """
-        get _status of the game_components is an integer code representing the _status.
+        get status of the game is an integer code representing the status.
 
-        :return: _status of the game_components
+        :return: status of the game
         """
         return self._status
 
     def set_status(self, status: int) -> None:
         """
-        set _status of the game_components is an integer code representing the _status.
+        set status of the game is an integer code representing the status.
 
         :param status: code (integer)
         """
@@ -128,14 +128,14 @@ class GameInterface:
 
     def set_state(self, state):
         """
-        set the state of the game_components
+        set the state of the game
         :param state: State to set
         """
         pass
 
     def get_turn(self) -> int:
         """
-        get the current _turn number
+        get the current turn number
 
         :return: Current Turn
         """
@@ -143,7 +143,7 @@ class GameInterface:
 
     def is_terminal_state(self) -> bool:
         """
-        boolean for if the game_components is in a terminal state.
+        boolean for if the game is in a terminal state.
 
         :return: True if terminal state has been reached, otherwise False.
         """
@@ -151,7 +151,7 @@ class GameInterface:
 
     def is_active_state(self) -> bool:
         """
-        boolean for if the game_components is NOT in a terminal state.
+        boolean for if the game is NOT in a terminal state.
 
         :return: True if terminal state has NOT been reached, otherwise False.
         """
@@ -159,17 +159,24 @@ class GameInterface:
 
     def is_tie(self) -> bool:
         """
-        boolean for if the game_components is in a tied state.
+        boolean for if the game is in a tied state.
         :return: True if tied status
         """
         return self.get_status() == self.get_tie_code()
 
+    def is_won(self) -> bool:
+        """
+        boolean for if the game is in a tied state.
+        :return: True if win status
+        """
+        return self.is_terminal_state() and not self.is_tie()
+
     def perform_action(self, directive) -> int:
         """
-        given a directive execute action/move upon the game_components state.
+        given a directive execute action/move upon the game state.
 
         :param directive: parameter for action specification
-        :return: updated _status code of the game_components
+        :return: updated _status code of the game
         """
         pass
 
