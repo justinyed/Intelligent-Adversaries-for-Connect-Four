@@ -57,7 +57,7 @@ def evaluation_function_weighted_matrix(game, current_player: int):
     elif game.is_tied():
         return TIE_VALUE
     elif game.is_terminal_state():
-        return (1 / (game.get_turn() + 1)) * LOSING_VALUE  # todo - not sure about this part
+        return (1 / (game.get_turn() + 1)) * LOSING_VALUE
 
     grid = game.get_board().get_grid()
 

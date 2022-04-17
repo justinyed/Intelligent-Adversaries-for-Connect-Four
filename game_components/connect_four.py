@@ -67,6 +67,9 @@ class ConnectFour(game.GameInterface):
             return self.get_status()
         return self.get_players()[self.get_turn() % self._player_count]
 
+    def get_other_player(self):
+        return -1 * self.get_current_player()
+
     def is_terminal_state(self) -> bool:
         return self._in_progress != self.get_status()
 

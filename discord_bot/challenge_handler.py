@@ -91,7 +91,6 @@ class ChallengeHandler(commands.Cog):
             )
             return False
 
-    # todo - add a way to forfeit/quit
     async def _game_handler(self, msg: discord.Message, game, player1, player2, uid):
         """
         Handles turns of game
@@ -105,25 +104,17 @@ class ChallengeHandler(commands.Cog):
         if game.is_terminal_state():
 
             if game.is_tied():
-
-                # update leaderboard
-                await self.leaderboard_handler.end_game(uid, 'tied', game.get_status())
-                await self.leaderboard_handler.update_player(str(player1), is_win=False, is_tie=True)
-                await self.leaderboard_handler.update_player(str(player2), is_win=False, is_tie=True)
+                await self.leaderboard_handler.end_game(uid, str(player1), str(player2), game.get_status(), True)
 
                 e = discord.Embed(title=MESSAGE.tie)
                 await msg.edit(content=ChallengeHandler._assemble_board(game), embed=e, components=[])
 
             if game.is_won():
-
                 # update leaderboard
                 winner = str(self.current_player(game, player1, player2))
                 loser = str(self.other_player(game, player1, player2))
-                print(winner, loser)
 
-                await self.leaderboard_handler.end_game(uid, winner, game.get_status())
-                await self.leaderboard_handler.update_player(winner, is_win=True, is_tie=False)
-                await self.leaderboard_handler.update_player(loser, is_win=False, is_tie=False)
+                await self.leaderboard_handler.end_game(uid, winner, loser, game.get_status())
 
                 e = discord.Embed(
                     title=MESSAGE.tell_winner(ChallengeHandler.current_player_name(game, player1, player2))
@@ -135,6 +126,8 @@ class ChallengeHandler(commands.Cog):
         def check_button(i: discord.Interaction, b: discord.Button):
             if not (i.message == msg and i.user_id == ChallengeHandler.current_player(game, player1, player2).id):
                 return False
+            if b.custom_id == config.FORFEIT:
+                return True
             return (int(b.custom_id) - 1) in game.get_legal_actions()
 
         await ChallengeHandler._update_display(msg, game, player1, player2)
@@ -145,6 +138,18 @@ class ChallengeHandler(commands.Cog):
             action = config.AGENTS[current_player].get_action(game)
         else:
             interaction, button = await self.bot.wait_for('button_click', check=check_button)
+
+            if button.custom_id == config.FORFEIT:  # Forfeit?  # todo - refactor; add stop gap
+                quiter = str(self.current_player(game, player1, player2))
+                winner = str(self.other_player(game, player1, player2))
+
+                forfeit_msg = f"{quiter} has opted to forfeit the game, {winner} is the Winner!"
+                e = discord.Embed(title=forfeit_msg)
+
+                await self.leaderboard_handler.end_game(uid, winner, quiter, 4)
+                await msg.edit(content="", embed=e, components=[], delete_after=10)
+                return
+
             action = int(button.custom_id) - 1
             await interaction.defer()
 
@@ -170,9 +175,7 @@ class ChallengeHandler(commands.Cog):
 
         # Initialize Leaderboard Entries
         uid = uuid.uuid1()
-        await self.leaderboard_handler.add_player(challenger)
-        await self.leaderboard_handler.add_player(opponent)
-        await self.leaderboard_handler.add_game(uid, challenger, opponent, str(player1), str(player2))
+        await self.leaderboard_handler.add_game(uid, str(player1), str(player2))
 
         return game, player1, player2, uid
 
@@ -266,7 +269,7 @@ class ChallengeHandler(commands.Cog):
         msg = await ctx.send(MESSAGE.welcome)
         agent1 = agent1.replace("@", "").replace(" ", "")
 
-        if agent2 is None:
+        if agent2 is None or agent2 == "''":
             agent2 = agent1
 
         for _ in range(iterations):

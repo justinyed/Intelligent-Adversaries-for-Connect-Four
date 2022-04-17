@@ -7,7 +7,8 @@ sql.register_adapter(UUID, lambda u: u.bytes_le)
 sql.register_converter('GUID', lambda b: UUID(bytes_le=b))
 
 MEMORY = ":memory:"
-
+in_progress = 'in_progress'
+dt_format = "%d/%m/%Y %H:%M:%S"
 
 class Leaderboard:
 
@@ -54,7 +55,7 @@ class Leaderboard:
 
     def add_player(self, player_id):
         now = datetime.now()
-        date = now.strftime("%d/%m/%Y %H:%M:%S")
+        date = now.strftime(dt_format)
         sql = "INSERT OR IGNORE INTO players(player_id, win_amount, loss_amount, " \
               "tie_amount, games_played, begin_date, last_date) VALUES(?,?,?,?,?,?,?)"
 
@@ -65,7 +66,7 @@ class Leaderboard:
 
     def update_player(self, player_id, is_win, is_tie=False):
         now = datetime.now()
-        date = now.strftime("%d/%m/%Y %H:%M:%S")
+        date = now.strftime(dt_format)
 
         cursor = self.connection.cursor()
         cursor.execute("SELECT win_amount, loss_amount, tie_amount, games_played FROM players WHERE player_id=?",
@@ -95,22 +96,21 @@ class Leaderboard:
             """
 
         cursor = self.connection.cursor()
-        cursor.execute(sql, (win, loss, tie, played + 1, player_id, date))
+        cursor.execute(sql, (win, loss, tie, played + 1, date, player_id))
         self.connection.commit()
 
-    def add_game(self, uid, challenger: str, opponent: str, player1: str, player2: str):
+    def add_game(self, uid, player1: str, player2: str):
         now = datetime.now()
-        in_progress = 'in_progress'
 
-        sql = "INSERT OR IGNORE INTO games(id,challenger,opponent,player1,player2,status_id,begin_date,moves,turns," \
+        sql = "INSERT OR IGNORE INTO games(id,player1,player2,status_id,begin_date,moves,turns," \
               "winner,end_date" \
-              ") VALUES(?,?,?,?,?,?,?,?,?,?,?)"
+              ") VALUES(?,?,?,?,?,?,?,?,?)"
 
         cursor = self.connection.cursor()
 
         cursor.execute(
             sql,
-            (uid, challenger, opponent, player1, player2, 0, now.strftime("%d/%m/%Y %H:%M:%S"), "", 0, in_progress,
+            (uid, player1, player2, 0, now.strftime(dt_format), "", 0, in_progress,
              in_progress),
         )
 
@@ -137,7 +137,7 @@ class Leaderboard:
 
     def end_game(self, uid, winner, status_id):
         now = datetime.now()
-        end = now.strftime("%d/%m/%Y %H:%M:%S")
+        end = now.strftime(dt_format)
         sql = \
             """UPDATE games
                 SET 
@@ -164,8 +164,6 @@ class Leaderboard:
 
         sql_create_table_games = """CREATE TABLE IF NOT EXISTS games (
                                         id GUID PRIMARY KEY,
-                                        challenger text,
-                                        opponent text NOT NULL,
                                         player1 text NOT NULL,
                                         player2 text NOT NULL,
                                         status_id integer NOT NULL,
@@ -179,6 +177,17 @@ class Leaderboard:
         self.create_table(sql_create_table_player)
         self.create_table(sql_create_table_games)
 
+    def get_game_start(self, uid):
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute("SELECT begin_date FROM games WHERE id=?", (uid,))
+            retrieved = cursor.fetchall()
+            start_date = retrieved[0]
+            return start_date
+        except Error as e:
+            print(e)
+            return
+
 
 if __name__ == '__main__':
     DATABASE = "../data/leaderboard.db"
@@ -187,7 +196,7 @@ if __name__ == '__main__':
 
     lb.add_player('spartanyed')
     lb.add_player('justinyedinak')
-    lb.add_game(g, "justinyedinak", "spartanyed", "justinyedinak", "spartanyed")
+    lb.add_game(g, "justinyedinak", "spartanyed")
 
     lb.update_move(g, 1)
     lb.update_move(g, 4)

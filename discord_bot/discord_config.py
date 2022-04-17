@@ -7,10 +7,16 @@ DATABASE = "./leaderboard.db"
 CLG_DESCRIPTION = 'Challenge a Current Player or Bot by providing the ID. ' \
                   'If no parameter is given, then a menu will assist.'
 
+FORFEIT = 'forfeit'
+FORFEIT_BUTTON = [Button(label="Quit", custom_id=FORFEIT, style=ButtonStyle.blurple)]
+
+
+DISABLED_BUTTON = [Button(label="\t", custom_id="empty", style=ButtonStyle.blurple, disabled=True)]
+
 PLAY_BUTTONS = [
     ActionRow(*list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.blurple) for i in range(1, 5)])),
     ActionRow(*(list([Button(label=f"{i}", custom_id=f"{i}", style=ButtonStyle.blurple) for i in range(5, 8)])
-                + [Button(label="\t", custom_id="empty", style=ButtonStyle.blurple, disabled=True)]))
+                + FORFEIT_BUTTON))
 ]
 
 ACCEPT_REJECT_BUTTONS = [Button(label='Accept', custom_id='accept', style=ButtonStyle.green),

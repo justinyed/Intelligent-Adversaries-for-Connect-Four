@@ -42,20 +42,30 @@ class LeaderBoardHandler(commands.Cog):
     #         pass
     #         # Display players records
 
-    async def add_player(self, player_id):
-        self.leaderboard.add_player(player_id)
-
-    async def update_player(self, player_id, is_win, is_tie=False):
+    async def update_player(self, player_id: str, is_win, is_tie=False):
         self.leaderboard.update_player(player_id, is_win, is_tie)
 
-    async def add_game(self, uid, challenger, opponent, player1, player2):
-        self.leaderboard.add_game(uid, challenger, opponent, player1, player2)
+    async def add_game(self, uid, player1: str, player2: str):
+        self.leaderboard.add_player(player1)
+        self.leaderboard.add_player(player2)
+        self.leaderboard.add_game(uid, player1, player2)
 
     async def update_move(self, uid, move):
         self.leaderboard.update_move(uid, move)
 
-    async def end_game(self, uid, winner, status):
-        self.leaderboard.end_game(uid, winner, status)
+    async def end_game(self, uid, winner, loser, status, is_tied=False):
+
+        if is_tied:
+            self.leaderboard.end_game(uid, 'tied', status)
+            self.leaderboard.update_player(winner, is_win=False, is_tie=True)
+            self.leaderboard.update_player(loser, is_win=False, is_tie=True)
+        else:
+            self.leaderboard.end_game(uid, winner, status)
+            self.leaderboard.update_player(winner, is_win=True, is_tie=False)
+            self.leaderboard.update_player(loser, is_win=False, is_tie=False)
+
+    async def get_game_start(self, uid):
+        return self.leaderboard.get_game_start(uid)
 
     @staticmethod
     def setup(bot: commands.Bot, db_file):
