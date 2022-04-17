@@ -93,7 +93,7 @@ class ChallengeHandler(commands.Cog):
 
     async def _game_handler(self, msg: discord.Message, game, player1, player2, uid):
         """
-        Handles turns of game
+        Handles turns of game.
         :param msg: message to display to users
         :param game: ConnectFour Game Object
         :param player1: id
