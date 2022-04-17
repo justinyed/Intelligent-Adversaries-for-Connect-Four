@@ -100,12 +100,12 @@ python setup.py build && python setup.py install
 | Analysis     | Analyze the performance and behavior of these techniques generally & when challenging each other during Connect Four battles.   |
 
 ### Directory Structure
-| Directory         | Description                                       |
-|-------------------|---------------------------------------------------|
-| `discord_bot`     | Discord Bot Interface                             |
+| Directory        | Description                                       |
+|------------------|---------------------------------------------------|
+| `discord_bot`    | Discord Bot Interface                             |
 | `game_components` | Connect Four Game Engine & Command Line Interface |
-| `inteliigence`    | Various Agents/Opponents for Connect Four         |
-| `analysis`        | Notebooks & scripts for analysis.                 |
+| `inteligence`    | Various Agents/Opponents for Connect Four         |
+| `analysis`       | Notebooks & scripts for analysis.                 |
 
 ---
 
