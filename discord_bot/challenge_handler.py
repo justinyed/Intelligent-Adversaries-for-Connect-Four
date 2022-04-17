@@ -3,8 +3,8 @@ from random import shuffle
 import discord
 from discord.ext import commands
 import asyncio
-import discord_config as config
-from discord_config import MESSAGE, TIME
+import discord_bot.discord_config as config
+from discord_bot.discord_config import MESSAGE, TIME
 import game_components
 
 
@@ -29,6 +29,8 @@ class ChallengeHandler(commands.Cog):
         # Direct Agent Selection?
         if opponent is None:
             opponent = await self._agent_selection(msg, ctx.author)
+        elif opponent.replace("@", "") in config.AGENTS.keys():
+            opponent = opponent.replace("@", "")
         else:
             opponent = await self.bot.fetch_user(opponent.strip("<@!>"))
 
@@ -97,6 +99,7 @@ class ChallengeHandler(commands.Cog):
         :param game: ConnectFour Game Object
         :param player1: id
         :param player2: id
+        :param: uid: unique game id
         """
 
         if game.is_terminal_state():
@@ -205,7 +208,6 @@ class ChallengeHandler(commands.Cog):
         else:
             return player2
 
-
     @staticmethod
     def current_player_name(game, player1, player2):
         p = ChallengeHandler.current_player(game, player1, player2)
@@ -251,3 +253,22 @@ class ChallengeHandler(commands.Cog):
         ch = ChallengeHandler(bot)
         bot.add_cog(ch)
         ch.leaderboard_handler = leaderboard_handler
+
+    @commands.command(name='demonstration', aliases=['demo'], pass_contaxt=True)
+    async def demo(self, ctx: commands.Context, agent1='Iterative_Agent', agent2=None, iterations=100):
+        """
+        Admin Command Only - Starts Demo Between Two Agents
+        """
+        if str(ctx.author) not in config.ADMINS:
+            await ctx.send("You do not have permission for this command", delete_after=3)
+            return
+
+        msg = await ctx.send(MESSAGE.welcome)
+        agent1 = agent1.replace("@", "").replace(" ", "")
+
+        if agent2 is None:
+            agent2 = agent1
+
+        for _ in range(iterations):
+            print(f"Started Demonstration between \"{agent1}\" and \"{agent2}\"")
+            await self._game_handler(msg, *await self._new_game(agent1, agent2))

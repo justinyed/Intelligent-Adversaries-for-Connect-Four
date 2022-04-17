@@ -1,15 +1,11 @@
 from sqlite3 import Error
-
-import discord
-import asyncio
 from discord.ext import commands
-import discord_config as constant
-from leaderboard_database import Leaderboard
+from discord_bot.leaderboard_database import Leaderboard
 
 
 class LeaderBoardHandler(commands.Cog):
 
-    def __init__(self, bot: commands.Bot, leaderboard):
+    def __init__(self, bot: commands.Bot, leaderboard: Leaderboard):
         try:
             self.leaderboard = leaderboard
         except Error as e:

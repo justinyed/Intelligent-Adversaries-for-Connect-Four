@@ -1,11 +1,11 @@
 import discord
 from discord.ext import commands
-from challenge_handler import ChallengeHandler
-from leaderboard_handler import LeaderBoardHandler
-from help_handler import HelpHandler
-from utilities import Utilities
-from json_utilities import Util
-from leaderboard_database import Leaderboard
+from discord_bot.challenge_handler import ChallengeHandler
+from discord_bot.leaderboard_handler import LeaderBoardHandler
+from discord_bot.help_handler import HelpHandler
+from discord_bot.utilities import Utilities
+from discord_bot.json_utilities import Util
+from discord_bot.leaderboard_database import Leaderboard
 
 discord.MemberCacheFlags.all()
 intents = discord.Intents(messages=True, guilds=True)

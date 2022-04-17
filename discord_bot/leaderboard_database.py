@@ -1,13 +1,10 @@
-import sqlite3 as sql
 import sqlite3 as Error
-import uuid
+import sqlite3 as sql
 from datetime import datetime
 from uuid import UUID, uuid1
-import pandas as pd
 
 sql.register_adapter(UUID, lambda u: u.bytes_le)
 sql.register_converter('GUID', lambda b: UUID(bytes_le=b))
-
 
 MEMORY = ":memory:"
 
@@ -57,21 +54,24 @@ class Leaderboard:
 
     def add_player(self, player_id):
         now = datetime.now()
-
-        sql = "INSERT OR IGNORE INTO players(player_id, win_amount, loss_amount, tie_amount, games_played, begin_date)" \
-              "VALUES(?,?,?,?,?,?)"
+        date = now.strftime("%d/%m/%Y %H:%M:%S")
+        sql = "INSERT OR IGNORE INTO players(player_id, win_amount, loss_amount, " \
+              "tie_amount, games_played, begin_date, last_date) VALUES(?,?,?,?,?,?,?)"
 
         cursor = self.connection.cursor()
-        cursor.execute(sql, (player_id, 0, 0, 0, 0, now.strftime("%d/%m/%Y %H:%M:%S")))
+        cursor.execute(sql, (player_id, 0, 0, 0, 0, date, date))
         self.connection.commit()
         return cursor.lastrowid
 
     def update_player(self, player_id, is_win, is_tie=False):
+        now = datetime.now()
+        date = now.strftime("%d/%m/%Y %H:%M:%S")
+
         cursor = self.connection.cursor()
         cursor.execute("SELECT win_amount, loss_amount, tie_amount, games_played FROM players WHERE player_id=?",
                        (player_id,))
-        l = cursor.fetchall()
-        win, loss, tie, played = l[0]
+        retrieved = cursor.fetchall()
+        win, loss, tie, played = retrieved[0]
 
         if is_tie and is_win:
             raise ValueError("is_tie and is_win can not both be true!")
@@ -89,30 +89,39 @@ class Leaderboard:
                     win_amount = ?,
                     loss_amount = ?,
                     tie_amount = ?,
-                    games_played = ?
+                    games_played = ?,
+                    last_date = ?
                 WHERE player_id = ?
             """
 
         cursor = self.connection.cursor()
-        cursor.execute(sql, (win, loss, tie, played + 1, player_id))
+        cursor.execute(sql, (win, loss, tie, played + 1, player_id, date))
         self.connection.commit()
 
     def add_game(self, uid, challenger: str, opponent: str, player1: str, player2: str):
         now = datetime.now()
+        in_progress = 'in_progress'
 
-        sql = "INSERT OR IGNORE INTO games(id,challenger,opponent,player1,player2,status_id,begin_date,moves,turns" \
-              ") VALUES(?,?,?,?,?,?,?,?,?)"
+        sql = "INSERT OR IGNORE INTO games(id,challenger,opponent,player1,player2,status_id,begin_date,moves,turns," \
+              "winner,end_date" \
+              ") VALUES(?,?,?,?,?,?,?,?,?,?,?)"
 
         cursor = self.connection.cursor()
-        cursor.execute(sql, (uid, challenger, opponent, player1, player2, 0, now.strftime("%d/%m/%Y %H:%M:%S"), "", 0))
+
+        cursor.execute(
+            sql,
+            (uid, challenger, opponent, player1, player2, 0, now.strftime("%d/%m/%Y %H:%M:%S"), "", 0, in_progress,
+             in_progress),
+        )
+
         self.connection.commit()
         return cursor.lastrowid
 
     def update_move(self, uid, move):
         cursor = self.connection.cursor()
         cursor.execute("SELECT turns, moves FROM games WHERE id=?", (uid,))
-        l = cursor.fetchall()
-        turns, moves = l[0]
+        retrieved = cursor.fetchall()
+        turns, moves = retrieved[0]
 
         sql = \
             """UPDATE games
@@ -149,6 +158,7 @@ class Leaderboard:
                                             tie_amount integer,
                                             games_played integer,
                                             begin_date text,
+                                            last_date text,
                                             UNIQUE(player_id)
                                     );"""
 
@@ -185,4 +195,3 @@ if __name__ == '__main__':
     lb.end_game(g, 'spartanyed', 2)
 
     lb.update_player('spartanyed', True)
-

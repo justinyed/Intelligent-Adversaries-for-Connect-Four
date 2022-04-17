@@ -25,12 +25,15 @@ class ActionQueue:
     def extend(self, container) -> None:
         if type(container) is ActionQueue:
             container = container.to_list()
+
         unclean = sorted(list(container) + self.to_list(), reverse=True)
         found, clean = [], []
+
         for value, action in unclean:
             if action not in found:
                 found.append(action)
                 clean.append((value, action))
+
         self.__data = deque(iterable=clean)
 
     def append(self, x: tuple) -> None:
@@ -106,6 +109,7 @@ def reflex_action_queue(game, evaluation_function, current_player):
 
     value_action_pairs = list(
         [(evaluation_function(generator.GENERATOR.get_successor(game, move), current_player), move)
-         for move in game.get_legal_actions()])
+         for move in game.get_legal_actions()]
+    )
 
     return ActionQueue(value_action_pairs)

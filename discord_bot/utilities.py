@@ -1,9 +1,6 @@
-import os
-from random import shuffle
-import discord
-from discord.ext import commands
-import discord_config as constant
 import time
+from discord.ext import commands
+import discord_bot.discord_config as config
 
 
 class Utilities(commands.Cog):
@@ -23,7 +20,7 @@ class Utilities(commands.Cog):
 
     @commands.command(name='clean', alias=['clear'], pass_context=True)
     async def clean(self, ctx: commands.Context):
-        if str(ctx.author) in constant.ADMINS:
+        if str(ctx.author) in config.ADMINS:
             await ctx.channel.purge()
         else:
             await ctx.send("You do not have permission for this command", delete_after=3)

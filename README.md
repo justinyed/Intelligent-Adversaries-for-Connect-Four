@@ -36,6 +36,10 @@ pip install -e .
 
 Run the `setup.py` file to set up the `PYTHONPATH`.
 
+```bash
+python setup.py build && python setup.py install
+```
+
 ---
 
 ## Details

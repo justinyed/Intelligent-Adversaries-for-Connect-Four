@@ -1,8 +1,5 @@
 import discord
 from discord.ext import commands
-import asyncio
-import discord_config as config
-from discord_config import MESSAGE, TIME
 
 
 class HelpHandler(commands.Cog):
