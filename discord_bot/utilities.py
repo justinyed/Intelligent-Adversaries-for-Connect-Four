@@ -25,8 +25,6 @@ class Utilities(commands.Cog):
         else:
             await ctx.send("You do not have permission for this command", delete_after=3)
 
-    # todo add mute, unmute, and kick admin command
-
     @staticmethod
     def setup(bot: commands.Bot):
         bot.add_cog(Utilities(bot))

@@ -1,19 +1,11 @@
 import os
 from sqlite3 import Error
 
-import pylab
-from discord.ext import commands
-from discord_bot.leaderboard_database import Leaderboard
-import tabulate as tb
-import pandas as pd
-from table2ascii import table2ascii as t2a, PresetStyle
-import dataframe_image as dfi
 import discord
-from datetime import datetime
-import df2img
-from pandas.plotting import table
 import matplotlib.pyplot as plt
-import seaborn as sns
+from discord.ext import commands
+
+from discord_bot.leaderboard_database import Leaderboard
 
 path = "./media/leaderboard.png"
 dt_format = "%d/%m/%Y %H:%M:%S"

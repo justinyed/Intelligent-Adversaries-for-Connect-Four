@@ -191,7 +191,7 @@ class IterativeDeepening(AlphaBeta):
             return intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
 
         moves = []
-        # todo - Keep the move order from the last Cycle; increases speed
+
         # iterative deepening
         for current_depth_limit in range(1, self.absolute_depth_limit + 1):
             self.depth_limit = current_depth_limit

@@ -5,7 +5,7 @@ import os
 class Util:
 
     @staticmethod
-    def deserialise_json_file(json_file_path: str) -> dict:
+    def deserialise_json_file(json_file_path: str):
         # Weak file check, simply check file extension is json.
         if json_file_path[-5:] != ".json":
             return None
@@ -28,13 +28,13 @@ class Util:
         try:
             os.remove(file_path)
         except OSError as e:
-            pass
+            print(e)
 
         with open(file_path, 'w') as file:
             file.write(json.dumps(data))
 
     @staticmethod
-    def read_json_from_file(file_path: str) -> dict:
+    def read_json_from_file(file_path: str):
         if not os.path.isfile(file_path):
             return None
 

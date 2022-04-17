@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SonarLintProjectSettings">
+    <option name="fileExclusions">
+      <list>
+        <option value="DIRECTORY:.pytest_cache" />
+        <option value="DIRECTORY:analysis" />
+        <option value="DIRECTORY:build" />
+        <option value="DIRECTORY:capstone.egg-info" />
+        <option value="DIRECTORY:dist" />
+        <option value="DIRECTORY:media" />
+        <option value="DIRECTORY:data" />
+        <option value="DIRECTORY:venv" />
+        <option value="FILE:.gitignore" />
+        <option value="FILE:README.md" />
+        <option value="FILE:requirements.txt" />
+        <option value="FILE:run.py" />
+        <option value="FILE:setup.py" />
+      </list>
+    </option>
+  </component>
+</project>

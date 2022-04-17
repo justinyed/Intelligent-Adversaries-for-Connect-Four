@@ -1,10 +1,10 @@
-# Intelligent Adversaries for Connect Four with a Discord Bot Interface
+# Connect Four Discord Bot with Intelligent Adversaries
 
 ## Introduction
 
 ### Description
 
-Python implementation of Connect Four with adversarial agents to play against. The Discord Game Bot interface allows the selection of agents or human players and will provide a leaderboard.
+Connect Four Discord Bot with Artificially Intelligent Opponents which vary in difficulty.
 
 ### Background:
 
@@ -44,24 +44,16 @@ python setup.py build && python setup.py install
 
 ## Details
 
-### Intelligence
+### Components
 
-**Intelligent Agents:** Choose the action which leads to the greatest expected utility.
 
-| Agents                 | Description                                                                                                        |
-|------------------------|--------------------------------------------------------------------------------------------------------------------|
-| Reflex                 | Choices a move based only on an evaluation function                                                                |
-| Minimax                | Choices a move which maximizes its own utility and minimizes the utility of its opponent                           |
-| Alpha-Beta Minimax     | Extension of Minimax which focuses on evaluating relevant states by pruning sub-trees with too few utility points. |
-| Iterative Deepening    | Minimax with Anytime Iterative Deepening.                                                                          |
-| Reinforcement Learning | Utilizes Reinforcement Learning (specifically Q-Learning) to Develop Policies.                                     |
+| Component    | Directory         | Description                                                                                                                     |
+|--------------|:------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| Interface    | `discord_bot`     | Discord Game Bot that will allow human players to play Connect Four against each other or Artificially Intelligent Adversaries. |
+| Game         | `game_components` | Connect Four Game Mechanics and Board Representation.                                                                           |
+| Intelligence | `intelligence`    | The Artificial Intelligence for the Adversarial Agents.                                                                         |
 
-### Command Line Interface
-
-**Command Line Interface:** Challenge Agents or Human Players.
-- Mainly For Testing or Debugging
-- Displays Turn, Current Status, and Last Move Made 
-- Colored Board
+---
 
 ### Discord Bot Interface
 
@@ -87,28 +79,19 @@ python setup.py build && python setup.py install
 
 ---
 
+### Intelligence
 
-## Project Structure
+**Intelligent Agents:** Choose the action which leads to the greatest expected utility.
 
-### Logical Structure
-
-| Component    | Description                                                                                                                     |
-|--------------|---------------------------------------------------------------------------------------------------------------------------------|
-| Interface    | Discord Game Bot that will allow human players to play Connect Four against each other or Artificially Intelligent Adversaries. |
-| Game         | Connect Four Game Mechanics and Board Representation.                                                                           |
-| Intelligence | The Artificial Intelligence for the Adversarial Agents.                                                                         |
-| Analysis     | Analyze the performance and behavior of these techniques generally & when challenging each other during Connect Four battles.   |
-
-### Directory Structure
-| Directory         | Description                                       |
-|-------------------|---------------------------------------------------|
-| `discord_bot`     | Discord Bot Interface                             |
-| `game_components` | Connect Four Game Engine & Command Line Interface |
-| `intelligence`    | Various Agents/Opponents for Connect Four         |
-| `analysis`        | Notebooks & scripts for analysis.                 |
+| Agents                 | Description                                                                                                        |
+|------------------------|--------------------------------------------------------------------------------------------------------------------|
+| Reflex                 | Choices a move based only on an evaluation function                                                                |
+| Minimax                | Choices a move which maximizes its own utility and minimizes the utility of its opponent                           |
+| Alpha-Beta Minimax     | Extension of Minimax which focuses on evaluating relevant states by pruning sub-trees with too few utility points. |
+| Iterative Deepening    | Minimax with Anytime Iterative Deepening.                                                                          |
+| Reinforcement Learning | Utilizes Reinforcement Learning (specifically Q-Learning) to Develop Policies.                                     |
 
 ---
-
 
 ## Acknowledgements
 
