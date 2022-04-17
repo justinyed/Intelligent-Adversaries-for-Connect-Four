@@ -1,7 +1,8 @@
-import sqlite3 as Error
+from sqlite3 import Error
 import sqlite3 as sql
 from datetime import datetime
 from uuid import UUID, uuid1
+import pandas as pd
 
 sql.register_adapter(UUID, lambda u: u.bytes_le)
 sql.register_converter('GUID', lambda b: UUID(bytes_le=b))
@@ -9,6 +10,8 @@ sql.register_converter('GUID', lambda b: UUID(bytes_le=b))
 MEMORY = ":memory:"
 in_progress = 'in_progress'
 dt_format = "%d/%m/%Y %H:%M:%S"
+rounding = 3
+
 
 class Leaderboard:
 
@@ -30,6 +33,7 @@ class Leaderboard:
             connection = sql.connect(db_file)
             print(f"Successfully Connected with sqlite3 version {sql.version}")
         except Error as e:
+            print(f"Couldn't Connect using path {db_file}")
             print(e)
         return connection
 
@@ -45,22 +49,36 @@ class Leaderboard:
             print(e)
 
     def __del__(self):
-        try:
-            print("Disconnecting from the Database...")
-            self.connection.close()
-            print("Successfully Disconnected.")
+        print("Disconnecting from the Database...")
+        self.connection.close()
+        print("Successfully Disconnected.")
 
+    def get_player(self, player_id):
+        try:
+            sql = f"SELECT * FROM players WHERE player_id={player_id}"
+            return pd.read_sql_query(sql, self.connection)
         except Error as e:
             print(e)
+            return None
+
+    def get_top_players(self, k):
+        try:
+            sql = f"SELECT * FROM players ORDER BY win_rate LIMIT {k}"
+            return pd.read_sql_query(sql, self.connection)
+        except Error as e:
+            print(e)
+            return None
 
     def add_player(self, player_id):
         now = datetime.now()
         date = now.strftime(dt_format)
+
         sql = "INSERT OR IGNORE INTO players(player_id, win_amount, loss_amount, " \
-              "tie_amount, games_played, begin_date, last_date) VALUES(?,?,?,?,?,?,?)"
+              "tie_amount, games_played, begin_date, last_date, win_rate, loss_rate, tie_rate, win_loss_rate) " \
+              "VALUES(?,?,?,?,?,?,?,?,?,?,?)"
 
         cursor = self.connection.cursor()
-        cursor.execute(sql, (player_id, 0, 0, 0, 0, date, date))
+        cursor.execute(sql, (player_id, 0, 0, 0, 0, date, date, 0.0, 0.0, 0.0, 0.0))
         self.connection.commit()
         return cursor.lastrowid
 
@@ -77,6 +95,8 @@ class Leaderboard:
         if is_tie and is_win:
             raise ValueError("is_tie and is_win can not both be true!")
 
+        played += 1
+
         if is_tie:
             tie += 1
         elif is_win:
@@ -91,12 +111,29 @@ class Leaderboard:
                     loss_amount = ?,
                     tie_amount = ?,
                     games_played = ?,
-                    last_date = ?
+                    last_date = ?,
+                    win_rate = ?,
+                    loss_rate = ?,
+                    tie_rate = ?,
+                    win_loss_rate = ?
                 WHERE player_id = ?
             """
 
+        if loss != 0.0:
+            win_loss_rate = round(win / loss, rounding)
+        else:
+            win_loss_rate = 0.0
+
         cursor = self.connection.cursor()
-        cursor.execute(sql, (win, loss, tie, played + 1, date, player_id))
+        cursor.execute(
+            sql,
+            (
+                win, loss, tie, played, date,
+                round(win / played, rounding), round(loss / played, rounding),
+                round(tie / played, rounding), win_loss_rate,
+                player_id,
+            )
+        )
         self.connection.commit()
 
     def add_game(self, uid, player1: str, player2: str):
@@ -157,6 +194,10 @@ class Leaderboard:
                                             loss_amount integer,
                                             tie_amount integer,
                                             games_played integer,
+                                            win_rate float,
+                                            loss_rate float,
+                                            tie_rate float,
+                                            win_loss_rate float,
                                             begin_date text,
                                             last_date text,
                                             UNIQUE(player_id)

@@ -1,6 +1,54 @@
+import os
 from sqlite3 import Error
+
+import pylab
 from discord.ext import commands
 from discord_bot.leaderboard_database import Leaderboard
+import tabulate as tb
+import pandas as pd
+from table2ascii import table2ascii as t2a, PresetStyle
+import dataframe_image as dfi
+import discord
+from datetime import datetime
+import df2img
+from pandas.plotting import table
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+path = "./media/leaderboard.png"
+dt_format = "%d/%m/%Y %H:%M:%S"
+
+
+def save_df_as_image(df, path):
+    fig, ax = plt.subplots(frameon=False)
+    ax.set_axis_off()  # remove the axis
+    plt.box(False)
+    fig.subplots_adjust(top=0.001, bottom=0)
+
+    columns = [
+        "player_id", "win_loss_rate", "games_played",
+        "win_rate", "loss_rate", "tie_rate",
+        "win_amount", "loss_amount", "tie_amount"
+    ]
+
+    columns_labels = [
+        "Player", "Win Loss Rate", "Games Played",
+        "Win Rate", "Loss Rate", "Tie Rate",
+        "Wins", "losses", "Ties"
+    ]
+
+    table = ax.table(
+        cellText=df[columns].values,
+        colLabels=columns_labels,
+        rowLabels=[f" {i + 1:3d} " for i in range(len(df.index))],
+        rowColours=["royalblue"] * len(df.index),
+        colColours=["royalblue"] * len(columns),
+        loc='center',
+    )
+
+    table.set_fontsize(14)
+    table.scale(4, 4)
+    plt.savefig(path, bbox_inches='tight', dpi=500, pad_inches=0)
 
 
 class LeaderBoardHandler(commands.Cog):
@@ -21,26 +69,23 @@ class LeaderBoardHandler(commands.Cog):
         :param ctx: context
         :param num_entries:
         """
-        msg = await ctx.send("Leaderboard is Loading")
-        author = ctx.author
+        df = self.leaderboard.get_top_players(num_entries)
+        save_df_as_image(df, path)
 
-        #  retrieve and display top num_entries
+        try:
+            if not os.path.isfile(path):
+                raise FileNotFoundError(f"File not found at {path}")
 
-    # @commands.command(name='record', aliases=['rec'], pass_contaxt=True)
-    # async def record(self, ctx: commands.Context, *players):
-    #     """
-    #     Displays the Record of a player or players
-    #     :param ctx: context
-    #     :param players:
-    #     """
-    #     msg = await ctx.send("Record is Loading")
-    #     author = ctx.author
-    #     if players is None:
-    #         pass
-    #         #  Display author's record
-    #     else:
-    #         pass
-    #         # Display players records
+            with open(path, 'rb') as f:
+                picture = discord.File(f, filename="lb.png")
+                e = discord.Embed(title="Leaderboard")
+                e.set_image(url=f"attachment://lb.png")
+
+                await ctx.send(content="Click on the Leaderboard below to View:", embed=e, file=picture, delete_after=20)
+
+        except Exception as e:
+            await ctx.send(content="Leaderboard Failed to Load.", delete_after=5)
+            print(e)
 
     async def update_player(self, player_id: str, is_win, is_tie=False):
         self.leaderboard.update_player(player_id, is_win, is_tie)
