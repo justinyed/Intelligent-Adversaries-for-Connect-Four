@@ -421,3 +421,4 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/windows,linux,macos,jetbrains,pycharm,python,jupyternotebooks
 /discord_bot/token.json
 /intelligence/data/
+!/data/leaderboard.db
