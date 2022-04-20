@@ -23,10 +23,10 @@ ACCEPT_REJECT_BUTTONS = [Button(label='Accept', custom_id='accept', style=Button
                          Button(label='Reject', custom_id='reject', style=ButtonStyle.red)]
 
 AGENTS = {
-    "AlphaBeta_Agent": intelligence.AlphaBeta(depth_limit=3),
-    "Iterative_Agent": intelligence.IterativeDeepening(depth_limit=100, time_limit=5.0),
-    "Hard": intelligence.IterativeDeepening(depth_limit=100, time_limit=5.0),
-
+    "Easy"  : intelligence.IterativeDeepening(depth_limit=1, time_limit=3.0),
+    "Medium": intelligence.IterativeDeepening(depth_limit=2, time_limit=3.0),
+    "Hard"  : intelligence.IterativeDeepening(depth_limit=3, time_limit=4.0),
+    "Elite" : intelligence.IterativeDeepening(depth_limit=5, time_limit=4.0),
 }
 
 AGENT_MENU = [

@@ -100,7 +100,6 @@ class ChallengeHandler(commands.Cog):
         :param player2: id
         :param: uid: unique game id
         """
-        await asyncio.sleep(0)
 
         if game.is_terminal_state():
 
@@ -136,7 +135,7 @@ class ChallengeHandler(commands.Cog):
         current_player = ChallengeHandler.current_player_name(game, player1, player2)
 
         if current_player in config.AGENTS.keys():
-            await asyncio.sleep(0)
+            await asyncio.sleep(0.3)  # Yield control
             action = config.AGENTS[current_player].get_action(game)
         else:
             interaction, button = await self.bot.wait_for('button_click', check=check_button)
@@ -167,7 +166,6 @@ class ChallengeHandler(commands.Cog):
         :return: game, player1, player2
         """
         # Shuffle who starts
-        challenger, opponent = str(player1), str(player2)
         players = [player1, player2]
         shuffle(players)
         player1, player2 = players
@@ -264,15 +262,15 @@ class ChallengeHandler(commands.Cog):
         """
         Starts Demo Between Two Agents
         """
-        # if str(ctx.author) not in config.ADMINS:
-        #     await ctx.send("You do not have permission for this command", delete_after=3)
-        #     return
+        if str(ctx.author) not in config.ADMINS:
+            await ctx.send("You do not have permission for this command", delete_after=3)
+            return
 
         msg = await ctx.send(MESSAGE.welcome)
         agent1 = agent1.replace("@", "").replace(" ", "")
 
         if agent2 is None or agent2 == "''":
             agent2 = agent1
-
-        print(f"Started Demonstration between \"{agent1}\" and \"{agent2}\"")
-        await self._game_handler(msg, *await self._new_game(agent1, agent2))
+        for i in range(iterations):
+            print(f"Started Demonstration({i}) between \"{agent1}\" and \"{agent2}\"")
+            await self._game_handler(msg, *await self._new_game(agent1, agent2))
