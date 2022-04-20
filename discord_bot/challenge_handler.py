@@ -258,7 +258,7 @@ class ChallengeHandler(commands.Cog):
         ch.leaderboard_handler = leaderboard_handler
 
     @commands.command(name='demonstration', aliases=['demo'], pass_contaxt=True)
-    async def demo(self, ctx: commands.Context, agent1='Iterative_Agent', agent2=None, iterations=100):
+    async def demo(self, ctx: commands.Context, agent1='Hard', agent2=None, iterations=100):
         """
         Starts Demo Between Two Agents
         """
@@ -274,3 +274,5 @@ class ChallengeHandler(commands.Cog):
         for i in range(iterations):
             print(f"Started Demonstration({i}) between \"{agent1}\" and \"{agent2}\"")
             await self._game_handler(msg, *await self._new_game(agent1, agent2))
+            await asyncio.sleep(5)
+

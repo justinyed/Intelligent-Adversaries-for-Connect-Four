@@ -89,7 +89,6 @@ python setup.py build && python setup.py install
 | Minimax                | Choices a move which maximizes its own utility and minimizes the utility of its opponent                           |
 | Alpha-Beta Minimax     | Extension of Minimax which focuses on evaluating relevant states by pruning sub-trees with too few utility points. |
 | Iterative Deepening    | Minimax with Anytime Iterative Deepening.                                                                          |
-| Reinforcement Learning | Utilizes Reinforcement Learning (specifically Q-Learning) to Develop Policies.                                     |
 
 ---
 
