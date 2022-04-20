@@ -56,7 +56,8 @@ class Reflex(Agent):
     def _get_action(self, game, time_start):
         if game.is_terminal_state():
             return None
-        return intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
+        return intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player)\
+            .get_best_action()
 
 
 class Insane(Agent):

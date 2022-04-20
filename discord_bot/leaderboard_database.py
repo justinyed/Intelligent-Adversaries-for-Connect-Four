@@ -1,8 +1,9 @@
 from sqlite3 import Error
 import sqlite3 as sql
 from datetime import datetime
-from uuid import UUID, uuid1
+from uuid import UUID
 import pandas as pd
+
 
 sql.register_adapter(UUID, lambda u: u.bytes_le)
 sql.register_converter('GUID', lambda b: UUID(bytes_le=b))
@@ -168,7 +169,6 @@ class Leaderboard:
                 WHERE id = ?
             """
 
-        cursor = self.connection.cursor()
         cursor.execute(sql, (turns + 1, moves + str(move), uid))
         self.connection.commit()
 
@@ -228,20 +228,3 @@ class Leaderboard:
         except Error as e:
             print(e)
             return
-
-
-if __name__ == '__main__':
-    DATABASE = "../data/leaderboard.db"
-    lb = Leaderboard(DATABASE)
-    g = uuid1()
-
-    lb.add_player('spartanyed')
-    lb.add_player('justinyedinak')
-    lb.add_game(g, "justinyedinak", "spartanyed")
-
-    lb.update_move(g, 1)
-    lb.update_move(g, 4)
-    lb.update_move(g, 6)
-    lb.end_game(g, 'spartanyed', 2)
-
-    lb.update_player('spartanyed', True)

@@ -4,8 +4,10 @@ from random import choice
 import intelligence.agent
 import intelligence.action_queue
 import intelligence.evaluation_functions
+
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
+from lru import LRU
 
 
 def depth_function_simple(game, depth_limit) -> int:
@@ -45,7 +47,8 @@ class MultiAgent(intelligence.agent.Agent, ABC):
     its possible actions and the possible actions of its opponent via an evaluation function.
     """
 
-    def __init__(self, eval_fn=intelligence.evaluation_functions.evaluation_function_weighted_matrix, depth_limit=2, depth_fn=depth_function_simple):
+    def __init__(self, eval_fn=intelligence.evaluation_functions.evaluation_function_weighted_matrix, depth_limit=2,
+                 depth_fn=depth_function_simple):
         """
         :param depth_limit: depth limit on the MiniMax depth search
         :param eval_fn: evaluation function (returns the static value of a state)
@@ -81,7 +84,8 @@ class MiniMax(MultiAgent):
     def _get_action(self, game, time_start):
         self.looks = 0
         if game.get_turn() == 0:
-            return intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
+            return intelligence.action_queue.reflex_action_queue(game, self.evaluation_function,
+                                                                 self._player).get_best_action()
 
         _, move = self._max_value(game, 0)
         return move
@@ -127,7 +131,8 @@ class AlphaBeta(MultiAgent):
     def _get_action(self, game, time_start):
 
         if game.get_turn() == 0:
-            return intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
+            return intelligence.action_queue.reflex_action_queue(game, self.evaluation_function,
+                                                                 self._player).get_best_action()
 
         _, move = self._max_value(game, 0, NEGATIVE_INF, POSITIVE_INF, time_start)
         return move
@@ -139,7 +144,8 @@ class AlphaBeta(MultiAgent):
             return self.evaluation_function(game, self._player), None
 
         value, best_actions = NEGATIVE_INF, []
-        ordered_actions = intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_actions()
+        ordered_actions = intelligence.action_queue.reflex_action_queue(game, self.evaluation_function,
+                                                                        self._player).get_actions()
 
         for action in ordered_actions:
             value_prime, _ = self._min_value(self.get_successor(game, action),
@@ -160,7 +166,8 @@ class AlphaBeta(MultiAgent):
             return self.evaluation_function(game, self._player), None
 
         value, best_action = POSITIVE_INF, None
-        ordered_actions = reversed(intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_actions())
+        ordered_actions = reversed(
+            intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_actions())
 
         for action in ordered_actions:
             value_prime, _ = self._max_value(self.get_successor(game, action),
@@ -180,15 +187,36 @@ class IterativeDeepening(AlphaBeta):
     Additionally, this agent will focus on evaluating relevant states by pruning subtrees with too few utility points.
     """
 
-    def __init__(self, eval_fn=intelligence.evaluation_functions.evaluation_function_weighted_matrix, depth_limit=3, depth_fn=depth_function_simple, time_limit=5.0):
+    def __init__(self, eval_fn=intelligence.evaluation_functions.evaluation_function_weighted_matrix, depth_limit=3,
+                 depth_fn=depth_function_simple, time_limit=5.0):
         super().__init__(eval_fn, depth_limit, depth_fn)
         self.absolute_depth_limit = depth_limit
         self.time_limit = time_limit
+        self._cache = LRU(100000)
+
+    def get_action(self, game):
+        """
+        The Agent will receive a game_components and must return an action from the legal moves
+        :param game: current state of the game_components
+        :return: The action chosen by the agent given the game_components
+        """
+
+        h = hash(game)
+
+        if h in self._cache:
+            return self._cache[h]
+        else:  # store
+            self._player = game.get_current_player()
+            self._opponent = -1 * self._player
+            a = self._get_action(game, time.time())
+            self._cache[h] = a
+            return a
 
     def _get_action(self, game, time_start):
 
         if game.get_turn() == 0:
-            return intelligence.action_queue.reflex_action_queue(game, self.evaluation_function, self._player).get_best_action()
+            return intelligence.action_queue.reflex_action_queue(game, self.evaluation_function,
+                                                                 self._player).get_best_action()
 
         moves = []
 

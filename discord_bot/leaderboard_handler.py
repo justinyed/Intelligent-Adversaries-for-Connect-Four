@@ -1,3 +1,4 @@
+import asyncio
 import os
 from sqlite3 import Error
 
@@ -40,7 +41,7 @@ def save_df_as_image(df, path):
 
     table.set_fontsize(14)
     table.scale(4, 4)
-    plt.savefig(path, bbox_inches='tight', dpi=500, pad_inches=0)
+    plt.savefig(path, bbox_inches='tight', dpi=128, pad_inches=0)
 
 
 class LeaderBoardHandler(commands.Cog):
@@ -52,6 +53,7 @@ class LeaderBoardHandler(commands.Cog):
             print("Failed to Load Database from file:", leaderboard.path)
             print(e)
         self.bot = bot
+        self.changed = True
         print("[LeaderBoardHandler Initialized]")
 
     @commands.command(name='leaderboard', aliases=['lb', 'record'], pass_contaxt=True)
@@ -61,8 +63,12 @@ class LeaderBoardHandler(commands.Cog):
         :param ctx: context
         :param num_entries:
         """
-        df = self.leaderboard.get_top_players(num_entries)
-        save_df_as_image(df, path)
+        msg = await ctx.send("Leaderboard is Loading...")
+
+        if self.changed:
+            df = self.leaderboard.get_top_players(num_entries)
+            save_df_as_image(df, path)
+            self.changed = False
 
         try:
             if not os.path.isfile(path):
@@ -70,13 +76,11 @@ class LeaderBoardHandler(commands.Cog):
 
             with open(path, 'rb') as f:
                 picture = discord.File(f, filename="lb.png")
-                e = discord.Embed(title="Leaderboard")
-                e.set_image(url=f"attachment://lb.png")
-
-                await ctx.send(content="Click on the Leaderboard below to View:", embed=e, file=picture, delete_after=20)
+                await msg.delete()
+                await ctx.send(content="Click on the Leaderboard below to View:", file=picture, delete_after=20)
 
         except Exception as e:
-            await ctx.send(content="Leaderboard Failed to Load.", delete_after=5)
+            await msg.edit(content="Leaderboard Failed to Load.", delete_after=5)
             print(e)
 
     async def update_player(self, player_id: str, is_win, is_tie=False):
@@ -91,6 +95,7 @@ class LeaderBoardHandler(commands.Cog):
         self.leaderboard.update_move(uid, move)
 
     async def end_game(self, uid, winner, loser, status, is_tied=False):
+        self.changed = True
 
         if is_tied:
             self.leaderboard.end_game(uid, 'tied', status)

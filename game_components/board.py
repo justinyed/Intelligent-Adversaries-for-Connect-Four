@@ -61,6 +61,9 @@ class BoardInterface:
         pass
 
     def get_grid(self):
+        return self._grid
+
+    def get_grid_copy(self):
         """
         get copy of grid
 
@@ -163,38 +166,6 @@ class BoardInterface:
         return hash(self._grid)
 
 
-class TupleBoard(BoardInterface):
-    """
-    The Internal Representation of a Grid Style Board Game.
-    """
-
-    def new_grid(self):
-        """
-        Initialize the Grid
-        :return: New Grid
-        """
-        return tuple((self.get_default()
-                      for _ in range(self.get_width() * self.get_height())))
-
-    def copy(self):
-        return TupleBoard(grid=copy.deepcopy(self.get_grid()), lowest=copy.deepcopy(self.get_lowest()))
-
-    def set_piece(self, position, piece):
-        """
-        :param position: Tuple (x, y) of position to place piece
-        :param piece: piece to place
-        """
-        index = position[X] + self.get_width() * position[Y]
-        self._grid = self._grid[:index] + (piece,) + self._grid[index + 1:]
-
-    def get_piece(self, position):
-        """
-        :param position: Tuple (x, y) of position to get
-        :return: piece at position
-        """
-        return self._grid[position[X] + self.get_width() * position[Y]]
-
-
 class ArrayBoard(BoardInterface):
     """
     The Internal Representation of a Grid Style Board Game.
@@ -207,11 +178,11 @@ class ArrayBoard(BoardInterface):
         """
         return np.zeros((self.get_height(), self.get_width()), dtype=np.int8)
 
-    def get_grid(self):
+    def get_grid_copy(self):
         return np.copy(self._grid)
 
     def copy(self):
-        return ArrayBoard(grid=self.get_grid(), lowest=copy.deepcopy(self.get_lowest()))
+        return ArrayBoard(grid=self.get_grid_copy(), lowest=copy.deepcopy(self.get_lowest()))
 
     def set_piece(self, position, piece):
         """
@@ -228,13 +199,13 @@ class ArrayBoard(BoardInterface):
         return self._grid[abs(position[Y] - (self.get_height() - 1))][position[X]]
 
     def __hash__(self):
-        return hash(self.get_grid().tostring())
+        return hash(self.get_grid_copy().tostring())
 
     def __eq__(self, other):
         return self.__hash__() == hash(other)
 
     def __copy__(self):
-        return ArrayBoard(grid=self.get_grid(), lowest=self.get_lowest())
+        return ArrayBoard(grid=self.get_grid_copy(), lowest=self.get_lowest())
 
     def __deepcopy__(self, memodict=None):
         if memodict is None:

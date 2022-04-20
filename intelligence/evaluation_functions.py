@@ -1,7 +1,10 @@
 import numpy as np
+from numba import njit, config
+from numba.extending import overload
 
 POSITIVE_INF = float("inf")
 NEGATIVE_INF = float("-inf")
+PLAYER1 = 1
 PLAYER2 = -1
 
 
@@ -35,6 +38,9 @@ WEIGHTS = np.array([[3, 4, 5, 7, 5, 4, 3],
                     [4, 6, 8, 10, 8, 6, 4],
                     [3, 4, 5, 7, 5, 4, 3]])
 
+WEIGHTS_NEGATIVE = -1 * WEIGHTS.copy()
+WEIGHTS_POSITIVE = WEIGHTS
+
 WINNING_VALUE = (10.0 ** 9) * np.sum(WEIGHTS)
 LOSING_VALUE = -1 * (10.0 ** 6) * np.sum(WEIGHTS)
 TIE_VALUE = -1 * (10.0 ** 3) * np.sum(WEIGHTS)
@@ -61,7 +67,9 @@ def evaluation_function_weighted_matrix(game, current_player: int):
 
     grid = game.get_board().get_grid()
 
-    if current_player == PLAYER2:  # neutralize grid
-        grid *= -1
+    if current_player == PLAYER1:
+        weights = WEIGHTS_POSITIVE
+    else:
+        weights = WEIGHTS_NEGATIVE
 
-    return np.sum(WEIGHTS * grid)
+    return np.sum(weights * grid)

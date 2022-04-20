@@ -100,6 +100,7 @@ class ChallengeHandler(commands.Cog):
         :param player2: id
         :param: uid: unique game id
         """
+        await asyncio.sleep(0)
 
         if game.is_terminal_state():
 
@@ -135,18 +136,19 @@ class ChallengeHandler(commands.Cog):
         current_player = ChallengeHandler.current_player_name(game, player1, player2)
 
         if current_player in config.AGENTS.keys():
+            await asyncio.sleep(0)
             action = config.AGENTS[current_player].get_action(game)
         else:
             interaction, button = await self.bot.wait_for('button_click', check=check_button)
 
             if button.custom_id == config.FORFEIT:  # Forfeit?  # todo - refactor; add stop gap
-                quiter = str(self.current_player(game, player1, player2))
+                quitter = str(self.current_player(game, player1, player2))
                 winner = str(self.other_player(game, player1, player2))
 
-                forfeit_msg = f"{quiter} has opted to forfeit the game, {winner} is the Winner!"
+                forfeit_msg = f"{quitter} has opted to forfeit the game, {winner} is the Winner!"
                 e = discord.Embed(title=forfeit_msg)
 
-                await self.leaderboard_handler.end_game(uid, winner, quiter, 4)
+                await self.leaderboard_handler.end_game(uid, winner, quitter, 4)
                 await msg.edit(content="", embed=e, components=[], delete_after=10)
                 return
 
@@ -154,7 +156,7 @@ class ChallengeHandler(commands.Cog):
             await interaction.defer()
 
         game.perform_action(action)
-        await self.leaderboard_handler.update_move(uid, action)
+        # await self.leaderboard_handler.update_move(uid, action)
         await self._game_handler(msg, game, player1, player2, uid)
 
     async def _new_game(self, player1, player2):
@@ -260,11 +262,11 @@ class ChallengeHandler(commands.Cog):
     @commands.command(name='demonstration', aliases=['demo'], pass_contaxt=True)
     async def demo(self, ctx: commands.Context, agent1='Iterative_Agent', agent2=None, iterations=100):
         """
-        Admin Command Only - Starts Demo Between Two Agents
+        Starts Demo Between Two Agents
         """
-        if str(ctx.author) not in config.ADMINS:
-            await ctx.send("You do not have permission for this command", delete_after=3)
-            return
+        # if str(ctx.author) not in config.ADMINS:
+        #     await ctx.send("You do not have permission for this command", delete_after=3)
+        #     return
 
         msg = await ctx.send(MESSAGE.welcome)
         agent1 = agent1.replace("@", "").replace(" ", "")
@@ -272,6 +274,5 @@ class ChallengeHandler(commands.Cog):
         if agent2 is None or agent2 == "''":
             agent2 = agent1
 
-        for _ in range(iterations):
-            print(f"Started Demonstration between \"{agent1}\" and \"{agent2}\"")
-            await self._game_handler(msg, *await self._new_game(agent1, agent2))
+        print(f"Started Demonstration between \"{agent1}\" and \"{agent2}\"")
+        await self._game_handler(msg, *await self._new_game(agent1, agent2))

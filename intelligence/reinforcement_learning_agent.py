@@ -210,7 +210,7 @@ class QLearning(Reinforcement):
     def _neutralize_state(self, state):
         if self._player == PLAYER2:
             board, turn, status = state.get_state()
-            grid = board.get_grid()
+            grid = board.get_grid_copy()
             grid *= -1
             board.set_grid(grid)
             state = c4.ConnectFour(state=(board, turn, status))
@@ -219,7 +219,7 @@ class QLearning(Reinforcement):
     @staticmethod
     def get_mirror_state(state):
         board, turn, status = state.get_state()
-        grid = board.get_grid()
+        grid = board.get_grid_copy()
         board.set_grid(np.fliplr(grid))
         return c4.ConnectFour(state=(board, turn, status))
 
