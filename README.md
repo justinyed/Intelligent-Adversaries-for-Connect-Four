@@ -95,7 +95,6 @@ python setup.py build && python setup.py install
 
 ## Acknowledgements
 
-
 - Learned a lot from the CNU Course CPSC 471: Intro to AI taught by Dr. Conner.
-
 - Agents were inspired by **my solutions** to the [AI UC Berkley Problems](http://ai.berkeley.edu).
+- The idea for the particular Static Evaluation Function I implemented is found in a paper by Martin Stenmark.
